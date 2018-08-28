@@ -2,8 +2,8 @@ package kafka;
 
 import alogs.Data;
 import alogs.IAlgo;
+import alogs.IRunning;
 import kafka.converters.MessageConverter;
-import messagehandlers.IMessageHandler;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
@@ -12,7 +12,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.*;
 
-public class KafkaMessageHandler<T> extends IMessageHandler {
+public class KafkaMessageHandler<T> extends IRunning {
 
     private KafkaConsumer<String, String> consumer;
     private final List<String> topics;
@@ -21,8 +21,7 @@ public class KafkaMessageHandler<T> extends IMessageHandler {
     private IAlgo algo;
     private MessageConverter<T> messageConverter;
 
-    public KafkaMessageHandler(int id, String groupId, List<String> topics, IAlgo algo) {
-        super();
+    public KafkaMessageHandler(int id, String groupId, List<String> topics, IAlgo algo) { super("KafkaMessageHandler" + id, 1,1);
         this.algo = algo;
         this.isRunning = true;
         this.id = id;
@@ -36,6 +35,8 @@ public class KafkaMessageHandler<T> extends IMessageHandler {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
         this.consumer = new KafkaConsumer<>(props);
+
+        go();
     }
 
     @Override

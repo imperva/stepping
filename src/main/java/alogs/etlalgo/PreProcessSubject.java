@@ -1,6 +1,7 @@
 package alogs.etlalgo;
 
 import alogs.Data;
+import alogs.IStep;
 import alogs.ISubject;
 
 import java.util.List;
@@ -19,7 +20,8 @@ public class PreProcessSubject implements ISubject {
         return null;
     }
 
-    public void attach(Object o) {
+    @Override
+    public void attach(IStep o) {
 
     }
 

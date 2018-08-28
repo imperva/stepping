@@ -14,9 +14,7 @@ public class ETLAlgo extends IAlgo {
     public AlgoInfraConfig init() {
 
         Container cntr = Container.getInstance();
-
-
-
+        cntr.add(subjectContainer, "subjectContainer");
 
         //* init steps
         IStep preStep = new PreProcessStep();
@@ -26,15 +24,15 @@ public class ETLAlgo extends IAlgo {
         steps.add(aggreStep);
 
         //* init subjects
+        List<ISubject> iSubjects = new ArrayList<>();
         ISubject NewDataArrivedSubject = new NewDataArrivedSubject();
         ISubject preProcessSubject = new PreProcessSubject();
-
-        cntr.add(preProcessSubject,"preProcessSubject");
-        cntr.add(NewDataArrivedSubject,"NewDataArrivedSubject");
+        iSubjects.add(preProcessSubject);
+        iSubjects.add(NewDataArrivedSubject);
 
         subjectContainer.setSubjectsList(cntr.getTypeOf(ISubject.class));
         //* attach subjects to steps
-        for (IStep step : steps) {
+        for (IStep step : cntr.<IStep>getTypeOf(IStep.class)) {
             step.init();
             for (ISubject subject : subjectContainer.getSubjectsList()) {
                 step.attach(subject);
@@ -47,9 +45,10 @@ public class ETLAlgo extends IAlgo {
 
     @Override
     public void runAlgo() {
-
+        Container cntr = Container.getInstance();
         //* in thread
-        subjectContainer.getByName("newDataArrivedSubject").occurred("get data from Q");
+        cntr.<SubjectContainer>getById("subjectContainer").getByName("newDataArrivedSubject").occurred(new Data("sss"));
+
     }
 
     @Override
