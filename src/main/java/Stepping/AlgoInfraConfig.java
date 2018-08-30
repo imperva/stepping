@@ -1,4 +1,4 @@
-package alogs;
+package Stepping;
 
 public class AlgoInfraConfig {
 

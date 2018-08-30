@@ -1,14 +1,14 @@
 package alogs.etlalgo;
 
-import alogs.Data;
-import alogs.IStep;
-import alogs.ISubject;
+import Stepping.Data;
+import Stepping.IStep;
+import Stepping.ISubject;
 
 import java.util.List;
 
 public class PreProcessSubject implements ISubject {
 
-    public void occurred(Data data) {
+    public void setData(Data data) {
 
     }
 

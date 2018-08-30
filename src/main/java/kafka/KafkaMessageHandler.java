@@ -1,8 +1,8 @@
 package kafka;
 
-import alogs.Data;
-import alogs.IAlgo;
-import alogs.IRunning;
+import Stepping.Data;
+import Stepping.IAlgo;
+import Stepping.IRunning;
 import kafka.converters.MessageConverter;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;

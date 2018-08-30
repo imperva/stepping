@@ -1,10 +1,6 @@
-package alogs.etlalgo;
+package Stepping;
 
-
-import alogs.Data;
-import alogs.IStep;
-import alogs.ISubject;
-import alogs.container.Container;
+import Stepping.container.Container;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +8,7 @@ import java.util.List;
 public class NewDataArrivedSubject implements ISubject {
     private List<IStep> iSteps = new ArrayList<>();
     private Data data = null;
-    public void occurred(Data data) {
+    public void setData(Data data) {
         this.data = data;
         publish();
     }

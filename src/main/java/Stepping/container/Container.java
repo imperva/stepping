@@ -1,4 +1,4 @@
-package alogs.container;
+package Stepping.container;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,22 +21,26 @@ public class Container {
         return instance;
     }
 
-    public <T> void add(T obj, String id) {
+    public <T> Container add(T obj, String id) {
         add(new Identifiable<>(obj, id));
+        return this;
     }
 
-    public <T> void add(Identifiable<T> identifiable) {
+    public <T> Container add(Identifiable<T> identifiable) {
         if (instance.objects.contains(identifiable))
             throw new RuntimeException("Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
         instance.objects.add(identifiable);
+        return this;
     }
 
-    public void remove(String id) {
+    public Container remove(String id) {
         instance.objects.removeIf((i) -> i.getId().toLowerCase().equals(id.toLowerCase()));
+        return this;
     }
 
-    public void add(List<Identifiable> identifiables) {
+    public Container add(List<Identifiable> identifiables) {
         instance.objects.addAll(identifiables);
+        return this;
     }
 
     public <T> T getById(String id) {

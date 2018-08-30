@@ -1,10 +1,10 @@
 package alogs.etlalgo;
 
 
-import alogs.Data;
-import alogs.IStep;
-import alogs.ISubject;
-import alogs.SubjectContainer;
+import Stepping.Data;
+import Stepping.IStep;
+import Stepping.ISubject;
+import Stepping.SubjectContainer;
 
 public class PreProcessStep implements IStep {
     public void init() {

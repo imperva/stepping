@@ -1,8 +1,9 @@
 package alogs.etlalgo;
 
-import alogs.*;
-
-import java.util.Queue;
+import Stepping.Data;
+import Stepping.IStep;
+import Stepping.ISubject;
+import Stepping.SubjectContainer;
 
 public class AggregationStep implements IStep {
 
@@ -19,7 +20,7 @@ public class AggregationStep implements IStep {
     public void dataArrived(Data data, SubjectContainer subjectContainer) {
         //* doing my stuff
         if (data.getType() == "publisgdecided") {
-            subjectContainer.getByName("ImessgaeHandler").occurred(data);
+            subjectContainer.getByName("ImessgaeHandler").setData(data);
         }
     }
 
