@@ -12,15 +12,15 @@ public class AggregationStep implements IStep {
     }
 
     public void attach(ISubject iSubject) {
-        if (iSubject.getData().getType() == "123") {
+        if (iSubject.getType() == "123") {
 
         }
     }
 
-    public void dataArrived(Data data, SubjectContainer subjectContainer) {
+    public void dataArrived(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
-        if (data.getType() == "publisgdecided") {
-            subjectContainer.getByName("ImessgaeHandler").setData(data);
+        if (subject.getType() == "publisgdecided") {
+            subjectContainer.getByName("ImessgaeHandler").setData(subject.getData());
         }
     }
 

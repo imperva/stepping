@@ -35,7 +35,7 @@ public abstract class IRunning implements Runnable , Closeable {
                     t.setName(id);
                     return t;
                 });
-//                LOGGER.info("init grouping main loop");
+
                 PropertiesReader properties = PropertiesReader.getInstance();
 
                 this.scheduledFuture = es.scheduleWithFixedDelay(this::run, initialdelay, delay, TimeUnit.MILLISECONDS);

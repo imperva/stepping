@@ -19,7 +19,7 @@ public abstract class AlgoBase extends IAlgo {
     }
 
     public AlgoInfraConfig init() {
-        DI(new NewDataArrivedSubject(), "newDataArrivedSubject");
+        DI(new Subject(), "newDataArrivedSubject");
         DI(new SubjectContainer(), "subjectContainer");
 
         IoC();

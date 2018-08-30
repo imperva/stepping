@@ -2,6 +2,7 @@ package alogs.etlalgo;
 
 import Stepping.AlgoBase;
 import Stepping.Data;
+import Stepping.ISubject;
 import Stepping.Subject;
 import Stepping.container.Container;
 
@@ -19,7 +20,7 @@ public class ETLAlgo extends AlgoBase {
     @Override
     protected void IoC() {
         //* init subjects
-        Subject subject = new Subject();
+        ISubject subject = new Subject();
         subject.setType("preProcessSubject");
 
         DI(subject, "preProcessSubject");

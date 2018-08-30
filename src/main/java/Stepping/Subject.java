@@ -1,22 +1,26 @@
 package Stepping;
 
-import org.apache.kafka.common.protocol.types.Field;
+import Stepping.container.Container;
 
 import java.util.List;
 
 public class Subject<T> implements ISubject<T> {
+
     private String type;
-    public Subject(String type){
+
+    public Subject() { }
+    public Subject(String type) {
         this.type = type;
     }
+
     @Override
     public String getType() {
-        return null;
+        return this.type;
     }
 
     @Override
     public void setType(String type) {
-
+        this.type = type;
     }
 
     @Override
@@ -31,7 +35,10 @@ public class Subject<T> implements ISubject<T> {
 
     @Override
     public void publish() {
-
+        List<IStep> iSteps = Container.getInstance().getTypeOf(IStep.class);
+        for (IStep step : iSteps) {
+            step.dataArrived(this, Container.getInstance().getById("subjectContainer"));
+        }
     }
 
     @Override

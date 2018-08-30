@@ -12,13 +12,16 @@ public class PreProcessStep implements IStep {
     }
 
     public void attach(ISubject iSubject) {
-        if (iSubject instanceof PreProcessSubject) {
+        if (iSubject.getType() == "xyz") {
             iSubject.attach(this);
         }
     }
 
     @Override
-    public void dataArrived(Data data, SubjectContainer subjectContainer) {
+    public void dataArrived(ISubject subject, SubjectContainer subjectContainer) {
+        if (subject.getType() == "xyz") {
+          //DO SOMETHING
+        }
 
     }
 
