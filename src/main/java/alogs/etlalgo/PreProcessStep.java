@@ -12,9 +12,9 @@ public class PreProcessStep implements IStep {
     }
 
     public void attach(ISubject iSubject) {
-      if(iSubject.getData().getType() == "XYZ"){
-          iSubject.attach(this);
-      }
+        if (iSubject instanceof PreProcessSubject) {
+            iSubject.attach(this);
+        }
     }
 
     @Override

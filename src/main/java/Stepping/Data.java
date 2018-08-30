@@ -4,7 +4,7 @@ package Stepping;
  * Created by gabi.beyo on 12/13/2017.
  */
 public class Data<T> {
-    private String type;
+
     private T data;
     
     public Data(T data){
@@ -12,14 +12,6 @@ public class Data<T> {
     }
     public Data(){
 
-    }
-
-    public String getType(){
-        return type;
-    }
-
-    public void setType(String type){
-        this.type = type;
     }
 
     public T getData(){

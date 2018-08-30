@@ -14,12 +14,14 @@ public abstract class AlgoBase extends IAlgo {
     @Override
     public void run() {
         while (true) {
-            start();
+            start(new Data<>());
         }
     }
 
     public AlgoInfraConfig init() {
-        DI(new NewDataArrivedSubject(), "NewDataArrivedSubject");
+        DI(new NewDataArrivedSubject(), "newDataArrivedSubject");
+        DI(new SubjectContainer(), "subjectContainer");
+
         IoC();
         initSteps();
         attachSubjects();
@@ -61,6 +63,6 @@ public abstract class AlgoBase extends IAlgo {
 
     }
     abstract protected void IoC();
-    abstract protected void start();
+    abstract protected void start(Data data);
 
 }

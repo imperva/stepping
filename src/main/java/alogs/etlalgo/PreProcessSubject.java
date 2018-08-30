@@ -8,6 +8,16 @@ import java.util.List;
 
 public class PreProcessSubject implements ISubject {
 
+    @Override
+    public String getType() {
+        return null;
+    }
+
+    @Override
+    public void setType(String type) {
+
+    }
+
     public void setData(Data data) {
 
     }
