@@ -1,12 +1,15 @@
 package alogs.etlalgo;
 
 
-import Stepping.Data;
-import Stepping.IStep;
-import Stepping.ISubject;
-import Stepping.SubjectContainer;
+import Stepping.*;
 
-public class PreProcessStep implements IStep {
+public class PreProcessStep extends StepBase {
+
+    protected PreProcessStep() { super("", 1, 1);
+
+    }
+
+    @Override
     public void init() {
 
     }
@@ -22,7 +25,6 @@ public class PreProcessStep implements IStep {
         if (subject.getType() == "xyz") {
           //DO SOMETHING
         }
-
     }
 
     public void dataArrived(Data data) {
@@ -30,6 +32,11 @@ public class PreProcessStep implements IStep {
     }
 
     public void shutdown() {
+
+    }
+
+    @Override
+    public void run() {
 
     }
 }

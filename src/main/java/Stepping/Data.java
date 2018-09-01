@@ -5,20 +5,20 @@ package Stepping;
  */
 public class Data<T> {
 
-    private T data;
-    
-    public Data(T data){
-        setData(data);
-    }
-    public Data(){
+    private T value;
 
+    public Data(T value) {
+        setValue(value);
     }
 
-    public T getData(){
-        return data;
+    public Data() {
     }
 
-    public void setData(T data){
-        this.data = data;
+    public T getValue() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
     }
 }

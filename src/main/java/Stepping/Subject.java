@@ -1,14 +1,19 @@
 package Stepping;
 
-import Stepping.container.Container;
+import Stepping.container.ContainerSingleton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Subject<T> implements ISubject<T> {
 
+    private List<IStep> iSteps = new ArrayList<IStep>();
     private String type;
+    private Data<T> data;
 
-    public Subject() { }
+    public Subject() {
+    }
+
     public Subject(String type) {
         this.type = type;
     }
@@ -25,29 +30,30 @@ public class Subject<T> implements ISubject<T> {
 
     @Override
     public Data<T> getData() {
-        return null;
+        return data;
     }
 
     @Override
     public List<IStep> getSubscribers() {
-        return null;
+        return iSteps;
     }
 
     @Override
     public void publish() {
-        List<IStep> iSteps = Container.getInstance().getTypeOf(IStep.class);
-        for (IStep step : iSteps) {
-            step.dataArrived(this, Container.getInstance().getById("subjectContainer"));
+        Thread.currentThread().getThreadGroup().getParent();
+        for (IStep step : getSubscribers()) {
+            step.dataArrived(this, ContainerSingleton.getInstance().getById("subjectContainer"));
         }
     }
 
     @Override
-    public void attach(IStep o) {
-
+    public void attach(IStep step) {
+        iSteps.add(step);
     }
 
     @Override
     public void setData(Data<T> data) {
-
+        this.data = data;
+        publish();
     }
 }

@@ -1,11 +1,12 @@
 package alogs.etlalgo;
 
-import Stepping.Data;
-import Stepping.IStep;
-import Stepping.ISubject;
-import Stepping.SubjectContainer;
+import Stepping.*;
 
-public class AggregationStep implements IStep {
+public class AggregationStep extends StepBase {
+
+    protected AggregationStep() { super("", 1, 1);
+
+    }
 
     public void init() {
 
@@ -29,4 +30,8 @@ public class AggregationStep implements IStep {
 
     }
 
+    @Override
+    public void run() {
+
+    }
 }

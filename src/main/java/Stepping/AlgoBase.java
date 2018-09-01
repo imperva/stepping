@@ -1,14 +1,15 @@
 package Stepping;
 
 import Stepping.container.Container;
+import Stepping.container.ContainerSingleton;
 
 public abstract class AlgoBase extends IAlgo {
-    private SubjectContainer subjectContainer = new SubjectContainer();
-    private Container cntr;
+
+    private Q q = new Q();
+    private Container cntr = new Container();
 
     protected AlgoBase(String id, int delay, int initialdelay){ super(id, delay, initialdelay);
-        cntr = Container.getInstance();
-        cntr.add(subjectContainer, "subjectContainer");
+
     }
 
     @Override
@@ -26,19 +27,21 @@ public abstract class AlgoBase extends IAlgo {
         initSteps();
         attachSubjects();
 
-        go();
+        wakenProcessingUnit();
         return null;
     }
 
     private void initSteps(){
-        for (IStep step : Container.getInstance().<IStep>getTypeOf(IStep.class)) {
+        Thread.currentThread().getThreadGroup().list();
+        for (IStep step : cntr.<IStep>getTypeOf(IStep.class)) {
             step.init();
+            step.setContainer(cntr);
         }
     }
 
     private void attachSubjects(){
         SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
-        for (IStep step : Container.getInstance().<IStep>getTypeOf(IStep.class)) {
+        for (IStep step : ContainerSingleton.getInstance().<IStep>getTypeOf(IStep.class)) {
             step.init();
             for (ISubject subject : subjectContainer.getSubjectsList()) {
                 step.attach(subject);
@@ -58,8 +61,9 @@ public abstract class AlgoBase extends IAlgo {
         cntr.add(obj, id);
     }
 
-    public void newDataArrived(Data data) {
-        //* in Q
+    public void newDataArrived(Data<?> data) {
+       data.getValue();
+       q.queue(data);
 
     }
     abstract protected void IoC();

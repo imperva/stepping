@@ -5,43 +5,52 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Container {
-
+public class ContainerSingleton {
+    private static ContainerSingleton instance;
     private List<Identifiable> objects = new ArrayList<>();
-
-    public Container() {
+    private static Object lock = new Object();
+    private ContainerSingleton() {
     }
 
+    public static ContainerSingleton getInstance() {
+        synchronized (lock) {
+            if (instance == null) {
+                instance = new ContainerSingleton();
+            }
+        }
+        return instance;
+    }
 
-    public <T> Container add(T obj) {
+    public <T> ContainerSingleton add(T obj) {
         add(new Identifiable<>(obj, obj.getClass().getName()));
         return this;
     }
 
-    public <T> Container add(T obj, String id) {
+    public <T> ContainerSingleton add(T obj, String id) {
         add(new Identifiable<>(obj, id));
         return this;
     }
 
-    public <T> Container add(Identifiable<T> identifiable) {
-        if (objects.contains(identifiable))
+    public <T> ContainerSingleton add(Identifiable<T> identifiable) {
+        if (instance.objects.contains(identifiable))
             throw new RuntimeException("Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
-        objects.add(identifiable);
+        instance.objects.add(identifiable);
         return this;
     }
 
-    public Container remove(String id) {
-        objects.removeIf((i) -> i.getId().toLowerCase().equals(id.toLowerCase()));
+    public ContainerSingleton remove(String id) {
+        instance.objects.removeIf((i) -> i.getId().toLowerCase().equals(id.toLowerCase()));
         return this;
     }
 
-    public Container add(List<Identifiable> identifiables) {
-        objects.addAll(identifiables);
+    public ContainerSingleton add(List<Identifiable> identifiables) {
+        instance.objects.addAll(identifiables);
         return this;
     }
 
     public <T> T getById(String id) {
-        for (Identifiable identifiable :  objects) {
+        for (Identifiable identifiable :
+                instance.objects) {
             if (identifiable.getId().toLowerCase().equals(id.toLowerCase()))
                 return (T) identifiable.get();
         }
@@ -68,8 +77,8 @@ public class Container {
 
     public <T> List<T> getSonOf(Class<?> interf) {
         List<T> ts = new ArrayList<>();
-        List<Object> objects2 = objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
-        for (Object o : objects2) {
+        List<Object> objects = instance.objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
+        for (Object o : objects) {
             Boolean found = getSonOf(interf, o.getClass(), new ArrayList<>());
             if (found)
                 ts.add((T) o);
@@ -79,20 +88,20 @@ public class Container {
 
     public <T> List<T> getTypeOf(Class<?> interf) {
         List<T> ts = new ArrayList<>();
-        List<Object> objects2 = objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
-        for (Object o : objects2) {
+        List<Object> objects = instance.objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
+        for (Object o : objects) {
             if (o.getClass().equals(interf))
                 ts.add((T) o);
         }
         return ts;
     }
 
-    public void clear() {
-        if (objects != null)
-            objects.clear();
+    public static void clear() {
+        if (instance != null)
+            instance.objects.clear();
     }
 
     public int size() {
-        return objects.size();
+        return instance.objects.size();
     }
 }

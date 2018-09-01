@@ -6,5 +6,5 @@ public abstract class IAlgo extends IRunning {
     }
 
     public abstract AlgoInfraConfig init();
-    public abstract void newDataArrived(Data data);
+    public abstract void newDataArrived(Data<?> data);
 }

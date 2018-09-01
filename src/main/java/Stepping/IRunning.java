@@ -25,18 +25,17 @@ public abstract class IRunning implements Runnable , Closeable {
         this.initialdelay = initialdelay;
     }
 
-    protected void go() {
+    protected void wakenProcessingUnit() {
         synchronized (IRunning.class) {
             if (scheduledFuture == null) {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = Executors.defaultThreadFactory().newThread(r);
+
                     t.setDaemon(true);
                     t.setContextClassLoader(null);
                     t.setName(id);
                     return t;
                 });
-
-                PropertiesReader properties = PropertiesReader.getInstance();
 
                 this.scheduledFuture = es.scheduleWithFixedDelay(this::run, initialdelay, delay, TimeUnit.MILLISECONDS);
                 this.scheduledExecutorService = es;

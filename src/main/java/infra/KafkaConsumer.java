@@ -1,9 +1,6 @@
-package kafka;
+package infra;
 
-import Stepping.Data;
-import Stepping.IAlgo;
 import Stepping.IRunning;
-import kafka.converters.MessageConverter;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
@@ -12,17 +9,18 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.*;
 
-public class KafkaMessageHandler<T> extends IRunning {
+public class KafkaConsumer<T> extends IRunning {
 
-    private KafkaConsumer<String, String> consumer;
+    private org.apache.kafka.clients.consumer.KafkaConsumer<String, String> consumer;
     private final List<String> topics;
     private final int id;
     private boolean isRunning;
-    private IAlgo algo;
+    private ICallback callback;
     private MessageConverter<T> messageConverter;
 
-    public KafkaMessageHandler(int id, String groupId, List<String> topics, IAlgo algo) { super("KafkaMessageHandler" + id, 1,1);
-        this.algo = algo;
+    public KafkaConsumer(int id, String groupId, List<String> topics, ICallback callback) {
+        super("KafkaConsumer" + id, 1, 1);
+        this.callback = callback;
         this.isRunning = true;
         this.id = id;
         this.topics = topics;
@@ -34,9 +32,9 @@ public class KafkaMessageHandler<T> extends IRunning {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
-        this.consumer = new KafkaConsumer<>(props);
+        this.consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
 
-        go();
+        wakenProcessingUnit();
     }
 
     @Override
@@ -68,9 +66,9 @@ public class KafkaMessageHandler<T> extends IRunning {
                     System.out.println(this.id + ": " + data);
                     System.out.println(this.id + ": " + Thread.currentThread().getId());
                 }
-                Data data  = new Data();
-                data.setData(messageConverter.convert(values));
-                algo.newDataArrived(data);
+                Message message = new Message();
+                message.setValue(messageConverter.convert(values));
+                callback.call(message);
             }
         } catch (WakeupException e) {
             // ignore for shutdown

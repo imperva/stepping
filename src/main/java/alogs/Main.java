@@ -1,27 +1,20 @@
 package alogs;
 
-import Stepping.IAlgo;
-import Stepping.IRunning;
 import Stepping.Stepping;
+import Stepping.IAlgo;
 import alogs.etlalgo.ETLAlgo;
-import kafka.KafkaMessageHandler;
-import java.util.Collections;
+import infra.KafkaMessengerWrapper;
 
 public class Main {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
+
         IAlgo etlAlgo = new ETLAlgo();
 
         //* TBD
         Stepping stepping = new Stepping();
-        stepping.add(new ETLAlgo());
-        stepping.init();
+        stepping.register(etlAlgo);
 
-        IRunning messageHandler = new KafkaMessageHandler<String>(
-                "consumer".hashCode(),
-                "etlGroup",
-                Collections.singletonList("damEngineRawData"),
-                etlAlgo);
+        KafkaMessengerWrapper kafkaMessengerWrapper = new KafkaMessengerWrapper(etlAlgo);
+
     }
-
 }
