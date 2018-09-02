@@ -31,7 +31,7 @@ public abstract class IRunning implements Runnable , Closeable {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = Executors.defaultThreadFactory().newThread(r);
 
-                    t.setDaemon(true);
+                    t.setDaemon(false);
                     t.setContextClassLoader(null);
                     t.setName(id);
                     return t;

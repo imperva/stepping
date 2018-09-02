@@ -32,6 +32,6 @@ public class AggregationStep extends StepBase {
 
     @Override
     public void run() {
-
+System.out.println("sss");
     }
 }

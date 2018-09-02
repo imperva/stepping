@@ -15,7 +15,7 @@ public class ETLAlgo extends AlgoBase {
     public void start(Data data) {
 
         //* in thread
-        getSubjectContainer().getByName("newDataArrivedSubject").setData(data);
+       // getSubjectContainer().getByName("newDataArrivedSubject").setData(data);
     }
 
     @Override

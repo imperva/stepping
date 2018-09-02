@@ -7,6 +7,7 @@ public abstract class AlgoBase extends IAlgo {
 
     private Q q = new Q();
     private Container cntr = new Container();
+    private IMessenger iMessenger;
 
     protected AlgoBase(String id, int delay, int initialdelay){ super(id, delay, initialdelay);
 
@@ -19,6 +20,7 @@ public abstract class AlgoBase extends IAlgo {
         }
     }
 
+    @Override
     public AlgoInfraConfig init() {
         DI(new Subject(), "newDataArrivedSubject");
         DI(new SubjectContainer(), "subjectContainer");
@@ -29,6 +31,23 @@ public abstract class AlgoBase extends IAlgo {
 
         wakenProcessingUnit();
         return null;
+    }
+
+    @Override
+    public void newDataArrived(Data<?> data) {
+        data.getValue();
+        q.queue(data);
+
+    }
+
+    @Override
+    public void publishData(Data<?> data) {
+        iMessenger.emit(data);
+    }
+
+    @Override
+    public void setMessenger(IMessenger messenger){
+        this.iMessenger = messenger;
     }
 
     private void initSteps(){
@@ -61,11 +80,7 @@ public abstract class AlgoBase extends IAlgo {
         cntr.add(obj, id);
     }
 
-    public void newDataArrived(Data<?> data) {
-       data.getValue();
-       q.queue(data);
 
-    }
     abstract protected void IoC();
     abstract protected void start(Data data);
 

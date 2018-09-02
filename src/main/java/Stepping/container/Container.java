@@ -12,7 +12,6 @@ public class Container {
     public Container() {
     }
 
-
     public <T> Container add(T obj) {
         add(new Identifiable<>(obj, obj.getClass().getName()));
         return this;
