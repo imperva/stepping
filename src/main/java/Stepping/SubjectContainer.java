@@ -17,10 +17,15 @@ public class SubjectContainer {
 
     public ISubject getByName(String name){
         for (ISubject subject: subjectsList) {
-            if (subject.toString() == name)
+            if (subject.getType() == name)
                 return subject;
 
         }
         return null;
+    }
+
+    public void add(ISubject subject) {
+        subjectsList.add(subject);
+
     }
 }

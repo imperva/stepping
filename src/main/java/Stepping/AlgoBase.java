@@ -1,7 +1,10 @@
 package Stepping;
 
 import Stepping.container.Container;
-import Stepping.container.ContainerSingleton;
+import alogs.etlalgo.SubjectType;
+
+import java.util.List;
+
 
 public abstract class AlgoBase extends IAlgo {
 
@@ -9,24 +12,45 @@ public abstract class AlgoBase extends IAlgo {
     private Container cntr = new Container();
     private IMessenger iMessenger;
 
-    protected AlgoBase(String id, int delay, int initialdelay){ super(id, delay, initialdelay);
+    protected AlgoBase(String id){ super(id);
 
     }
 
     @Override
     public void run() {
         while (true) {
-            start(new Data<>());
+//            try {
+//                Thread.sleep(2);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            List x = q.take();
+            if(x.size() > 0) {
+                System.out.println("@@@@ DATA");
+                for (Object o : x) {
+                    start(new Data<>(o));
+                }
+            }
+            //else
+                //System.out.println("NO DATA@@@@");
         }
     }
 
     @Override
     public AlgoInfraConfig init() {
-        DI(new Subject(), "newDataArrivedSubject");
+        DI(new Subject("newDataArrivedSubject"), "newDataArrivedSubject");
         DI(new SubjectContainer(), "subjectContainer");
+
 
         IoC();
         initSteps();
+
+        for (Subject subject: getContainer().<Subject>getTypeOf(Subject.class)             ) {
+            SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
+            subjectContainer.add(subject);
+            subject.setContainer(cntr);
+        }
+
         attachSubjects();
 
         wakenProcessingUnit();
@@ -37,12 +61,6 @@ public abstract class AlgoBase extends IAlgo {
     public void newDataArrived(Data<?> data) {
         data.getValue();
         q.queue(data);
-
-    }
-
-    @Override
-    public void publishData(Data<?> data) {
-        iMessenger.emit(data);
     }
 
     @Override
@@ -51,16 +69,17 @@ public abstract class AlgoBase extends IAlgo {
     }
 
     private void initSteps(){
-        Thread.currentThread().getThreadGroup().list();
-        for (IStep step : cntr.<IStep>getTypeOf(IStep.class)) {
+        for (IStep step : cntr.<IStep>getSonOf(IStep.class)) {
             step.init();
             step.setContainer(cntr);
+            step.setMessenger(iMessenger);
         }
     }
 
     private void attachSubjects(){
         SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
-        for (IStep step : ContainerSingleton.getInstance().<IStep>getTypeOf(IStep.class)) {
+
+        for (IStep step : cntr.<IStep>getSonOf(StepBase.class)) {
             step.init();
             for (ISubject subject : subjectContainer.getSubjectsList()) {
                 step.attach(subject);

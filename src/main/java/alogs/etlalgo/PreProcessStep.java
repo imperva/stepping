@@ -5,7 +5,7 @@ import Stepping.*;
 
 public class PreProcessStep extends StepBase {
 
-    protected PreProcessStep() { super("", 1, 1);
+    protected PreProcessStep() { super(PreProcessStep.class.getName());
 
     }
 
@@ -15,28 +15,29 @@ public class PreProcessStep extends StepBase {
     }
 
     public void attach(ISubject iSubject) {
-        if (iSubject.getType() == "xyz") {
+        if (iSubject.getType() == "newDataArrivedSubject") {
             iSubject.attach(this);
         }
     }
 
+    int dataArribedIndex = 0;
     @Override
     public void dataArrived(ISubject subject, SubjectContainer subjectContainer) {
-        if (subject.getType() == "xyz") {
-          //DO SOMETHING
+        if (subject.getType() == "newDataArrivedSubject") {
+            System.out.println("PreProcessStep: newDataArrivedSubject Arrived!");
+            dataArribedIndex++;
+            if(dataArribedIndex == 20){
+                dataArribedIndex =0;
+
+                subjectContainer.getByName(SubjectType.PRE_PROCESS.name()).setData(new Data());
+            }
         }
     }
 
-    public void dataArrived(Data data) {
-
-    }
 
     public void shutdown() {
 
     }
 
-    @Override
-    public void run() {
 
-    }
 }

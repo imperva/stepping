@@ -1,5 +1,7 @@
 package Stepping;
 
+import Stepping.container.Container;
+
 import java.util.List;
 
 public interface ISubject<T> {
@@ -10,4 +12,6 @@ public interface ISubject<T> {
    List<IStep> getSubscribers();
    void attach(IStep o);
    void publish();
+   Container getContainer() ;
+   void setContainer(Container container);
 }

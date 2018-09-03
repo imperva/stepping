@@ -19,7 +19,7 @@ public class KafkaConsumer<T> extends IRunning {
     private MessageConverter<T> messageConverter;
 
     public KafkaConsumer(int id, String groupId, List<String> topics, ICallback callback) {
-        super("KafkaConsumer" + id, 1, 1);
+        super("KafkaConsumer" + id);
         this.callback = callback;
         this.isRunning = true;
         this.id = id;

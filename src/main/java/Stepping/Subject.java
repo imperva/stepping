@@ -1,6 +1,8 @@
 package Stepping;
 
-import Stepping.container.ContainerSingleton;
+
+
+import Stepping.container.Container;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ public class Subject<T> implements ISubject<T> {
     private List<IStep> iSteps = new ArrayList<IStep>();
     private String type;
     private Data<T> data;
+    private Container cntr;
 
     public Subject() {
     }
@@ -40,9 +43,9 @@ public class Subject<T> implements ISubject<T> {
 
     @Override
     public void publish() {
-        Thread.currentThread().getThreadGroup().getParent();
+
         for (IStep step : getSubscribers()) {
-            step.dataArrived(this, ContainerSingleton.getInstance().getById("subjectContainer"));
+            step.dataArrived(this, cntr.getById("subjectContainer"));
         }
     }
 
@@ -55,5 +58,13 @@ public class Subject<T> implements ISubject<T> {
     public void setData(Data<T> data) {
         this.data = data;
         publish();
+    }
+
+    public Container getContainer() {
+        return cntr;
+    }
+
+    public void setContainer(Container container) {
+        this.cntr = container;
     }
 }

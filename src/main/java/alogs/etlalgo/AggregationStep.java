@@ -4,7 +4,8 @@ import Stepping.*;
 
 public class AggregationStep extends StepBase {
 
-    protected AggregationStep() { super("", 1, 1);
+    protected AggregationStep() {
+        super(AggregationStep.class.getName());
 
     }
 
@@ -13,15 +14,18 @@ public class AggregationStep extends StepBase {
     }
 
     public void attach(ISubject iSubject) {
-        if (iSubject.getType() == "123") {
-
+        if (iSubject.getType().equals(SubjectType.PRE_PROCESS.name())) {
+            iSubject.attach(this);
         }
     }
 
     public void dataArrived(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
-        if (subject.getType() == "publisgdecided") {
-            subjectContainer.getByName("ImessgaeHandler").setData(subject.getData());
+        if (subject.getType().equals(SubjectType.PRE_PROCESS.name())) {
+
+            System.out.println("AggregationStep: preProcessedData Arrived!");
+            System.out.println("AggregationStep: publishing data");
+            publishData(new Data<Object>());
         }
     }
 
@@ -32,6 +36,6 @@ public class AggregationStep extends StepBase {
 
     @Override
     public void run() {
-System.out.println("sss");
+        System.out.println("sss");
     }
 }

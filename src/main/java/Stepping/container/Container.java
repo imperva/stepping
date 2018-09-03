@@ -56,12 +56,24 @@ public class Container {
             }
             return false;
         }
+
+        if (clss.equals(interf)) {
+            return true;
+        }
+
         for (Class intfc : clss.getInterfaces()) {
             if (intfc.equals(interf)) {
                 return true;
             }
             context.addAll(Arrays.asList(intfc.getInterfaces()));
         }
+
+//        Class sprclss = clss.getSuperclass();
+//        if (sprclss.equals(interf)) {
+//            return true;
+//        }
+//        context.add(sprclss);
+
         return getSonOf(interf, clss.getSuperclass(), context);
     }
 

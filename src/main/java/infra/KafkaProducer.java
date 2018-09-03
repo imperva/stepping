@@ -3,7 +3,7 @@ package infra;
 import Stepping.IRunning;
 
 public class KafkaProducer extends IRunning {
-    public KafkaProducer() { super("", 1, 1);
+    public KafkaProducer() { super(KafkaProducer.class.getName());
 
     }
 

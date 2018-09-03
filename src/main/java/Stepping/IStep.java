@@ -3,8 +3,8 @@ package Stepping;
 import Stepping.container.Container;
 
 public abstract class IStep extends IRunning {
-    protected IStep(String id, int delay, int initialdelay) {
-        super(id, delay, initialdelay);
+    protected IStep(String id) {
+        super(id);
     }
 
     abstract public void init();
@@ -12,4 +12,6 @@ public abstract class IStep extends IRunning {
     abstract public void dataArrived(ISubject iSubject, SubjectContainer subjectContainer);
     abstract public void shutdown();
     abstract public void setContainer(Container cntr);
+    abstract public void setMessenger(IMessenger messenger);
+    abstract public void publishData(Data<?> data);
 }

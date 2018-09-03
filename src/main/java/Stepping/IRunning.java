@@ -18,11 +18,17 @@ public abstract class IRunning implements Runnable , Closeable {
     private int delay = 10;
     private int initialdelay = 10;
     private String id;
+    private boolean daemon = false;
 
-    protected IRunning(String id, int delay, int initialdelay) {
+    protected IRunning(String id) {
+        this.id = id;
+    }
+
+    protected IRunning(String id, int delay, int initialdelay, boolean daemon) {
         this.id = id;
         this.delay = delay;
         this.initialdelay = initialdelay;
+        this.daemon = daemon;
     }
 
     protected void wakenProcessingUnit() {
@@ -31,7 +37,7 @@ public abstract class IRunning implements Runnable , Closeable {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = Executors.defaultThreadFactory().newThread(r);
 
-                    t.setDaemon(false);
+                    t.setDaemon(daemon);
                     t.setContextClassLoader(null);
                     t.setName(id);
                     return t;
