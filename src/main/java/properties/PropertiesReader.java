@@ -22,7 +22,6 @@ public class PropertiesReader extends Properties {
         if (propertiesReader == null) {
             throw new UnsupportedOperationException();
         }
-
         return propertiesReader;
     }
 

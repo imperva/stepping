@@ -29,7 +29,7 @@ public class Main {
             System.out.println("SENDINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
             etlAlgo.newDataArrived(new Data<Object>());
             try {
-                Thread.sleep(2);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

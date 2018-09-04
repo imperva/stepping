@@ -12,11 +12,16 @@ public class ETLAlgo extends AlgoBase {
     }
 
     @Override
-    public void start(Data data) {
-
+    public void newDataArrivedCallBack(Data data) {
         //* in thread
          getSubjectContainer().getByName("newDataArrivedSubject").setData(data);
     }
+
+    @Override
+    protected void tickCallBack(){
+        System.out.println("ETLAlgo TICKS");
+    }
+
 
     @Override
     protected void IoC() {
@@ -31,6 +36,7 @@ public class ETLAlgo extends AlgoBase {
         DI(new LoggerStep(), "LoggerStep");
 
     }
+
 
     public void shutdown() {
         //* cleanup;

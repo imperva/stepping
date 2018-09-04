@@ -1,7 +1,5 @@
 package Stepping;
 
-import Stepping.container.Container;
-
 public abstract class IStep extends IRunning {
     protected IStep(String id) {
         super(id);
@@ -14,5 +12,9 @@ public abstract class IStep extends IRunning {
     abstract public void setContainer(Container cntr);
     abstract public void setMessenger(IMessenger messenger);
     abstract public void publishData(Data<?> data);
-    abstract protected void start(ISubject data, SubjectContainer subjectContainer);
+    //abstract protected void start(ISubject data, SubjectContainer subjectContainer);
+
+
+    abstract protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
+    abstract protected void tickCallBack();
 }

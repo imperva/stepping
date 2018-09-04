@@ -10,12 +10,17 @@ public class LoggerStep extends StepBase {
     }
 
     @Override
-    protected void start(ISubject data, SubjectContainer subjectContainer) {
-        System.out.println("LISTEN TO ALLLLLLLLLLLLLLLLLLL: " + data.getType());
+    public void attach(ISubject iSubject) {
+        iSubject.attach(this);
     }
 
     @Override
-    public void attach(ISubject iSubject) {
-        iSubject.attach(this);
+    protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+        System.out.println("LISTEN TO ALLLLLLLLLLLLLLLLLLL: " + subject.getType());
+    }
+
+    @Override
+    protected void tickCallBack() {
+        System.out.println("LoggerStep TICKS");
     }
 }

@@ -8,6 +8,7 @@ public class AggregationStep extends StepBase {
         super(AggregationStep.class.getName());
     }
 
+    @Override
     public void attach(ISubject iSubject) {
         if (iSubject.getType().equals(SubjectType.PRE_PROCESS.name())) {
             iSubject.attach(this);
@@ -15,7 +16,12 @@ public class AggregationStep extends StepBase {
     }
 
     @Override
-    protected void start(ISubject subject, SubjectContainer subjectContainer) {
+    protected void tickCallBack() {
+        System.out.println("AggregationStep TICKS");
+    }
+
+    @Override
+    protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
         if (subject.getType().equals(SubjectType.PRE_PROCESS.name())) {
             System.out.println("AggregationStep: preProcessedData Arrived!");

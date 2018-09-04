@@ -1,14 +1,11 @@
 package Stepping;
 
-import Stepping.container.Container;
-import alogs.etlalgo.SubjectType;
-
 import java.util.List;
 
 
 public abstract class AlgoBase extends IAlgo {
 
-    private Q q = new Q();
+    private Q q = new Q<Data>();
     private Container cntr = new Container();
     private IMessenger iMessenger;
 
@@ -18,22 +15,15 @@ public abstract class AlgoBase extends IAlgo {
 
     @Override
     public void run() {
-      //  while (true) {
-//            try {
-//                Thread.sleep(2);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            List x = q.take();
-            if(x.size() > 0) {
-                System.out.println("@@@@ DATA");
-                for (Object o : x) {
-                    start(new Data<>(o));
-                }
+        List<Data> subjectList = q.take();
+        if (subjectList.size() > 0) {
+            for (Data data : subjectList) {
+                newDataArrivedCallBack(data);
             }
-            //else
-                //System.out.println("NO DATA@@@@");
-       // }
+        } else {
+            tickCallBack();
+        }
+
     }
 
     @Override
@@ -99,8 +89,4 @@ public abstract class AlgoBase extends IAlgo {
     protected  <T> void DI(T obj, String id){
         cntr.add(obj, id);
     }
-
-
-;
-
 }

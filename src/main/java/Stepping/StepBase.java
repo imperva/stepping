@@ -1,7 +1,5 @@
 package Stepping;
 
-import Stepping.container.Container;
-
 import java.util.List;
 
 public abstract class StepBase extends IStep {
@@ -36,12 +34,13 @@ public abstract class StepBase extends IStep {
 
     @Override
     public void run() {
-        List<ISubject> x = q.take();
-        if (x.size() > 0) {
-            System.out.println("@@@@ DATA");
-            for (ISubject o : x) {
-                start(o, container.getById("subjectContainer"));
+        List<ISubject> subjectList = q.take();
+        if (subjectList.size() > 0) {
+            for (ISubject subject : subjectList) {
+                newDataArrivedCallBack(subject, container.getById("subjectContainer"));
             }
+        } else {
+            tickCallBack();
         }
     }
 
