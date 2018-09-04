@@ -1,9 +1,6 @@
 package Stepping;
 
-
-
 import Stepping.container.Container;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +42,7 @@ public class Subject<T> implements ISubject<T> {
     public void publish() {
 
         for (IStep step : getSubscribers()) {
-            step.dataArrived(this, cntr.getById("subjectContainer"));
+            step.dataArrived(this);
         }
     }
 
@@ -60,10 +57,12 @@ public class Subject<T> implements ISubject<T> {
         publish();
     }
 
+    @Override
     public Container getContainer() {
         return cntr;
     }
 
+    @Override
     public void setContainer(Container container) {
         this.cntr = container;
     }

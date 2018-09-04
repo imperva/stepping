@@ -18,7 +18,7 @@ public abstract class AlgoBase extends IAlgo {
 
     @Override
     public void run() {
-        while (true) {
+      //  while (true) {
 //            try {
 //                Thread.sleep(2);
 //            } catch (InterruptedException e) {
@@ -33,24 +33,18 @@ public abstract class AlgoBase extends IAlgo {
             }
             //else
                 //System.out.println("NO DATA@@@@");
-        }
+       // }
     }
 
     @Override
     public AlgoInfraConfig init() {
-        DI(new Subject("newDataArrivedSubject"), "newDataArrivedSubject");
+
         DI(new SubjectContainer(), "subjectContainer");
 
 
         IoC();
         initSteps();
-
-        for (Subject subject: getContainer().<Subject>getTypeOf(Subject.class)             ) {
-            SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
-            subjectContainer.add(subject);
-            subject.setContainer(cntr);
-        }
-
+        initSubjects();
         attachSubjects();
 
         wakenProcessingUnit();
@@ -59,13 +53,20 @@ public abstract class AlgoBase extends IAlgo {
 
     @Override
     public void newDataArrived(Data<?> data) {
-        data.getValue();
         q.queue(data);
     }
 
     @Override
     public void setMessenger(IMessenger messenger){
         this.iMessenger = messenger;
+    }
+
+    private void initSubjects(){
+        for (Subject subject: getContainer().<Subject>getTypeOf(Subject.class)             ) {
+            SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
+            subjectContainer.add(subject);
+            subject.setContainer(cntr);
+        }
     }
 
     private void initSteps(){
@@ -100,7 +101,6 @@ public abstract class AlgoBase extends IAlgo {
     }
 
 
-    abstract protected void IoC();
-    abstract protected void start(Data data);
+;
 
 }

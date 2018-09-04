@@ -9,9 +9,10 @@ public abstract class IStep extends IRunning {
 
     abstract public void init();
     abstract public void attach(ISubject iSubject);
-    abstract public void dataArrived(ISubject iSubject, SubjectContainer subjectContainer);
+    abstract public void dataArrived(ISubject iSubject);
     abstract public void shutdown();
     abstract public void setContainer(Container cntr);
     abstract public void setMessenger(IMessenger messenger);
     abstract public void publishData(Data<?> data);
+    abstract protected void start(ISubject data, SubjectContainer subjectContainer);
 }

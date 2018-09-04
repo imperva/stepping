@@ -8,8 +8,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Created by gabi.beyo on 1/31/2018.
  */
-class Q {
-    private BlockingQueue<Data<?>> blockingQueue = new LinkedBlockingDeque<Data<?>>();
+class Q<T>{
+    private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<T>();
 
 
     public Q() {
@@ -25,12 +25,12 @@ class Q {
         return null;
     }
 
-    public void queue(Data<?> incident) {
+    public void queue(T incident) {
         blockingQueue.add(incident);
 
     }
 
-    public void queue(List<Data<?>> incidents) {
+    public void queue(List<T> incidents) {
         blockingQueue.addAll(incidents);
     }
 
@@ -38,14 +38,14 @@ class Q {
         return !blockingQueue.isEmpty();
     }
 
-    public List<Data<?>> take() {
-        List<Data<?>> incidents = new ArrayList<>();
+    public List<T> take() {
+        List<T> incidents = new ArrayList<>();
         blockingQueue.drainTo(incidents);
         return incidents;
     }
 
-    public List<Data<?>> take(int max) {
-        List<Data<?>> incidents = new ArrayList<>();
+    public List<T> take(int max) {
+        List<T> incidents = new ArrayList<>();
         blockingQueue.drainTo(incidents, max);
         return incidents;
     }

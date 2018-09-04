@@ -6,11 +6,6 @@ public class AggregationStep extends StepBase {
 
     protected AggregationStep() {
         super(AggregationStep.class.getName());
-
-    }
-
-    public void init() {
-
     }
 
     public void attach(ISubject iSubject) {
@@ -19,23 +14,13 @@ public class AggregationStep extends StepBase {
         }
     }
 
-    public void dataArrived(ISubject subject, SubjectContainer subjectContainer) {
+    @Override
+    protected void start(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
         if (subject.getType().equals(SubjectType.PRE_PROCESS.name())) {
-
             System.out.println("AggregationStep: preProcessedData Arrived!");
             System.out.println("AggregationStep: publishing data");
             publishData(new Data<Object>());
         }
-    }
-
-
-    public void shutdown() {
-
-    }
-
-    @Override
-    public void run() {
-        System.out.println("sss");
     }
 }

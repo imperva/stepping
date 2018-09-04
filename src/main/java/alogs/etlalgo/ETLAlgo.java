@@ -23,10 +23,13 @@ public class ETLAlgo extends AlgoBase {
         //* init subjects
         ISubject<PreProcessDTO> subject = new Subject<PreProcessDTO>(SubjectType.PRE_PROCESS.name());
         DI(subject, "preProcessedData");
+        DI(new Subject("newDataArrivedSubject"), "newDataArrivedSubject");
 
         //* init steps
         DI(new PreProcessStep(), "preStep");
         DI(new AggregationStep(), "aggreStep");
+        DI(new LoggerStep(), "LoggerStep");
+
     }
 
     public void shutdown() {

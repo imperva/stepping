@@ -2,9 +2,13 @@ package Stepping;
 
 import Stepping.container.Container;
 
+import java.util.List;
+
 public abstract class StepBase extends IStep {
     protected Container container;
     private IMessenger messenger;
+
+    private Q q = new Q<ISubject>();
 
     protected StepBase(String id) {
         super(id);
@@ -26,8 +30,28 @@ public abstract class StepBase extends IStep {
     }
 
     @Override
+    public void dataArrived(ISubject subject) {
+        q.queue(subject);
+    }
+
+    @Override
     public void run() {
+        List<ISubject> x = q.take();
+        if (x.size() > 0) {
+            System.out.println("@@@@ DATA");
+            for (ISubject o : x) {
+                start(o, container.getById("subjectContainer"));
+            }
+        }
+    }
+
+    @Override
+    public void shutdown() {
 
     }
 
+    @Override
+    public void init() {
+        wakenProcessingUnit();
+    }
 }
