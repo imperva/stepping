@@ -7,8 +7,8 @@ public abstract class IAlgo extends IRunning {
     }
 
     public abstract AlgoInfraConfig init();
-    public abstract void newDataArrived(Data<?> data);
-    public abstract void setMessenger(IMessenger messenger);
+
+    protected abstract void setMessenger(IMessenger messenger);
     abstract protected void IoC();
     abstract protected void newDataArrivedCallBack(Data data);
     abstract protected void tickCallBack();

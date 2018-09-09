@@ -2,6 +2,7 @@ package infra;
 
 import Stepping.Data;
 import Stepping.IAlgo;
+import Stepping.IExternalDataReceiver;
 import Stepping.IMessenger;
 
 public class StubMessengerWrapper implements IMessenger {
@@ -24,4 +25,8 @@ public class StubMessengerWrapper implements IMessenger {
         System.out.println("StubMessengerWrapper: Data published to Kafka");
     }
 
+    @Override
+    public void fetching(IExternalDataReceiver dataReceiver) {
+
+    }
 }

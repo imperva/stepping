@@ -36,7 +36,6 @@ public abstract class IRunning implements Runnable , Closeable {
             if (scheduledFuture == null) {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = Executors.defaultThreadFactory().newThread(r);
-
                     t.setDaemon(daemon);
                     t.setContextClassLoader(null);
                     t.setName(id);
@@ -52,17 +51,17 @@ public abstract class IRunning implements Runnable , Closeable {
     @Override
     public void close() {
         try {
-            LOGGER.info("Try close Grouping orchestrator gracefully");
+            LOGGER.info("Try close Stepping orchestrator gracefully");
             if (scheduledFuture != null && !scheduledFuture.isDone() && !scheduledFuture.isCancelled()) {
-                LOGGER.trace("Start Closing Grouping orchestrator Process");
+                LOGGER.trace("Start Closing Stepping orchestrator Process");
                 boolean isCanceled = scheduledFuture.cancel(true);
-                LOGGER.trace("Grouping orchestrator Future canceled successfully?: " + isCanceled);
+                LOGGER.trace("Stepping orchestrator Future canceled successfully?: " + isCanceled);
                 scheduledExecutorService.shutdownNow();
-                LOGGER.trace("Grouping orchestrator ScheduledExecutorService shutted down");
-                LOGGER.info("Finish closing Grouping orchestrator");
+                LOGGER.trace("Stepping orchestrator ScheduledExecutorService shutted down");
+                LOGGER.info("Finish closing Stepping orchestrator");
             }
         } catch (Exception e) {
-            LOGGER.error("Failed closing Grouping orchestrator", e);
+            LOGGER.error("Failed closing Stepping orchestrator", e);
         }
     }
 }

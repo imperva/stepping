@@ -41,7 +41,7 @@ public class Subject<T> implements ISubject<T> {
     public void publish() {
 
         for (IStep step : getSubscribers()) {
-            step.dataArrived(this);
+            step.newDataArrived(this);
         }
     }
 

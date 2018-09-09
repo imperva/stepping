@@ -22,12 +22,11 @@ public class ETLAlgo extends AlgoBase {
         System.out.println("ETLAlgo TICKS");
     }
 
-
     @Override
     protected void IoC() {
         //* init subjects
         ISubject<PreProcessDTO> subject = new Subject<PreProcessDTO>(SubjectType.PRE_PROCESS.name());
-        DI(subject, "preProcessedData");
+        DI(subject, subject.getType());
         DI(new Subject("newDataArrivedSubject"), "newDataArrivedSubject");
 
         //* init steps

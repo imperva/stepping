@@ -1,17 +1,16 @@
 package Stepping;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-
-public abstract class AlgoBase extends IAlgo {
+public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
 
     private Q q = new Q<Data>();
     private Container cntr = new Container();
     private IMessenger iMessenger;
-
-    protected AlgoBase(String id){ super(id);
-
-    }
+    protected AlgoBase(String id){ super(id); }
 
     @Override
     public void run() {
@@ -23,22 +22,36 @@ public abstract class AlgoBase extends IAlgo {
         } else {
             tickCallBack();
         }
-
     }
 
     @Override
     public AlgoInfraConfig init() {
 
-        DI(new SubjectContainer(), "subjectContainer");
 
+        DI(new SubjectContainer(), "subjectContainer");
 
         IoC();
         initSteps();
         initSubjects();
+        regiterShutdownHook();
         attachSubjects();
+        restate();
 
-        wakenProcessingUnit();
+
+
+        //wakenProcessingUnit();
+        wakenAllProcessingUnit();
         return null;
+    }
+
+    private void regiterShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+    }
+
+    private void wakenAllProcessingUnit() {
+        for (IRunning running : cntr.<IStep>getSonOf(IRunning.class)) {
+          running.wakenProcessingUnit();
+        }
     }
 
     @Override
@@ -47,8 +60,22 @@ public abstract class AlgoBase extends IAlgo {
     }
 
     @Override
-    public void setMessenger(IMessenger messenger){
+    protected void setMessenger(IMessenger messenger){
         this.iMessenger = messenger;
+    }
+
+    @Override
+    public void close(){
+
+        for (Closeable closable: getContainer().<Closeable>getSonOf(Closeable.class)) {
+            try {
+                closable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
     }
 
     private void initSubjects(){
@@ -57,6 +84,24 @@ public abstract class AlgoBase extends IAlgo {
             subjectContainer.add(subject);
             subject.setContainer(cntr);
         }
+    }
+
+    private void restate(){
+        List<Thread> threads = new ArrayList<>();
+        for (IStep step : cntr.<IStep>getSonOf(IStep.class)) {
+            Thread thread = new Thread(()->{ step.restate();});
+            thread.setName("restate: " + step.getClass().getName());
+            thread.start();
+            threads.add(thread);
+        }
+
+        threads.stream().forEach((t)->{
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void initSteps(){

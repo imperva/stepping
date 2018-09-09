@@ -2,39 +2,48 @@ package alogs;
 
 import Stepping.Data;
 import Stepping.Stepping;
-import Stepping.IAlgo;
+import Stepping.IMessenger;
 import alogs.etlalgo.ETLAlgo;
-import infra.KafkaMessengerWrapper;
-import infra.StubMessengerWrapper;
+import infra.KafkaConsumer;
+import infra.KafkaProducer;
+import Stepping.IExternalDataReceiver;
+import Stepping.AlgoBase;
+import infra.Message;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
-        IAlgo etlAlgo = new ETLAlgo();
-        StubMessengerWrapper messengerWrapper = new StubMessengerWrapper(etlAlgo);
-        etlAlgo.setMessenger(messengerWrapper);
+        ETLAlgo etlAlgo = new ETLAlgo();
 
-        //* TBD
-        Stepping stepping = new Stepping();
-        stepping.register(etlAlgo);
+        new Stepping().register(etlAlgo, new IMessenger() {
 
-
-        messengerWrapper.init();
-
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> ((ETLAlgo) etlAlgo).shutdown()));
-
-        Thread t = new Thread(new Thread(() -> {
-        while (true) {
-            System.out.println("SENDINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
-            etlAlgo.newDataArrived(new Data<Object>());
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            private KafkaConsumer kafkaConsumer;
+            private KafkaProducer kafkaProducer;
+            @Override
+            public void init() {
+                kafkaConsumer = new KafkaConsumer(1,"",null,null);
+                kafkaProducer = new KafkaProducer();
             }
-        }
-        }));
-        t.start();
+
+            @Override
+            public void fetching(IExternalDataReceiver dataReceiver) {
+                //fetching data
+
+                //on data arrives
+
+                dataReceiver.newDataArrived(new Data<Object>());
+            }
+
+
+            @Override
+            public void emit(Data data) {
+                kafkaProducer.send(new Message());
+            }
+        }).go();
+
+        Thread.sleep(10000);
+
+        etlAlgo.close();
+        //Runtime.getRuntime().addShutdownHook(new Thread(() -> ((AlgoBase) etlAlgo).shutdown()));
     }
 }

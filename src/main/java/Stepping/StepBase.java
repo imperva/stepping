@@ -1,5 +1,6 @@
 package Stepping;
 
+import java.io.Closeable;
 import java.util.List;
 
 public abstract class StepBase extends IStep {
@@ -28,7 +29,7 @@ public abstract class StepBase extends IStep {
     }
 
     @Override
-    public void dataArrived(ISubject subject) {
+    public void newDataArrived(ISubject subject) {
         q.queue(subject);
     }
 
@@ -45,12 +46,16 @@ public abstract class StepBase extends IStep {
     }
 
     @Override
-    public void shutdown() {
-
+    public void close() {
+        try {
+            shutdown();
+        } finally {
+            super.close();
+        }
     }
 
     @Override
     public void init() {
-        wakenProcessingUnit();
+
     }
 }

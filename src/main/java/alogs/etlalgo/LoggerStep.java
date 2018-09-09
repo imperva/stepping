@@ -15,6 +15,11 @@ public class LoggerStep extends StepBase {
     }
 
     @Override
+    public void shutdown() {
+
+    }
+
+    @Override
     protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         System.out.println("LISTEN TO ALLLLLLLLLLLLLLLLLLL: " + subject.getType());
     }
@@ -22,5 +27,14 @@ public class LoggerStep extends StepBase {
     @Override
     protected void tickCallBack() {
         System.out.println("LoggerStep TICKS");
+    }
+
+    @Override
+    public void restate()  {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

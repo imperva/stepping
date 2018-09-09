@@ -18,8 +18,22 @@ public class PreProcessStep extends StepBase {
     }
 
     @Override
+    public void shutdown() {
+
+    }
+
+    @Override
     protected void tickCallBack() {
         System.out.println("PreProcessStep TICKS");
+    }
+
+    @Override
+    public void restate() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

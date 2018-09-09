@@ -1,15 +1,13 @@
 package infra;
 
-import Stepping.Data;
-import Stepping.IAlgo;
-import Stepping.IMessenger;
+import Stepping.*;
 
 public class KafkaMessengerWrapper implements IMessenger {
     private KafkaConsumer kafkaConsumer;
     private KafkaProducer kafkaProducer;
-    private IAlgo iAlgo;
+    private AlgoBase iAlgo;
 
-    public KafkaMessengerWrapper(IAlgo iAlgo) {
+    public KafkaMessengerWrapper(AlgoBase iAlgo) {
         this.iAlgo = iAlgo;
     }
 
@@ -24,6 +22,11 @@ public class KafkaMessengerWrapper implements IMessenger {
         Message message = new Message();
         message.setValue(data.getValue());
         kafkaProducer.send(message);
+    }
+
+    @Override
+    public void fetching(IExternalDataReceiver dataReceiver) {
+
     }
 
 }
