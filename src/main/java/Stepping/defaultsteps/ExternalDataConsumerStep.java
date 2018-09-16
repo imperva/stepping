@@ -40,7 +40,7 @@ public class ExternalDataConsumerStep extends StepBase {
         Data data = iMessenger.fetching();
         if (data.getValue() != null) {
 
-            //There are two internal options to start the algo: 1. Start from the externalDataReceiver (the algo itself) or from initial step that attached to S_DATA_ARRIVED subject
+            //There are two internal options to start the algo: 1. Start from the externalDataReceiver (the algo itself) or from initial step that attached to S_DATA_ARRIVED
             if (externalDataReceiver != null) {
                 //Fire externalDataReceiver if we want to use orchestrator to manage the flow
                 externalDataReceiver.newDataArrived(data);

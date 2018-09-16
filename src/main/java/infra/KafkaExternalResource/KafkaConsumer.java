@@ -19,18 +19,18 @@ public class KafkaConsumer {
 
     private org.apache.kafka.clients.consumer.KafkaConsumer<String, String> consumer;
     private final List<String> topics;
-    private final int id;
+    private final String id;
     private MessageConverter messageConverter;
     private boolean shouldRun;
 
-    public KafkaConsumer(int id, String groupId, List<String> topics) {
+    public KafkaConsumer(KafkaConsumerConfig config) {
         this.shouldRun = true;
-        this.id = id;
-        this.topics = topics;
+        this.id = config.getId();
+        this.topics = config.getTopics();
         messageConverter = new MessageConverter();
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "10.100.65.25:9093");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBrokerHost());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, config.getGroupId());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -38,7 +38,7 @@ public class KafkaConsumer {
         this.consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
     }
 
-    public Data<JsonObject> fetch() {
+    public Data<List<JsonObject>> fetch() {
         try {
             consumer.subscribe(topics, new ConsumerRebalanceListener() {
                 @Override
@@ -71,7 +71,7 @@ public class KafkaConsumer {
                     .map(val -> messageConverter.convert(val))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList()): new ArrayList<>();
-            return new Data(allValues);
+            return new Data<>(allValues);
 
         } catch (WakeupException e) {
             return null;

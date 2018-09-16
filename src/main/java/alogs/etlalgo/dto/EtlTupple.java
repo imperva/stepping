@@ -13,6 +13,7 @@ public class EtlTupple {
     private String database;
     private String dbUser;
     private String serviceType;
+    private String customerId;
 
     public String getOsUser() {
         return osUser;
@@ -86,6 +87,14 @@ public class EtlTupple {
         this.serviceType = serviceType;
     }
 
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -99,11 +108,12 @@ public class EtlTupple {
                 Objects.equals(destHost, etlTupple.destHost) &&
                 Objects.equals(database, etlTupple.database) &&
                 Objects.equals(dbUser, etlTupple.dbUser) &&
-                Objects.equals(serviceType, etlTupple.serviceType);
+                Objects.equals(serviceType, etlTupple.serviceType) &&
+                Objects.equals(customerId, etlTupple.customerId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(osUser, srcIp, srcHost, srcApp, destIp, destHost, database, dbUser, serviceType);
+        return Objects.hash(osUser, srcIp, srcHost, srcApp, destIp, destHost, database, dbUser, serviceType, customerId);
     }
 }

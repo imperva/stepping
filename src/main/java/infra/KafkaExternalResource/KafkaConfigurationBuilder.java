@@ -1,9 +1,7 @@
 package infra.KafkaExternalResource;
 
-import java.util.List;
+import infra.ConfigurationBuilder;
 
-public interface KafkaConfigurationBuilder {
-
-    List<KafkaConfig> getConfig();
+public interface KafkaConfigurationBuilder extends ConfigurationBuilder<KafkaConfig> {
 
 }

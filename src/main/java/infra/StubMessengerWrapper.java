@@ -15,7 +15,7 @@ public class StubMessengerWrapper<T> implements IMessenger {
         this.iAlgo = iAlgo;
     }
 
-
+    @Override
     public void init() {
 
     }
@@ -26,6 +26,7 @@ public class StubMessengerWrapper<T> implements IMessenger {
         System.out.println("StubMessengerWrapper: Data published to Kafka");
     }
 
+    @Override
     public Data<T> fetching() {
         return null;
     }
