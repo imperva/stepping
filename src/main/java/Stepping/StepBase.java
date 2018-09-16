@@ -1,11 +1,9 @@
 package Stepping;
 
-import java.io.Closeable;
 import java.util.List;
 
 public abstract class StepBase extends IStep {
     protected Container container;
-    private IMessenger messenger;
 
     private Q q = new Q<ISubject>();
 
@@ -20,12 +18,7 @@ public abstract class StepBase extends IStep {
 
     @Override
     public void setMessenger(IMessenger messenger) {
-        this.messenger = messenger;
-    }
 
-    @Override
-    public void publishData(Data<?> data) {
-        messenger.emit(data);
     }
 
     @Override
@@ -38,7 +31,7 @@ public abstract class StepBase extends IStep {
         List<ISubject> subjectList = q.take();
         if (subjectList.size() > 0) {
             for (ISubject subject : subjectList) {
-                newDataArrivedCallBack(subject, container.getById("subjectContainer"));
+                newDataArrivedCallBack(subject, container.getById(DefaultID.SUBJECT_CONTAINER.name()));
             }
         } else {
             tickCallBack();

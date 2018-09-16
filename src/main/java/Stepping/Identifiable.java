@@ -6,7 +6,7 @@ public class Identifiable<T> {
     private T object;
 
     public Identifiable(T object, String id) {
-        if (id == null || id.trim() == "")
+        if (id == null || "".equals(id.trim()))
             throw new RuntimeException("Identifiable Object must contain an ID name");
 
         this.id = id;

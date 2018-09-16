@@ -1,6 +1,14 @@
 package alogs.etlalgo;
 
-import Stepping.*;
+import Stepping.Data;
+import Stepping.ISubject;
+import Stepping.StepBase;
+import Stepping.SubjectContainer;
+import Stepping.defaultsteps.DefaultSubjectType;
+import alogs.etlalgo.dto.EtlTupple;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AggregationStep extends StepBase {
 
@@ -10,7 +18,7 @@ public class AggregationStep extends StepBase {
 
     @Override
     public void attach(ISubject iSubject) {
-        if (iSubject.getType().equals(SubjectType.PRE_PROCESS.name())) {
+        if (iSubject.getType().equals(SubjectType.AGGREGATION.name())) {
             iSubject.attach(this);
         }
     }
@@ -34,13 +42,18 @@ public class AggregationStep extends StepBase {
         }
     }
 
+    //todo add subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(aggrTupples); to SubjectContainer?
     @Override
     protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
-        if (subject.getType().equals(SubjectType.PRE_PROCESS.name())) {
+        if (subject.getType().equals(SubjectType.AGGREGATION.name())) {
             System.out.println("AggregationStep: preProcessedData Arrived!");
             System.out.println("AggregationStep: publishing data");
-            publishData(new Data<Object>());
+            Data<List<EtlTupple>> tupples = subject.getData();
+            Data<List<EtlTupple>> aggrTupples = new Data(tupples.getValue().stream()
+                    .distinct()
+                    .collect(Collectors.toList()));
+            subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(aggrTupples);
         }
     }
 }

@@ -1,5 +1,9 @@
 package Stepping;
 
+import Stepping.defaultsteps.DefaultSubjectType;
+import Stepping.defaultsteps.ExternalDataConsumerStep;
+import Stepping.defaultsteps.ExternalDataProducerStep;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,10 +11,12 @@ import java.util.List;
 
 public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
 
-    private Q q = new Q<Data>();
+    protected Q q = new Q<Data>();
     private Container cntr = new Container();
     private IMessenger iMessenger;
-    protected AlgoBase(String id){ super(id); }
+    protected AlgoBase(String id){
+        super(id);
+    }
 
     @Override
     public void run() {
@@ -28,21 +34,22 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     public AlgoInfraConfig init() {
 
 
-        DI(new SubjectContainer(), "subjectContainer");
+        DI(new SubjectContainer(), DefaultID.SUBJECT_CONTAINER.name());
 
         IoC();
         initSteps();
         initSubjects();
         regiterShutdownHook();
         attachSubjects();
+        attachExternalDataReceiver();
         restate();
-
-
 
         //wakenProcessingUnit();
         wakenAllProcessingUnit();
         return null;
     }
+
+    protected abstract void attachExternalDataReceiver();
 
     private void regiterShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
@@ -54,9 +61,15 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
         }
     }
 
+    //todo Add abstract method IoC that each child will need to implement
+    //todo Add iMessenger to ExternalDataConsumerStep and remove it from all steps
     @Override
-    public void newDataArrived(Data<?> data) {
-        q.queue(data);
+    protected void IoC() {
+        DI(new Subject(DefaultSubjectType.S_DATA_ARRIVED.name()), DefaultSubjectType.S_DATA_ARRIVED.name());
+        if (iMessenger != null) {
+            DI(new ExternalDataConsumerStep(), DefaultID.EXTERNAL_DATA_CONSUMER.name());
+            DI(new ExternalDataProducerStep(), DefaultID.EXTERNAL_DATA_PRODUCER.name());
+        }
     }
 
     @Override
@@ -66,6 +79,9 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
 
     @Override
     public void close(){
+        if (iMessenger != null) {
+            iMessenger.shutdown();
+        }
 
         for (Closeable closable: getContainer().<Closeable>getSonOf(Closeable.class)) {
             try {
@@ -79,8 +95,8 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     }
 
     private void initSubjects(){
-        for (Subject subject: getContainer().<Subject>getTypeOf(Subject.class)             ) {
-            SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
+        for (Subject subject: getContainer().<Subject>getTypeOf(Subject.class)) {
+            SubjectContainer subjectContainer = getSubjectContainer();
             subjectContainer.add(subject);
             subject.setContainer(cntr);
         }
@@ -95,7 +111,7 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
             threads.add(thread);
         }
 
-        threads.stream().forEach((t)->{
+        threads.forEach((t)->{
             try {
                 t.join();
             } catch (InterruptedException e) {
@@ -113,10 +129,9 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     }
 
     private void attachSubjects(){
-        SubjectContainer subjectContainer = getContainer().getById("subjectContainer");
+        SubjectContainer subjectContainer = getContainer().getById(DefaultID.SUBJECT_CONTAINER.name());
 
         for (IStep step : cntr.<IStep>getSonOf(StepBase.class)) {
-            step.init();
             for (ISubject subject : subjectContainer.getSubjectsList()) {
                 step.attach(subject);
             }
@@ -124,7 +139,7 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     }
 
     protected SubjectContainer getSubjectContainer(){
-        return cntr.getById("subjectContainer");
+        return getContainer().getById(DefaultID.SUBJECT_CONTAINER.name());
     }
 
     protected Container getContainer(){

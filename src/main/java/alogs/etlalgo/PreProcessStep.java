@@ -2,17 +2,25 @@ package alogs.etlalgo;
 
 
 import Stepping.*;
+import Stepping.defaultsteps.DefaultSubjectType;
+import alogs.etlalgo.converters.EtlTuppleConverter;
+import alogs.etlalgo.dto.EtlTupple;
+import com.google.gson.JsonObject;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PreProcessStep extends StepBase {
-    int dataArribedIndex = 0;
+
+    private EtlTuppleConverter etlTuppleConverter;
 
     protected PreProcessStep() {
         super(PreProcessStep.class.getName());
-
+        etlTuppleConverter = new EtlTuppleConverter();
     }
 
     public void attach(ISubject iSubject) {
-        if (iSubject.getType() == "newDataArrivedSubject") {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(iSubject.getType())) {
             iSubject.attach(this);
         }
     }
@@ -38,13 +46,13 @@ public class PreProcessStep extends StepBase {
 
     @Override
     protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if (subject.getType() == "newDataArrivedSubject") {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subject.getType())) {
             System.out.println("PreProcessStep: newDataArrivedSubject Arrived!");
-            dataArribedIndex++;
-            if (dataArribedIndex == 5) {
-                dataArribedIndex = 0;
-                subjectContainer.getByName(SubjectType.PRE_PROCESS.name()).setData(new Data());
-            }
+            Data<List<JsonObject>> data = subject.getData();
+            List<EtlTupple> tupples = data.getValue().stream()
+                    .map(jsonObject -> etlTuppleConverter.convert(jsonObject))
+                    .collect(Collectors.toList());
+            subjectContainer.getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
     }
 }

@@ -1,11 +1,18 @@
 package infra;
 
-import java.util.List;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-public class MessageConverter<T> {
+public class MessageConverter {
 
-    public T convert(List<String> values) {
-        return null;
+    private JsonParser jsonParser;
+
+    public MessageConverter() {
+        jsonParser = new JsonParser();
+    }
+
+    public JsonObject convert(String value) {
+        return value != null && !value.trim().isEmpty()? jsonParser.parse(value).getAsJsonObject(): null;
     }
 
 }

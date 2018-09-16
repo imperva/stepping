@@ -17,7 +17,7 @@ public class SubjectContainer {
 
     public ISubject getByName(String name){
         for (ISubject subject: subjectsList) {
-            if (subject.getType() == name)
+            if (subject.getType().equals(name))
                 return subject;
 
         }

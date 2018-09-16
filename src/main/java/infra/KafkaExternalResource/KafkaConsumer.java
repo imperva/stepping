@@ -1,30 +1,33 @@
-package infra;
+package infra.KafkaExternalResource;
 
-import Stepping.IRunning;
-import org.apache.kafka.clients.consumer.*;
+import Stepping.Data;
+import com.google.gson.JsonObject;
+import infra.MessageConverter;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class KafkaConsumer<T> extends IRunning {
+public class KafkaConsumer {
 
     private org.apache.kafka.clients.consumer.KafkaConsumer<String, String> consumer;
     private final List<String> topics;
     private final int id;
-    private boolean isRunning;
-    private ICallback callback;
-    private MessageConverter<T> messageConverter;
+    private MessageConverter messageConverter;
+    private boolean shouldRun;
 
-    public KafkaConsumer(int id, String groupId, List<String> topics, ICallback callback) {
-        super("KafkaConsumer" + id);
-        this.callback = callback;
-        this.isRunning = true;
+    public KafkaConsumer(int id, String groupId, List<String> topics) {
+        this.shouldRun = true;
         this.id = id;
         this.topics = topics;
-        messageConverter = new MessageConverter<>();
+        messageConverter = new MessageConverter();
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "10.100.65.25:9093");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -33,12 +36,9 @@ public class KafkaConsumer<T> extends IRunning {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
         this.consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
-
-        wakenProcessingUnit();
     }
 
-    @Override
-    public void run() {
+    public Data<JsonObject> fetch() {
         try {
             consumer.subscribe(topics, new ConsumerRebalanceListener() {
                 @Override
@@ -54,24 +54,27 @@ public class KafkaConsumer<T> extends IRunning {
                 }
             });
 
-            while (isRunning) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofDays(30L));
-                List<String> values = new ArrayList<>();
-                for (ConsumerRecord<String, String> record : records) {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("partition", record.partition());
-                    data.put("offset", record.offset());
-                    data.put("value", record.value());
-                    values.add(record.value());
-                    System.out.println(this.id + ": " + data);
-                    System.out.println(this.id + ": " + Thread.currentThread().getId());
-                }
-                Message message = new Message();
-                message.setValue(messageConverter.convert(values));
-                callback.call(message);
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofDays(30L));
+            if (!shouldRun) return null;
+
+            List<String> values = new ArrayList<>();
+            for (ConsumerRecord<String, String> record : records) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("partition", record.partition());
+                data.put("offset", record.offset());
+                data.put("value", record.value());
+                values.add(record.value());
+                System.out.println(this.id + ": " + data);
+                System.out.println(this.id + ": " + Thread.currentThread().getId());
             }
+            List<JsonObject> allValues = !values.isEmpty()? values.stream()
+                    .map(val -> messageConverter.convert(val))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()): new ArrayList<>();
+            return new Data(allValues);
+
         } catch (WakeupException e) {
-            // ignore for shutdown
+            return null;
         } finally {
             consumer.close();
         }
@@ -79,5 +82,6 @@ public class KafkaConsumer<T> extends IRunning {
 
     public void shutdown() {
         consumer.wakeup();
+        shouldRun = false;
     }
 }

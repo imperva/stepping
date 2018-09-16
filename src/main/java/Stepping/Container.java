@@ -13,12 +13,12 @@ public class Container {
     }
 
     public <T> Container add(T obj) {
-        add(new Identifiable<>(obj, obj.getClass().getName()));
+        add(new Identifiable(obj, obj.getClass().getName()));
         return this;
     }
 
     public <T> Container add(T obj, String id) {
-        add(new Identifiable<>(obj, id));
+        add(new Identifiable(obj, id));
         return this;
     }
 

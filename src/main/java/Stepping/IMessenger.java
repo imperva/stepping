@@ -1,7 +1,8 @@
 package Stepping;
 
-public interface IMessenger {
+public interface IMessenger<T> {
     void init();
     void emit(Data data);
-    void fetching(IExternalDataReceiver  dataReceiver);
+    Data<T> fetching();
+    void shutdown();
 }

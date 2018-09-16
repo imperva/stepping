@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Created by gabi.beyo on 1/31/2018.
  */
-class Q<T>{
+public class Q<T>{
     private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<T>();
 
 
