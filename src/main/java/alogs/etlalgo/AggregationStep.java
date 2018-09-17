@@ -6,14 +6,19 @@ import Stepping.StepBase;
 import Stepping.SubjectContainer;
 import Stepping.defaultsteps.DefaultSubjectType;
 import alogs.etlalgo.dto.EtlTupple;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AggregationStep extends StepBase {
 
+    private Gson gson;
+
     protected AggregationStep() {
         super(AggregationStep.class.getName());
+        gson = new Gson();
     }
 
     @Override
@@ -50,8 +55,9 @@ public class AggregationStep extends StepBase {
             System.out.println("AggregationStep: preProcessedData Arrived!");
             System.out.println("AggregationStep: publishing data");
             Data<List<EtlTupple>> tupples = subject.getData();
-            Data<List<EtlTupple>> aggrTupples = new Data(tupples.getValue().stream()
+            Data<List<JsonObject>> aggrTupples = new Data(tupples.getValue().stream()
                     .distinct()
+                    .map(etlTupple -> gson.toJsonTree(etlTupple))
                     .collect(Collectors.toList()));
             subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(aggrTupples);
         }

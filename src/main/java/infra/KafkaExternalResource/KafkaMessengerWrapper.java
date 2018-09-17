@@ -35,6 +35,7 @@ public class KafkaMessengerWrapper implements IMessenger<List<JsonObject>> {
     @Override
     public void shutdown() {
         kafkaConsumer.shutdown();
+        kafkaProducer.shutdown();
     }
 
 }
