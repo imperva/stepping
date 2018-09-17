@@ -34,6 +34,7 @@ public class KafkaConsumer {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
         consumer.subscribe(topics, new ConsumerRebalanceListener() {
             @Override
