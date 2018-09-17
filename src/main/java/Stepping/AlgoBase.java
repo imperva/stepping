@@ -66,6 +66,7 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     @Override
     protected void IoC() {
         DI(new Subject(DefaultSubjectType.S_DATA_ARRIVED.name()), DefaultSubjectType.S_DATA_ARRIVED.name());
+        DI(new Subject(DefaultSubjectType.S_PUBLISH_DATA.name()), DefaultSubjectType.S_PUBLISH_DATA.name());
         if (iMessenger != null) {
             DI(new ExternalDataConsumerStep(), DefaultID.EXTERNAL_DATA_CONSUMER.name());
             DI(new ExternalDataProducerStep(), DefaultID.EXTERNAL_DATA_PRODUCER.name());
