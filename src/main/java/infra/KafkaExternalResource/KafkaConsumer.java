@@ -35,25 +35,25 @@ public class KafkaConsumer {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
-        this.consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
+        consumer.subscribe(topics, new ConsumerRebalanceListener() {
+            @Override
+            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                System.out.println("Partition Revoked");
+            }
+
+            @Override
+            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                System.out.println("Partition Assigned");
+
+                //todo for testing remove it when finishing to test
+                consumer.seekToBeginning(Arrays.asList(new TopicPartition(topics.get(0), 0), new TopicPartition(topics.get(0), 1), new TopicPartition(topics.get(0), 2)));
+                System.out.println("Reset offset of all partitions");
+            }
+        });
     }
 
     public Data<List<JsonObject>> fetch() {
         try {
-            consumer.subscribe(topics, new ConsumerRebalanceListener() {
-                @Override
-                public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                    System.out.println();
-
-                }
-
-                @Override
-                public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-//                    consumer.seekToBeginning(Arrays.asList(new TopicPartition(topics.get(0), 0)));
-                    System.out.println();
-                }
-            });
-
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofDays(30L));
             if (!shouldRun) return null;
 
@@ -71,6 +71,9 @@ public class KafkaConsumer {
                     .map(val -> messageConverter.convert(val))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList()): new ArrayList<>();
+            if (allValues.size() > 0) {
+                System.out.println(String.format("Read new data from Kafka: %s", allValues.toString()));
+            }
             return new Data<>(allValues);
 
         } catch (WakeupException e) {

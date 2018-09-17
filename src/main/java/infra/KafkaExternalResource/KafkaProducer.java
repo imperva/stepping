@@ -32,6 +32,7 @@ public class KafkaProducer {
     }
 
     public void send(Data<List<JsonObject>> messages){
+        System.out.println(String.format("Going to send message to Kafka: %s", messages.toString()));
         Map<Integer, String> idToListOfMessages = convert(messages);
         topics.forEach(topic -> {
             idToListOfMessages.forEach((key, message) -> {
