@@ -10,7 +10,6 @@ public abstract class IStep extends IRunning {
     abstract public void newDataArrived(ISubject iSubject);
     abstract public void shutdown();
     abstract public void setContainer(Container cntr);
-    abstract public void setMessenger(IMessenger messenger);
     abstract protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
     abstract protected void tickCallBack();
     abstract public void restate();

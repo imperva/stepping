@@ -16,11 +16,6 @@ public class StubMessengerWrapper<T> implements IMessenger {
     }
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
     public void emit(Data data) {
 
         System.out.println("StubMessengerWrapper: Data published to Kafka");

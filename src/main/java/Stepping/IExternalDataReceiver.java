@@ -1,5 +1,5 @@
-package Stepping;
-
-public interface IExternalDataReceiver {
-    void newDataArrived(Data<?> data);
-}
+//package Stepping;
+//
+//public interface IExternalDataReceiver {
+//    void newDataArrived(Data<?> data);
+//}

@@ -16,10 +16,6 @@ public abstract class StepBase extends IStep {
         container = cntr;
     }
 
-    @Override
-    public void setMessenger(IMessenger messenger) {
-
-    }
 
     @Override
     public void newDataArrived(ISubject subject) {

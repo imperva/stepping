@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
-
-    protected Q q = new Q<Data>();
+public abstract class AlgoBase extends IAlgo {
     private Container cntr = new Container();
     private IMessenger iMessenger;
     protected AlgoBase(String id){
@@ -20,36 +18,20 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
 
     @Override
     public void run() {
-        List<Data> subjectList = q.take();
-        if (subjectList.size() > 0) {
-            for (Data data : subjectList) {
-                newDataArrivedCallBack(data);
-            }
-        } else {
-            tickCallBack();
-        }
+        tickCallBack();
     }
 
     @Override
-    public AlgoInfraConfig init() {
-
-
-        DI(new SubjectContainer(), DefaultID.SUBJECT_CONTAINER.name());
-
+    public void init() {
         IoC();
         initSteps();
         initSubjects();
         regiterShutdownHook();
         attachSubjects();
-        attachExternalDataReceiver();
         restate();
 
-        //wakenProcessingUnit();
         wakenAllProcessingUnit();
-        return null;
     }
-
-    protected abstract void attachExternalDataReceiver();
 
     private void regiterShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
@@ -65,11 +47,17 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
     //todo Add iMessenger to ExternalDataConsumerStep and remove it from all steps
     @Override
     protected void IoC() {
+        DI(new SubjectContainer(), DefaultID.SUBJECT_CONTAINER.name());
+
         DI(new Subject(DefaultSubjectType.S_DATA_ARRIVED.name()), DefaultSubjectType.S_DATA_ARRIVED.name());
         DI(new Subject(DefaultSubjectType.S_PUBLISH_DATA.name()), DefaultSubjectType.S_PUBLISH_DATA.name());
         if (iMessenger != null) {
-            DI(new ExternalDataConsumerStep(), DefaultID.EXTERNAL_DATA_CONSUMER.name());
-            DI(new ExternalDataProducerStep(), DefaultID.EXTERNAL_DATA_PRODUCER.name());
+            ExternalDataConsumerStep externalDataConsumerStep = new ExternalDataConsumerStep();
+            externalDataConsumerStep.setiMessenger(iMessenger);
+            ExternalDataProducerStep externalDataProducerStep = new ExternalDataProducerStep();
+            externalDataProducerStep.setMessenger(iMessenger);
+            DI(externalDataConsumerStep, DefaultID.EXTERNAL_DATA_CONSUMER.name());
+            DI(externalDataProducerStep, DefaultID.EXTERNAL_DATA_PRODUCER.name());
         }
     }
 
@@ -91,8 +79,6 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
                 e.printStackTrace();
             }
         }
-
-
     }
 
     private void initSubjects(){
@@ -125,7 +111,6 @@ public abstract class AlgoBase extends IAlgo implements IExternalDataReceiver {
         for (IStep step : cntr.<IStep>getSonOf(IStep.class)) {
             step.init();
             step.setContainer(cntr);
-            step.setMessenger(iMessenger);
         }
     }
 

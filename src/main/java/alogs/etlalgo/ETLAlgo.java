@@ -14,28 +14,8 @@ public class ETLAlgo extends AlgoBase {
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data) {
-//         getSubjectContainer().getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(data);
-    }
-
-    //User can add data to queue that later will be used by algo as orchestrator at newDataArrivedCallBack
-    @Override
-    public void newDataArrived(Data<?> data) {
-//        q.queue(data);
-    }
-
-    @Override
     protected void tickCallBack(){
         System.out.println("ETLAlgo TICKS");
-    }
-
-    @Override
-    protected void attachExternalDataReceiver() {
-        //Set externalDataReceiver if we want to use orchestrator to manage the flow
-//        ExternalDataConsumerStep externalDataConsumerStep = getContainer().getById(DefaultID.EXTERNAL_DATA_CONSUMER.name());
-//        if (externalDataConsumerStep != null) {
-//            externalDataConsumerStep.setExternalDataReceiver(this);
-//        }
     }
 
     @Override

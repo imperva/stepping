@@ -16,8 +16,7 @@ public class KafkaMessengerWrapper implements IMessenger<List<JsonObject>> {
         init();
     }
 
-    @Override
-    public void init() {
+    private void init() {
         this.kafkaConsumer = new KafkaConsumer(kafkaConfig.getConsumerConfig());
         this.kafkaProducer = new KafkaProducer(kafkaConfig.getProducerConfig());
     }

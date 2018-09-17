@@ -78,14 +78,12 @@ public class KafkaConsumer {
             return new Data<>(allValues);
 
         } catch (WakeupException e) {
-            return null;
-        } finally {
-            consumer.close();
+            throw new RuntimeException(e);
         }
     }
 
     public void shutdown() {
-        consumer.wakeup();
+        consumer.close(); //todo ??
         shouldRun = false;
     }
 }

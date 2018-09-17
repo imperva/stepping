@@ -42,7 +42,6 @@ public class ExternalDataProducerStep extends StepBase {
 
     }
 
-    @Override
     public void setMessenger(IMessenger iMessenger) {
         this.iMessenger = iMessenger;
     }
