@@ -3,12 +3,11 @@ package infra;
 import Stepping.Data;
 import Stepping.IAlgo;
 import Stepping.IMessenger;
-import infra.KafkaExternalResource.KafkaConsumer;
-import infra.KafkaExternalResource.KafkaProducer;
 
-public class StubMessengerWrapper<T> implements IMessenger {
-    private KafkaConsumer kafkaConsumer;
-    private KafkaProducer kafkaProducer;
+import java.io.IOException;
+
+public class StubMessengerWrapper implements IMessenger {
+
     private IAlgo iAlgo;
 
     public StubMessengerWrapper(IAlgo iAlgo) {
@@ -22,12 +21,17 @@ public class StubMessengerWrapper<T> implements IMessenger {
     }
 
     @Override
-    public Data<T> fetching() {
+    public Data fetching() {
         return null;
     }
 
     @Override
     public void shutdown() {
+
+    }
+
+    @Override
+    public void close() throws IOException {
 
     }
 }

@@ -1,11 +1,9 @@
 package alogs.etlalgo;
 
 import Stepping.AlgoBase;
-import Stepping.Data;
 import Stepping.ISubject;
 import Stepping.Subject;
 import alogs.etlalgo.dto.EtlId;
-import alogs.etlalgo.dto.EtlTupple;
 
 public class ETLAlgo extends AlgoBase {
 
@@ -23,7 +21,7 @@ public class ETLAlgo extends AlgoBase {
         super.IoC();
 
         //* init subjects
-        ISubject<EtlTupple> subject = new Subject<EtlTupple>(SubjectType.AGGREGATION.name());
+        ISubject subject = new Subject(SubjectType.AGGREGATION.name());
         DI(subject, subject.getType());
 
         //* init steps

@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -30,21 +29,20 @@ public class KafkaProducer {
         producer = new org.apache.kafka.clients.producer.KafkaProducer<>(convert(config));
     }
 
-    public void send(Data<List<JsonObject>> messages){
+    public void send(Data messages){
         System.out.println(String.format("Going to send message to Kafka from %s: %s", id, messages.getValue().toString()));
-        Map<Integer, String> idToListOfMessages = convert(messages);
+        Map<Integer, String> idToListOfMessages = convert((List<JsonObject>) messages.getValue());
         final Integer[] currentCustomer = {-1};
         topics.forEach(topic -> idToListOfMessages.forEach((key, message) -> {
             try {
                 long time = System.currentTimeMillis();
                 currentCustomer[0] = key;
                 final ProducerRecord<Integer, String> record = new ProducerRecord<>(topic, key, message);
-                RecordMetadata metadata = producer.send(record).get();
+                producer.send(record);
                 long elapsedTime = System.currentTimeMillis() - time;
                 System.out.printf("sent record(key=%s value=%s) " +
-                                "meta(partition=%d, offset=%d) time=%d",
-                        record.key(), record.value(), metadata.partition(),
-                        metadata.offset(), elapsedTime);
+                                "time=%d",
+                        record.key(), record.value(), elapsedTime);
             } catch (Exception e){
                 System.out.println(String.format("Failed to send message: %s. Error: %s", message, e.getMessage()));
                 System.out.println(String.format("Failed to send message: %s. Error: %s", message, e.getMessage()));
@@ -54,9 +52,9 @@ public class KafkaProducer {
         }));
     }
 
-    private Map<Integer, String> convert(Data<List<JsonObject>> message) {
+    private Map<Integer, String> convert(List<JsonObject> messages) {
         try {
-            Map<Integer, List<JsonObject>> idToListOfMessages = message.getValue().stream()
+            Map<Integer, List<JsonObject>> idToListOfMessages = messages.stream()
                     .filter(jsonObject -> jsonObject.has(partitionKey) && jsonObject.get(partitionKey) != null)
                     .collect(Collectors.groupingBy((JsonObject jsonObject) -> jsonObject.get(partitionKey).getAsString().hashCode(), Collectors.mapping(jsonObject -> jsonObject, Collectors.toList())));
             return idToListOfMessages.entrySet().stream()

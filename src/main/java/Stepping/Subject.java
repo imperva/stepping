@@ -3,11 +3,11 @@ package Stepping;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Subject<T> implements ISubject<T> {
+public class Subject implements ISubject {
 
     private List<IStep> iSteps = new ArrayList<IStep>();
     private String type;
-    private Data<T> data;
+    private Data data;
     private Container cntr;
 
     public Subject() {
@@ -28,7 +28,7 @@ public class Subject<T> implements ISubject<T> {
     }
 
     @Override
-    public Data<T> getData() {
+    public Data getData() {
         return data;
     }
 
@@ -51,7 +51,7 @@ public class Subject<T> implements ISubject<T> {
     }
 
     @Override
-    public void setData(Data<T> data) {
+    public void setData(Data data) {
         this.data = data;
         publish();
     }

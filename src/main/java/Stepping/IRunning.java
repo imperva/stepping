@@ -15,8 +15,8 @@ public abstract class IRunning implements Runnable , Closeable {
 
     private ScheduledFuture scheduledFuture;
     private ScheduledExecutorService scheduledExecutorService;
-    private int delay = 50;
-    private int initialdelay = 10;
+    private int delay = 1;
+    private int initialdelay = 1;
     private String id;
     private boolean daemon = false;
 

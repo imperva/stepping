@@ -53,7 +53,7 @@ public abstract class AlgoBase extends IAlgo {
         DI(new Subject(DefaultSubjectType.S_PUBLISH_DATA.name()), DefaultSubjectType.S_PUBLISH_DATA.name());
         if (iMessenger != null) {
             ExternalDataConsumerStep externalDataConsumerStep = new ExternalDataConsumerStep();
-            externalDataConsumerStep.setiMessenger(iMessenger);
+            externalDataConsumerStep.setMessenger(iMessenger);
             ExternalDataProducerStep externalDataProducerStep = new ExternalDataProducerStep();
             externalDataProducerStep.setMessenger(iMessenger);
             DI(externalDataConsumerStep, DefaultID.EXTERNAL_DATA_CONSUMER.name());
@@ -68,6 +68,8 @@ public abstract class AlgoBase extends IAlgo {
 
     @Override
     public void close(){
+
+        //todo if messanger is in our container then it will be closed as all others. thus shotdown is redundunt
         if (iMessenger != null) {
             iMessenger.shutdown();
         }

@@ -16,7 +16,7 @@ public class AggregationStep extends StepBase {
 
     private Gson gson;
 
-    protected AggregationStep() {
+    AggregationStep() {
         super(AggregationStep.class.getName());
         gson = new Gson();
     }
@@ -54,12 +54,12 @@ public class AggregationStep extends StepBase {
         if (subject.getType().equals(SubjectType.AGGREGATION.name())) {
             System.out.println("AggregationStep: preProcessedData Arrived!");
             System.out.println("AggregationStep: publishing data");
-            Data<List<EtlTupple>> tupples = subject.getData();
-            Data<List<JsonObject>> aggrTupples = new Data(tupples.getValue().stream()
+            List<EtlTupple> tupples = (List<EtlTupple>) subject.getData().getValue();
+            List<JsonObject> aggrTupples = tupples.stream()
                     .distinct()
-                    .map(etlTupple -> gson.toJsonTree(etlTupple))
-                    .collect(Collectors.toList()));
-            subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(aggrTupples);
+                    .map(etlTupple -> gson.toJsonTree(etlTupple).getAsJsonObject())
+                    .collect(Collectors.toList());
+            subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(new Data(aggrTupples));
         }
     }
 }

@@ -14,7 +14,7 @@ public class PreProcessStep extends StepBase {
 
     private EtlTuppleConverter etlTuppleConverter;
 
-    protected PreProcessStep() {
+    PreProcessStep() {
         super(PreProcessStep.class.getName());
         etlTuppleConverter = new EtlTuppleConverter();
     }
@@ -46,13 +46,14 @@ public class PreProcessStep extends StepBase {
 
     @Override
     protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+
         if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subject.getType())) {
             System.out.println("PreProcessStep: newDataArrivedSubject Arrived!");
-            Data<List<JsonObject>> data = subject.getData();
-            List<EtlTupple> tupples = data.getValue().stream()
+            List<JsonObject> data = (List<JsonObject>) subject.getData().getValue();
+            List<EtlTupple> tupples = data.stream()
                     .map(jsonObject -> etlTuppleConverter.convert(jsonObject))
                     .collect(Collectors.toList());
-            subjectContainer.getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
+            subjectContainer.<List<EtlTupple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
     }
 }

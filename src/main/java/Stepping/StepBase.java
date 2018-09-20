@@ -5,10 +5,14 @@ import java.util.List;
 public abstract class StepBase extends IStep {
     protected Container container;
 
-    private Q q = new Q<ISubject>();
+    private Q<ISubject> q = new Q<ISubject>();
 
     protected StepBase(String id) {
         super(id);
+    }
+
+    protected StepBase(String id, int delay, int initialdelay, boolean daemon) {
+        super(id, delay, initialdelay, daemon);
     }
 
     @Override

@@ -1,5 +1,4 @@
 package Stepping;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,12 +12,12 @@ public class Container {
     }
 
     public <T> Container add(T obj) {
-        add(new Identifiable(obj, obj.getClass().getName()));
+        add(new Identifiable<T>(obj, obj.getClass().getName()));
         return this;
     }
 
     public <T> Container add(T obj, String id) {
-        add(new Identifiable(obj, id));
+        add(new Identifiable<T>(obj, id));
         return this;
     }
 
@@ -67,13 +66,6 @@ public class Container {
             }
             context.addAll(Arrays.asList(intfc.getInterfaces()));
         }
-
-//        Class sprclss = clss.getSuperclass();
-//        if (sprclss.equals(interf)) {
-//            return true;
-//        }
-//        context.add(sprclss);
-
         return getSonOf(interf, clss.getSuperclass(), context);
     }
 

@@ -2,11 +2,10 @@ package infra.KafkaExternalResource;
 
 import Stepping.Data;
 import Stepping.IMessenger;
-import com.google.gson.JsonObject;
 
-import java.util.List;
+import java.io.IOException;
 
-public class KafkaMessengerWrapper implements IMessenger<List<JsonObject>> {
+public class KafkaMessengerWrapper implements IMessenger {
     private KafkaConsumer kafkaConsumer;
     private KafkaProducer kafkaProducer;
     private KafkaConfig kafkaConfig;
@@ -22,12 +21,12 @@ public class KafkaMessengerWrapper implements IMessenger<List<JsonObject>> {
     }
 
     @Override
-    public void emit(Data<List<JsonObject>> data) {
+    public void emit(Data data) {
         kafkaProducer.send(data);
     }
 
     @Override
-    public Data<List<JsonObject>> fetching() {
+    public Data fetching() {
         return this.kafkaConsumer.fetch();
     }
 
@@ -37,4 +36,8 @@ public class KafkaMessengerWrapper implements IMessenger<List<JsonObject>> {
         kafkaProducer.shutdown();
     }
 
+    @Override
+    public void close() throws IOException {
+
+    }
 }

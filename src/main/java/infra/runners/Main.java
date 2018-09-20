@@ -17,8 +17,7 @@ public class Main {
 
     private static Stepping stepping = new Stepping();
 
-    public static void main(String[] args) throws InterruptedException {
-
+    public static void main(String[] args) {
         IdGenerator idGenerator = new RandomIdGenerator();
         ConfigurationBuilder<KafkaConfig> configurationBuilder = new KafkaConfigurationBuilderStub();
 

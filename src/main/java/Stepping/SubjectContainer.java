@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubjectContainer {
-    private List<ISubject<?>> subjectsList = new ArrayList<ISubject<?>>();
+    private List<ISubject> subjectsList = new ArrayList<ISubject>();
 
 
-    public List<ISubject<?>> getSubjectsList() {
+    public List<ISubject> getSubjectsList() {
         return subjectsList;
     }
 
-    public void setSubjectsList(List<ISubject<?>> subjectsList) {
+    public void setSubjectsList(List<ISubject> subjectsList) {
         this.subjectsList = subjectsList;
     }
 
@@ -26,6 +26,5 @@ public class SubjectContainer {
 
     public void add(ISubject subject) {
         subjectsList.add(subject);
-
     }
 }

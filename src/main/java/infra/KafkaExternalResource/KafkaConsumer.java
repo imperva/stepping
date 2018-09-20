@@ -34,6 +34,7 @@ public class KafkaConsumer {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+       props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 20);
         consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "example.CustomAssignor");
         consumer.subscribe(topics, new ConsumerRebalanceListener() {
@@ -53,7 +54,7 @@ public class KafkaConsumer {
         });
     }
 
-    public Data<List<JsonObject>> fetch() {
+    public Data fetch() {
         try {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofDays(30L));
             if (!shouldRun) return null;
@@ -75,7 +76,7 @@ public class KafkaConsumer {
             if (allValues.size() > 0) {
                 System.out.println(String.format("Read new data from Kafka: %s", allValues.toString()));
             }
-            return new Data<>(allValues);
+            return new Data(allValues);
 
         } catch (WakeupException e) {
             throw new RuntimeException(e);

@@ -3,22 +3,22 @@ package Stepping;
 /**
  * Created by gabi.beyo on 12/13/2017.
  */
-public class Data<T> {
+public class Data {
 
-    private T value;
+    private Object value;
 
-    public Data(T value) {
+    public Data(Object value) {
         setValue(value);
     }
 
     public Data() {
     }
 
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(T value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }

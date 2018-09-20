@@ -1,6 +1,9 @@
 package Stepping.defaultsteps;
 
 import Stepping.*;
+import com.google.gson.JsonObject;
+
+import java.util.List;
 
 public class ExternalDataConsumerStep extends StepBase {
 
@@ -40,13 +43,13 @@ public class ExternalDataConsumerStep extends StepBase {
         Data data = iMessenger.fetching();
         if (data.getValue() != null) {
             SubjectContainer subjectContainer = container.getById(DefaultID.SUBJECT_CONTAINER.name());
-            subjectContainer.getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(data);
+            subjectContainer.<List<JsonObject>>getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(data);
         } else {
             System.out.println("No data received from external resource");
         }
     }
 
-    public void setiMessenger(IMessenger iMessenger) {
+    public void setMessenger(IMessenger iMessenger) {
         this.iMessenger = iMessenger;
     }
 }
