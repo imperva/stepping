@@ -2,7 +2,6 @@ package Stepping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import properties.PropertiesReader;
 
 import java.io.Closeable;
 import java.util.concurrent.Executors;
@@ -10,29 +9,31 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public abstract class IRunning implements Runnable , Closeable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IRunning.class);
+public class Running implements Closeable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Running.class);
 
     private ScheduledFuture scheduledFuture;
     private ScheduledExecutorService scheduledExecutorService;
-    private int delay = 1;
-    private int initialdelay = 1;
+    private int delay = 0;
+    private int initialdelay = 0;
     private String id;
     private boolean daemon = false;
+    private Runnable runnable;
 
-    protected IRunning(String id) {
-        this.id = id;
+    protected Running(String id, Runnable runnable) { this(id, runnable,100,100,false);
+
     }
 
-    protected IRunning(String id, int delay, int initialdelay, boolean daemon) {
+    protected Running(String id, Runnable runnable, int delay, int initialdelay, boolean daemon) {
         this.id = id;
         this.delay = delay;
         this.initialdelay = initialdelay;
         this.daemon = daemon;
+        this.runnable = runnable;
     }
 
     protected void wakenProcessingUnit() {
-        synchronized (IRunning.class) {
+        synchronized (Running.class) {
             if (scheduledFuture == null) {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -42,7 +43,7 @@ public abstract class IRunning implements Runnable , Closeable {
                     return t;
                 });
 
-                this.scheduledFuture = es.scheduleWithFixedDelay(this::run, initialdelay, delay, TimeUnit.MILLISECONDS);
+                this.scheduledFuture = es.scheduleWithFixedDelay(this.runnable::run, initialdelay, delay, TimeUnit.MILLISECONDS);
                 this.scheduledExecutorService = es;
             }
         }

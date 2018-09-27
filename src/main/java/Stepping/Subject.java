@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Subject implements ISubject {
 
-    private List<IStep> iSteps = new ArrayList<IStep>();
+    private List<IStepDecorator> iSteps = new ArrayList<IStepDecorator>();
     private String type;
     private Data data;
     private Container cntr;
@@ -33,20 +33,20 @@ public class Subject implements ISubject {
     }
 
     @Override
-    public List<IStep> getSubscribers() {
+    public List<IStepDecorator> getSubscribers() {
         return iSteps;
     }
 
     @Override
     public void publish() {
 
-        for (IStep step : getSubscribers()) {
+        for (IStepDecorator step : getSubscribers()) {
             step.newDataArrived(this);
         }
     }
 
     @Override
-    public void attach(IStep step) {
+    public void attach(IStepDecorator step) {
         iSteps.add(step);
     }
 

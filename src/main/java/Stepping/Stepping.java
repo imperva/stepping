@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Stepping {
-    private List<IAlgo> algos = new ArrayList<IAlgo>();
+    private List<Algo> algos = new ArrayList<Algo>();
 
-    public Stepping register(IAlgo iAlgo, IMessenger iMessenger) {
-        algos.add(iAlgo);
-        iAlgo.setMessenger(iMessenger);
+    public Stepping register(Algo iAlgo, IMessenger iMessenger) {
+        Algo algo = new DefaultAlgoDecorator(iAlgo);
+        algos.add(algo);
+        algo.setMessenger(iMessenger);
         return this;
     }
 
     public void go() {
-        for (IAlgo algo : algos) {
+        for (Algo algo : algos) {
             algo.init();
         }
     }

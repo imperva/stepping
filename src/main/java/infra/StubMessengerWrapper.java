@@ -1,16 +1,16 @@
 package infra;
 
 import Stepping.Data;
-import Stepping.IAlgo;
+import Stepping.Algo;
 import Stepping.IMessenger;
 
 import java.io.IOException;
 
 public class StubMessengerWrapper implements IMessenger {
 
-    private IAlgo iAlgo;
+    private Algo iAlgo;
 
-    public StubMessengerWrapper(IAlgo iAlgo) {
+    public StubMessengerWrapper(Algo iAlgo) {
         this.iAlgo = iAlgo;
     }
 

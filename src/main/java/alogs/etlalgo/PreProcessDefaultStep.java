@@ -7,32 +7,30 @@ import alogs.etlalgo.converters.EtlTuppleConverter;
 import alogs.etlalgo.dto.EtlTupple;
 import com.google.gson.JsonObject;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PreProcessStep extends StepBase {
+public class PreProcessDefaultStep implements Step {
 
     private EtlTuppleConverter etlTuppleConverter;
 
-    PreProcessStep() {
-        super(PreProcessStep.class.getName());
+    PreProcessDefaultStep() {
+       // super(PreProcessDefaultStep.class.getName());
         etlTuppleConverter = new EtlTuppleConverter();
     }
 
-    public void attach(ISubject iSubject) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(iSubject.getType())) {
-            iSubject.attach(this);
-        }
-    }
+//    public void attach(ISubject iSubject) {
+//        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(iSubject.getType())) {
+//            iSubject.attach(this);
+//        }
+//    }
+
+
 
     @Override
-    public void shutdown() {
-
-    }
-
-    @Override
-    protected void tickCallBack() {
-        System.out.println("PreProcessStep TICKS");
+    public void tickCallBack() {
+        System.out.println("PreProcessDefaultStep TICKS");
     }
 
     @Override
@@ -45,15 +43,38 @@ public class PreProcessStep extends StepBase {
     }
 
     @Override
-    protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+    public void setContainer(Container cntr) {
+
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public boolean isAttach(String eventType) {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(eventType)) {
+           return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
 
         if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subject.getType())) {
-            System.out.println("PreProcessStep: newDataArrivedSubject Arrived!");
+            System.out.println("PreProcessDefaultStep: newDataArrivedSubject Arrived!");
             List<JsonObject> data = (List<JsonObject>) subject.getData().getValue();
             List<EtlTupple> tupples = data.stream()
                     .map(jsonObject -> etlTuppleConverter.convert(jsonObject))
                     .collect(Collectors.toList());
             subjectContainer.<List<EtlTupple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

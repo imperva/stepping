@@ -7,8 +7,8 @@ public interface ISubject {
    void setType(String type);
    void setData(Data data);
    Data getData();
-   List<IStep> getSubscribers();
-   void attach(IStep o);
+   List<IStepDecorator> getSubscribers();
+   void attach(IStepDecorator o);
    void publish();
    Container getContainer() ;
    void setContainer(Container container);

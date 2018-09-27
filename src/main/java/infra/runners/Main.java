@@ -1,7 +1,7 @@
 package infra.runners;
 
 import Stepping.Stepping;
-import alogs.etlalgo.ETLAlgo;
+import alogs.etlalgo.ETLDefaultAlgo;
 import infra.AlgoId;
 import infra.ConfigurationBuilder;
 import infra.IdGenerator;
@@ -17,7 +17,7 @@ public class Main {
 
     private static Stepping stepping = new Stepping();
 
-    public static void main(String[] args) {
+    public static void main(String[] args)  {
         IdGenerator idGenerator = new RandomIdGenerator();
         ConfigurationBuilder<KafkaConfig> configurationBuilder = new KafkaConfigurationBuilderStub();
 
@@ -25,9 +25,9 @@ public class Main {
         config.forEach((algo, messengerConfigs) -> {
             if (AlgoId.ETL.name().equals(algo)) {
                 messengerConfigs.forEach(messengerConfig -> {
-                    ETLAlgo etlAlgo = new ETLAlgo();
+                    ETLDefaultAlgo etlAlgo = new ETLDefaultAlgo();
                     stepping.register(etlAlgo, new KafkaMessengerWrapper(messengerConfig)).go();
-                    Runtime.getRuntime().addShutdownHook(new Thread((etlAlgo)::shutdown));
+                    Runtime.getRuntime().addShutdownHook(new Thread((etlAlgo)::close));
                 });
             }
         });

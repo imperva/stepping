@@ -1,32 +1,36 @@
 package alogs.etlalgo;
 
-import Stepping.ISubject;
-import Stepping.StepBase;
-import Stepping.SubjectContainer;
+import Stepping.*;
 import Stepping.defaultsteps.DefaultSubjectType;
 
-public class LoggerStep extends StepBase {
+import java.io.IOException;
 
-    LoggerStep() {
-        super(LoggerStep.class.getName());
+public class LoggerDefaultStep implements Step {
+
+    LoggerDefaultStep() {
+
+        //super(LoggerDefaultStep.class.getName());
     }
     private long counterProduce;
     private long counterConsume;
 
+
+
     @Override
-    public void attach(ISubject iSubject) {
-        if(iSubject.getType().equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || iSubject.getType().equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
-            iSubject.attach(this);
+    public void init() {
+
+    }
+
+    @Override
+    public boolean isAttach(String eventType) {
+        if(eventType.equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || eventType.equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
+           return true;
         }
+        return false;
     }
 
     @Override
-    public void shutdown() {
-
-    }
-
-    @Override
-    protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         if(subject.getType().equals(DefaultSubjectType.S_PUBLISH_DATA.name())) {
             counterProduce++;
         }
@@ -37,7 +41,7 @@ public class LoggerStep extends StepBase {
     }
 
     @Override
-    protected void tickCallBack() {
+    public void tickCallBack() {
         System.out.println("**** COUNTER PRODUCE ******* : " + counterProduce);
         System.out.println("**** COUNTER CONSUME ******* : " + counterConsume);
     }
@@ -49,5 +53,15 @@ public class LoggerStep extends StepBase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setContainer(Container cntr) {
+
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

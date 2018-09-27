@@ -3,24 +3,17 @@ package Stepping.defaultsteps;
 import Stepping.*;
 import com.google.gson.JsonObject;
 
+import java.io.IOException;
 import java.util.List;
 
-public class ExternalDataConsumerStep extends StepBase {
+public class ExternalDataConsumerDefaultStep implements Step {
 
     private IMessenger iMessenger;
+    private Container container;
 
 
-    public ExternalDataConsumerStep() {
-        super(ExternalDataConsumerStep.class.getName());
-    }
-
-    @Override
-    public void attach(ISubject iSubject) {
-
-    }
-
-    @Override
-    public void shutdown() {
+    public ExternalDataConsumerDefaultStep() {
+       // super(ExternalDataConsumerDefaultStep.class.getName());
     }
 
     @Override
@@ -29,17 +22,27 @@ public class ExternalDataConsumerStep extends StepBase {
     }
 
     @Override
+    public boolean isAttach(String eventType) {
+        return false;
+    }
+
+    @Override
     public void restate() {
 
     }
 
     @Override
-    protected void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+    public void setContainer(Container cntr) {
+        this.container = cntr;
+    }
+
+    @Override
+    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
 
     }
 
     @Override
-    protected void tickCallBack() {
+    public void tickCallBack() {
         Data data = iMessenger.fetching();
         if (data.getValue() != null) {
             SubjectContainer subjectContainer = container.getById(DefaultID.SUBJECT_CONTAINER.name());
@@ -51,5 +54,10 @@ public class ExternalDataConsumerStep extends StepBase {
 
     public void setMessenger(IMessenger iMessenger) {
         this.iMessenger = iMessenger;
+    }
+
+    @Override
+    public void close() {
+
     }
 }

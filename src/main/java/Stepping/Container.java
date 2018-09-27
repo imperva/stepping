@@ -12,7 +12,7 @@ public class Container {
     }
 
     public <T> Container add(T obj) {
-        add(new Identifiable<T>(obj, obj.getClass().getName()));
+        add(new Identifiable<T>(obj, obj.getClass().getName() + obj.hashCode()));
         return this;
     }
 
