@@ -1,6 +1,8 @@
 package Stepping;
 
-public interface IStepDecorator extends Step, Runnable {
+import java.io.Closeable;
+
+public interface IStepDecorator extends Step, Runnable, Closeable {
 
     void newDataArrived(ISubject iSubject);
 

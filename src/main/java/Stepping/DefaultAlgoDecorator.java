@@ -1,9 +1,5 @@
 package Stepping;
 
-import Stepping.defaultsteps.DefaultSubjectType;
-import Stepping.defaultsteps.ExternalDataConsumerDefaultStep;
-import Stepping.defaultsteps.ExternalDataProducerDefaultStep;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -16,7 +12,10 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     protected DefaultAlgoDecorator(Algo algo) {
         this.algo = algo;
-        this.running = new Running(DefaultAlgoDecorator.class.getName(), this);
+        this.running = new Running(DefaultAlgoDecorator.class.getName(), this,
+                new Integer(SteppingProperties.getInstance().getProperty("stepping.default.algo.delay")),
+                new Integer(SteppingProperties.getInstance().getProperty("stepping.default.algo.initialdelay")),
+                new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.algo.daemon")));
     }
 
     @Override
@@ -29,7 +28,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
         initSubjects();
 
-        regiterShutdownHook();
+        registerShutdownHook();
         attachSubjects();
 
         restate();
@@ -51,7 +50,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
     }
 
 
-    private void regiterShutdownHook() {
+    private void registerShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
@@ -145,7 +144,11 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     private void makeStepDecoratorRun() {
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            cntr.add(new Running(iStepDecorator.getStep().getClass().getName(), iStepDecorator));
+            cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
+                    iStepDecorator,
+                    new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.delay")),
+                    new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.initialdelay")),
+                    new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.step.daemon"))));
         }
     }
 
@@ -185,6 +188,6 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     @Override
     public void run() {
-        //DO SOME STUFF GLOBALLY
+        algo.tickCallBack();
     }
 }

@@ -1,6 +1,4 @@
-package Stepping.defaultsteps;
-
-import Stepping.*;
+package Stepping;
 
 public class ExternalDataProducerDefaultStep implements Step {
 
@@ -17,8 +15,8 @@ public class ExternalDataProducerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(eventType)) {
+    public boolean isAttach(String subjecType) {
+        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(subjecType)) {
             return true;
         }
         return false;
@@ -43,16 +41,21 @@ public class ExternalDataProducerDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
         this.container = cntr;
     }
 
-    public void setMessenger(IMessenger iMessenger) {
-        this.iMessenger = iMessenger;
+    @Override
+    public StepConfig getStepConfig() {
+        return null;
     }
 
-    @Override
-    public void close() {
-
+    public void setMessenger(IMessenger iMessenger) {
+        this.iMessenger = iMessenger;
     }
 }

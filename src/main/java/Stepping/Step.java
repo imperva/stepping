@@ -1,12 +1,10 @@
 package Stepping;
 
-import java.io.Closeable;
-
-public interface  Step extends Closeable {
+public interface  Step {
 
       void init();
 
-      boolean isAttach(String eventType);
+      boolean isAttach(String subjecType);
 
       void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
 
@@ -14,5 +12,9 @@ public interface  Step extends Closeable {
 
       void restate();
 
+      void shuttingDown();
+
       void setContainer(Container cntr);
+
+      StepConfig getStepConfig();
 }

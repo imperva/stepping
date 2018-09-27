@@ -14,15 +14,15 @@ public class Running implements Closeable {
 
     private ScheduledFuture scheduledFuture;
     private ScheduledExecutorService scheduledExecutorService;
-    private int delay = 0;
-    private int initialdelay = 0;
+    private int delay;
+    private int initialdelay;
     private String id;
-    private boolean daemon = false;
+    private boolean daemon;
     private Runnable runnable;
 
-    protected Running(String id, Runnable runnable) { this(id, runnable,100,100,false);
-
-    }
+//    protected Running(String id, Runnable runnable) { this(id, runnable,100,100,false);
+//
+//    }
 
     protected Running(String id, Runnable runnable, int delay, int initialdelay, boolean daemon) {
         this.id = id;

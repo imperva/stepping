@@ -1,7 +1,6 @@
 package alogs.etlalgo;
 
 import Stepping.*;
-import Stepping.defaultsteps.DefaultSubjectType;
 import alogs.etlalgo.dto.EtlTupple;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -46,8 +45,18 @@ public class AggregationDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
 
+    }
+
+    @Override
+    public StepConfig getStepConfig() {
+        return null;
     }
 
     @Override
@@ -56,8 +65,8 @@ public class AggregationDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        if (eventType.equals(SubjectType.AGGREGATION.name())) {
+    public boolean isAttach(String subjecType) {
+        if (subjecType.equals(SubjectType.AGGREGATION.name())) {
             return true;
         }
         return false;
@@ -77,10 +86,5 @@ public class AggregationDefaultStep implements Step {
                     .collect(Collectors.toList());
             subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(new Data(aggrTupples));
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-
     }
 }

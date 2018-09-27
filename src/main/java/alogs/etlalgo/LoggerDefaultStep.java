@@ -1,7 +1,6 @@
 package alogs.etlalgo;
 
 import Stepping.*;
-import Stepping.defaultsteps.DefaultSubjectType;
 
 import java.io.IOException;
 
@@ -22,8 +21,8 @@ public class LoggerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        if(eventType.equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || eventType.equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
+    public boolean isAttach(String subjectType) {
+        if(subjectType.equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || subjectType.equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
            return true;
         }
         return false;
@@ -56,12 +55,19 @@ public class LoggerDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
 
     }
 
     @Override
-    public void close() throws IOException {
-
+    public StepConfig getStepConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setDecelerationStrategy(new DefaultDecelerationStrategy());
+        return stepConfig;
     }
 }

@@ -1,10 +1,13 @@
 package Stepping;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
+    private IDecelerationStrategy decelerationStrategy;
+    private Integer currentDecelerationTimeout = null;
 
     private Q<ISubject> q = new Q<ISubject>();
     private Step step;
@@ -13,12 +16,15 @@ public class DefaultStepDecorator implements IStepDecorator {
         this.step = step;
     }
 
-
     @Override
     public void setContainer(Container cntr) {
         container = cntr;
     }
 
+    @Override
+    public StepConfig getStepConfig() {
+        return step.getStepConfig();
+    }
 
     @Override
     public void restate() {
@@ -26,16 +32,19 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void shuttingDown() {
+        step.shuttingDown();
+    }
+
+    @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         step.newDataArrivedCallBack(subject, subjectContainer);
     }
-
 
     @Override
     public void newDataArrived(ISubject subject) {
         q.queue(subject);
     }
-
 
     @Override
     public void tickCallBack() {
@@ -46,27 +55,60 @@ public class DefaultStepDecorator implements IStepDecorator {
             }
         }
         step.tickCallBack();
+
+        decelerate(calcDecelerationTimeout(subjectList.size()));
+    }
+
+    private void decelerate(int decelerationTimeout) {
+        try {
+            if (decelerationTimeout > 0)
+                Thread.sleep(decelerationTimeout);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int calcDecelerationTimeout(int queuedItemsSize) {
+        if(decelerationStrategy == null)
+            return 0;
+        currentDecelerationTimeout = decelerationStrategy.decelerate(new Date(), queuedItemsSize, this.currentDecelerationTimeout);
+        return currentDecelerationTimeout;
     }
 
     @Override
     public void close() {
-        try {
-            step.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            //close();
-        }
+        shuttingDown();
     }
 
     @Override
     public void init() {
         step.init();
+        setDecelerationStrategy();
+    }
+
+    private void setDecelerationStrategy() {
+        if (step.getStepConfig() == null) {
+            decelerationStrategy = new DefaultDecelerationStrategy();
+            return;
+        }
+
+        if (!step.getStepConfig().isEnableDecelerationStrategy()) {
+            decelerationStrategy = null;
+            return;
+        }
+
+        if (step.getStepConfig().getDecelerationStrategy() != null) {
+            decelerationStrategy = step.getStepConfig().getDecelerationStrategy();
+            return;
+        } else {
+            decelerationStrategy = new DefaultDecelerationStrategy();
+            return;
+        }
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        return step.isAttach(eventType);
+    public boolean isAttach(String subjecType) {
+        return step.isAttach(subjecType);
     }
 
     @Override

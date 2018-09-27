@@ -1,4 +1,4 @@
-package Stepping.defaultsteps;
+package Stepping;
 
 public enum DefaultSubjectType {
     S_DATA_ARRIVED,

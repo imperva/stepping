@@ -1,10 +1,6 @@
 package alogs.dbusertodbprofilealgo;
 
 import Stepping.*;
-import Stepping.defaultsteps.DefaultSubjectType;
-
-import java.io.IOException;
-
 public class LearningDefaultStep implements Step {
 
     public LearningDefaultStep() {
@@ -21,8 +17,8 @@ public class LearningDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(eventType)) {
+    public boolean isAttach(String subjecType) {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjecType)) {
            return true;
         }
         return false;
@@ -46,12 +42,17 @@ public class LearningDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
 
     }
 
     @Override
-    public void close() throws IOException {
-
+    public StepConfig getStepConfig() {
+        return null;
     }
 }

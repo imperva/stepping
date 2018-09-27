@@ -1,9 +1,7 @@
-package Stepping.defaultsteps;
+package Stepping;
 
-import Stepping.*;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ExternalDataConsumerDefaultStep implements Step {
@@ -22,7 +20,7 @@ public class ExternalDataConsumerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
+    public boolean isAttach(String subjecType) {
         return false;
     }
 
@@ -32,8 +30,18 @@ public class ExternalDataConsumerDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
         this.container = cntr;
+    }
+
+    @Override
+    public StepConfig getStepConfig() {
+        return null;
     }
 
     @Override
@@ -56,8 +64,4 @@ public class ExternalDataConsumerDefaultStep implements Step {
         this.iMessenger = iMessenger;
     }
 
-    @Override
-    public void close() {
-
-    }
 }

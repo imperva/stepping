@@ -1,4 +1,4 @@
 package Stepping;
 
-public abstract class IAlgoDecorator implements Algo  {
+public abstract class IAlgoDecorator implements Algo, Runnable  {
 }

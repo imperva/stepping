@@ -27,7 +27,6 @@ public class Main {
                 messengerConfigs.forEach(messengerConfig -> {
                     ETLDefaultAlgo etlAlgo = new ETLDefaultAlgo();
                     stepping.register(etlAlgo, new KafkaMessengerWrapper(messengerConfig)).go();
-                    Runtime.getRuntime().addShutdownHook(new Thread((etlAlgo)::close));
                 });
             }
         });

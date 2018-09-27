@@ -35,8 +35,4 @@ public class DbUserAccessDbProfilerDefaultAlgo implements Algo {
 
     }
 
-    @Override
-    public void run() {
-
-    }
-}
+ }

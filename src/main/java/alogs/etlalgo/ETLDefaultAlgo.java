@@ -2,9 +2,6 @@ package alogs.etlalgo;
 
 import Stepping.*;
 import alogs.etlalgo.dto.EtlId;
-
-
-import java.io.IOException;
 import java.util.HashMap;
 
 public class ETLDefaultAlgo implements Algo {
@@ -51,8 +48,5 @@ public class ETLDefaultAlgo implements Algo {
 
     }
 
-    @Override
-    public void run() {
 
-    }
 }

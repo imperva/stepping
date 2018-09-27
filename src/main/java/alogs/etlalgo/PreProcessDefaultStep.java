@@ -2,7 +2,6 @@ package alogs.etlalgo;
 
 
 import Stepping.*;
-import Stepping.defaultsteps.DefaultSubjectType;
 import alogs.etlalgo.converters.EtlTuppleConverter;
 import alogs.etlalgo.dto.EtlTupple;
 import com.google.gson.JsonObject;
@@ -43,8 +42,18 @@ public class PreProcessDefaultStep implements Step {
     }
 
     @Override
+    public void shuttingDown() {
+
+    }
+
+    @Override
     public void setContainer(Container cntr) {
 
+    }
+
+    @Override
+    public StepConfig getStepConfig() {
+        return null;
     }
 
     @Override
@@ -53,8 +62,8 @@ public class PreProcessDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String eventType) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(eventType)) {
+    public boolean isAttach(String subjecType) {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjecType)) {
            return true;
         }
         return false;
@@ -71,10 +80,5 @@ public class PreProcessDefaultStep implements Step {
                     .collect(Collectors.toList());
             subjectContainer.<List<EtlTupple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-
     }
 }

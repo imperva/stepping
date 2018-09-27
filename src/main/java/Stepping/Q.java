@@ -11,19 +11,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class Q<T>{
     private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<T>();
 
-
-    public Q() {
-
-    }
-
-    public Q(String config) {
-
-    }
-
-    public List peek() {
-        blockingQueue.peek();
-        return null;
-    }
+        public T peek() {
+           return blockingQueue.peek();
+        }
 
     public void queue(T incident) {
         blockingQueue.add(incident);
@@ -53,7 +43,6 @@ public class Q<T>{
     public int size() {
         return blockingQueue.size();
     }
-
 
     public void clear(){
         blockingQueue.clear();
