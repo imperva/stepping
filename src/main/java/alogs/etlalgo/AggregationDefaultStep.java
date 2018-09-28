@@ -55,18 +55,13 @@ public class AggregationDefaultStep implements Step {
     }
 
     @Override
-    public StepConfig getStepConfig() {
-        return null;
-    }
-
-    @Override
     public void init() {
 
     }
 
     @Override
-    public boolean isAttach(String subjecType) {
-        if (subjecType.equals(SubjectType.AGGREGATION.name())) {
+    public boolean isAttach(String subjectType) {
+        if (subjectType.equals(SubjectType.AGGREGATION.name())) {
             return true;
         }
         return false;

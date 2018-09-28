@@ -25,10 +25,6 @@ public class StubMessengerWrapper implements IMessenger {
         return null;
     }
 
-    @Override
-    public void shutdown() {
-
-    }
 
     @Override
     public void close() throws IOException {

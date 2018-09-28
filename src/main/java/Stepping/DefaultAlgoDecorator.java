@@ -22,8 +22,8 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
     public void init() {
         registerIoC();
 
-        initSteps();
         decorateSteps();
+        initSteps();
         makeStepDecoratorRun();
 
         initSubjects();
@@ -41,11 +41,12 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
         HashMap<String, Object> IoCMap = IoC();
         defaultIoCMap.putAll(IoCMap);
         DI(defaultIoCMap);
+        DI(this, this.getClass().getName());
     }
 
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
-            cntr.add(new DefaultStepDecorator(step));
+            cntr.add(new DefaultStepDecorator(step,this));
         }
     }
 
@@ -88,6 +89,11 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
     }
 
     @Override
+    public StepConfig getStepConfig() {
+        return algo.getStepConfig();
+    }
+
+    @Override
     public void setMessenger(IMessenger messenger) {
         algo.setMessenger(iMessenger);
         this.iMessenger = messenger;
@@ -100,11 +106,6 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     @Override
     public void close() {
-        //todo if messanger is in our container then it will be closed as all others. thus shotdown is redundunt
-        if (iMessenger != null) {
-            iMessenger.shutdown();
-        }
-
         for (Closeable closable : getContainer().<Closeable>getSonOf(Closeable.class)) {
             try {
                 closable.close();
@@ -124,7 +125,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     private void restate() {
         List<Thread> threads = new ArrayList<>();
-        for (Step step : cntr.<Step>getSonOf(Step.class)) {
+        for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Thread thread = new Thread(() -> {
                 step.restate();
             });
@@ -143,20 +144,24 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
     }
 
     private void makeStepDecoratorRun() {
+        int delay = new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.delay"));
+        int initialDelay = new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.initialdelay"));
+        boolean isDaemon = new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.step.daemon"));
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
                     iStepDecorator,
-                    new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.delay")),
-                    new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.initialdelay")),
-                    new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.step.daemon"))));
+                    delay,
+                    initialDelay,
+                    isDaemon));
         }
     }
 
 
     private void initSteps() {
-        for (Step step : cntr.<Step>getSonOf(Step.class)) {
+        for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             step.init();
             step.setContainer(cntr);
+            step.setStepConfig(getStepConfig());
         }
     }
 
@@ -188,6 +193,6 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     @Override
     public void run() {
-        algo.tickCallBack();
+        tickCallBack();
     }
 }

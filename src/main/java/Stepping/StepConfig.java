@@ -1,16 +1,16 @@
 package Stepping;
 
 public class StepConfig {
-   private IDecelerationStrategy  iDecelerationStrategy = new DefaultDecelerationStrategy();
+   private IDecelerationStrategy decelerationStrategy = new DefaultDecelerationStrategy();
    private boolean enableDecelerationStrategy = false;
 
 
     public IDecelerationStrategy getDecelerationStrategy() {
-        return iDecelerationStrategy;
+        return decelerationStrategy;
     }
 
     public void setDecelerationStrategy(IDecelerationStrategy iDecelerationStrategy) {
-        this.iDecelerationStrategy = iDecelerationStrategy;
+        this.decelerationStrategy = iDecelerationStrategy;
     }
 
     public boolean isEnableDecelerationStrategy() {

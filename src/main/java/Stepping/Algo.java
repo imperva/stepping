@@ -12,4 +12,6 @@ public interface Algo extends Closeable {
     HashMap<String, Object> IoC();
 
     void tickCallBack();
+
+    StepConfig getStepConfig();
 }

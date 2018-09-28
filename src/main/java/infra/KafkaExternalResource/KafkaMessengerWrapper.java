@@ -30,14 +30,11 @@ public class KafkaMessengerWrapper implements IMessenger {
         return this.kafkaConsumer.fetch();
     }
 
-    @Override
-    public void shutdown() {
-        kafkaConsumer.shutdown();
-        kafkaProducer.shutdown();
-    }
+
 
     @Override
     public void close() throws IOException {
-
+        kafkaConsumer.shutdown();
+        kafkaProducer.shutdown();
     }
 }

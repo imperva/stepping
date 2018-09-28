@@ -20,7 +20,7 @@ public class ExternalDataConsumerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjecType) {
+    public boolean isAttach(String subjectType) {
         return false;
     }
 
@@ -37,11 +37,6 @@ public class ExternalDataConsumerDefaultStep implements Step {
     @Override
     public void setContainer(Container cntr) {
         this.container = cntr;
-    }
-
-    @Override
-    public StepConfig getStepConfig() {
-        return null;
     }
 
     @Override

@@ -15,8 +15,8 @@ public class ExternalDataProducerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjecType) {
-        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(subjecType)) {
+    public boolean isAttach(String subjectType) {
+        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(subjectType)) {
             return true;
         }
         return false;
@@ -50,10 +50,6 @@ public class ExternalDataProducerDefaultStep implements Step {
         this.container = cntr;
     }
 
-    @Override
-    public StepConfig getStepConfig() {
-        return null;
-    }
 
     public void setMessenger(IMessenger iMessenger) {
         this.iMessenger = iMessenger;

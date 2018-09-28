@@ -43,6 +43,7 @@ public class LoggerDefaultStep implements Step {
     public void tickCallBack() {
         System.out.println("**** COUNTER PRODUCE ******* : " + counterProduce);
         System.out.println("**** COUNTER CONSUME ******* : " + counterConsume);
+        throw new RuntimeException("test");
     }
 
     @Override
@@ -62,12 +63,5 @@ public class LoggerDefaultStep implements Step {
     @Override
     public void setContainer(Container cntr) {
 
-    }
-
-    @Override
-    public StepConfig getStepConfig() {
-        StepConfig stepConfig = new StepConfig();
-        stepConfig.setDecelerationStrategy(new DefaultDecelerationStrategy());
-        return stepConfig;
     }
 }

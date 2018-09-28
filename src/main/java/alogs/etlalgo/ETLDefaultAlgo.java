@@ -16,6 +16,11 @@ public class ETLDefaultAlgo implements Algo {
     }
 
     @Override
+    public StepConfig getStepConfig() {
+        return null;
+    }
+
+    @Override
     public void init() {
 
     }

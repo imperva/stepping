@@ -52,18 +52,13 @@ public class PreProcessDefaultStep implements Step {
     }
 
     @Override
-    public StepConfig getStepConfig() {
-        return null;
-    }
-
-    @Override
     public void init() {
 
     }
 
     @Override
-    public boolean isAttach(String subjecType) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjecType)) {
+    public boolean isAttach(String subjectType) {
+        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjectType)) {
            return true;
         }
         return false;

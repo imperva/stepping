@@ -4,7 +4,7 @@ public interface  Step {
 
       void init();
 
-      boolean isAttach(String subjecType);
+      boolean isAttach(String subjectType);
 
       void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
 
@@ -15,6 +15,4 @@ public interface  Step {
       void shuttingDown();
 
       void setContainer(Container cntr);
-
-      StepConfig getStepConfig();
 }

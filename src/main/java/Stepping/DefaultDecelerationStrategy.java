@@ -8,6 +8,7 @@ public class DefaultDecelerationStrategy implements IDecelerationStrategy {
     private int minItemsInPeriod;
     private int decelerateRate;
     private int maxTimeout;
+    private int minTimeout = 0;
     private Date stopDate = null;
     private int totItems = 0;
 
@@ -21,20 +22,22 @@ public class DefaultDecelerationStrategy implements IDecelerationStrategy {
 
     @Override
     public int decelerate(Date now, int itemsInQ, int currentDecelerationTimeout) {
-        totItems = +itemsInQ;
+        totItems += itemsInQ;
         if (stopDate == null) {
             stopDate = calcStopDate();
         }
 
         if (stopDate.after(now)) {
-            if (totItems < minItemsInPeriod && (currentDecelerationTimeout + decelerateRate) > maxTimeout) {
+            int increasedDeceleration = currentDecelerationTimeout + decelerateRate;
+            int decreasedDeceleration = currentDecelerationTimeout - decelerateRate;
+            if (totItems < minItemsInPeriod && increasedDeceleration < maxTimeout) {
                 stopDate = null;
                 totItems = 0;
-                return currentDecelerationTimeout + decelerateRate;
-            } else if (totItems > minItemsInPeriod) {
+                return increasedDeceleration;
+            } else if (totItems >= minItemsInPeriod && decreasedDeceleration > minTimeout) {
                 stopDate = null;
                 totItems = 0;
-                return 0;//* Remove any deceleration
+                return decreasedDeceleration;//* Remove any deceleration
             }
         }
         return currentDecelerationTimeout;

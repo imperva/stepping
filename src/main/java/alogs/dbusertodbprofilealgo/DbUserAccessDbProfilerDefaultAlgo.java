@@ -2,6 +2,8 @@ package alogs.dbusertodbprofilealgo;
 
 import Stepping.Algo;
 import Stepping.IMessenger;
+import Stepping.StepConfig;
+
 import java.util.HashMap;
 
 public class DbUserAccessDbProfilerDefaultAlgo implements Algo {
@@ -9,6 +11,11 @@ public class DbUserAccessDbProfilerDefaultAlgo implements Algo {
     @Override
     public void tickCallBack() {
 
+    }
+
+    @Override
+    public StepConfig getStepConfig() {
+        return null;
     }
 
 
