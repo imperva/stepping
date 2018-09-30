@@ -1,5 +1,4 @@
 package Stepping;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +8,8 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     private Q<ISubject> q = new Q<ISubject>();
     private Step step;
-    private StepConfig stepConfig;
+    private StepConfig globalAlgoStepConfig;
+    private StepConfig localStepConfig;
 
     DefaultStepDecorator(Step step) {
         this.step = step;
@@ -45,12 +45,11 @@ public class DefaultStepDecorator implements IStepDecorator {
         List<ISubject> subjectList = q.take();
         if (subjectList.size() > 0) {
             for (ISubject subject : subjectList) {
-                newDataArrivedCallBack(subject, container.getById(DefaultID.SUBJECT_CONTAINER.name()));
+               newDataArrivedCallBack(subject, container.getById(DefaultID.SUBJECT_CONTAINER.name()));
             }
         }
-        step.tickCallBack();
-
         decelerate(calcDecelerationTimeout(subjectList.size()));
+        step.tickCallBack();
     }
 
     private void decelerate(int decelerationTimeout) {
@@ -63,12 +62,21 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     private int calcDecelerationTimeout(int queuedItemsSize) {
-        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
+        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy(solveStepConfig());
         if (decelerationStrategy == null)
             return 0;
         Date now = new Date();
         this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
         return this.currentDecelerationTimeout;
+    }
+
+    private StepConfig solveStepConfig() {
+        if (localStepConfig == null) {
+            System.out.println("solveStepConfig ****" + this.step.getClass().getName());
+            StepConfig localConfig = getLocalStepConfig();
+            localStepConfig = localConfig != null ? localConfig : globalAlgoStepConfig;
+        }
+        return localStepConfig;
     }
 
     @Override
@@ -81,7 +89,7 @@ public class DefaultStepDecorator implements IStepDecorator {
         step.init();
     }
 
-    private IDecelerationStrategy solveDecelerationStrategy() {
+    private IDecelerationStrategy solveDecelerationStrategy(StepConfig stepConfig) {
         if (stepConfig == null) {
             return new DefaultDecelerationStrategy();
         }
@@ -115,8 +123,10 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void setStepConfig(StepConfig stepConfig) {
-        this.stepConfig = stepConfig;
+    public void setGlobalAlgoStepConfig(StepConfig globalAlgoStepConfig) {
+        if(globalAlgoStepConfig == null)
+            throw new RuntimeException("GlobalAlgoStepConfig is required");
+        this.globalAlgoStepConfig = globalAlgoStepConfig;
 
     }
 
@@ -129,6 +139,11 @@ public class DefaultStepDecorator implements IStepDecorator {
             container.<IExceptionHandler>getById(DefaultID.EXCEPTION_HANDLER.name()).handle(e);
             throw e;
         }
+    }
+
+    @Override
+    public StepConfig getLocalStepConfig(){
+        return step.getLocalStepConfig();
     }
 }
 

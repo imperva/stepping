@@ -14,7 +14,7 @@ public class DbUserAccessDbProfilerDefaultAlgo implements Algo {
     }
 
     @Override
-    public StepConfig getStepConfig() {
+    public StepConfig getGlobalAlgoStepConfig() {
         return null;
     }
 

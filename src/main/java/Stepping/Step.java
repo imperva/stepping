@@ -15,4 +15,8 @@ public interface  Step {
       void shuttingDown();
 
       void setContainer(Container cntr);
+
+      default StepConfig getLocalStepConfig(){
+            return null;
+      }
 }

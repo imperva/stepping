@@ -87,8 +87,8 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     }
 
     @Override
-    public StepConfig getStepConfig() {
-        return algo.getStepConfig();
+    public StepConfig getGlobalAlgoStepConfig() {
+        return algo.getGlobalAlgoStepConfig();
     }
 
     @Override
@@ -172,7 +172,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             step.init();
             step.setContainer(cntr);
-            step.setStepConfig(getStepConfig());
+            step.setGlobalAlgoStepConfig(getGlobalAlgoStepConfig());
         }
     }
 

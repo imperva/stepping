@@ -45,4 +45,9 @@ public class LoggerDefaultStep implements Step {
     public void setContainer(Container cntr) {
 
     }
+
+    @Override
+    public StepConfig getLocalStepConfig(){
+        return null;
+    }
 }

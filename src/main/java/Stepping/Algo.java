@@ -13,5 +13,5 @@ public interface Algo extends Closeable {
 
     void tickCallBack();
 
-    StepConfig getStepConfig();
+    StepConfig getGlobalAlgoStepConfig();
 }
