@@ -52,9 +52,9 @@ public class Running implements Closeable {
     @Override
     public void close() {
         try {
-            LOGGER.info("Try close Stepping orchestrator gracefully");
+            LOGGER.info("Try close Stepping orchestrator gracefully. ID:" + id);
             if (scheduledFuture != null && !scheduledFuture.isDone() && !scheduledFuture.isCancelled()) {
-                LOGGER.trace("Start Closing Stepping orchestrator Process");
+                LOGGER.info("Start Closing Stepping orchestrator Process");
                 boolean isCanceled = scheduledFuture.cancel(true);
                 LOGGER.trace("Stepping orchestrator Future canceled successfully?: " + isCanceled);
                 scheduledExecutorService.shutdownNow();

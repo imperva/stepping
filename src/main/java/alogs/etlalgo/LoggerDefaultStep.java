@@ -2,18 +2,9 @@ package alogs.etlalgo;
 
 import Stepping.*;
 
-import java.io.IOException;
-
 public class LoggerDefaultStep implements Step {
-
     LoggerDefaultStep() {
-
-        //super(LoggerDefaultStep.class.getName());
     }
-    private long counterProduce;
-    private long counterConsume;
-
-
 
     @Override
     public void init() {
@@ -22,28 +13,18 @@ public class LoggerDefaultStep implements Step {
 
     @Override
     public boolean isAttach(String subjectType) {
-        if(subjectType.equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || subjectType.equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
-           return true;
-        }
-        return false;
+        return true;
     }
 
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if(subject.getType().equals(DefaultSubjectType.S_PUBLISH_DATA.name())) {
-            counterProduce++;
-        }
-
-        if(subject.getType().equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
-           counterConsume++;
-        }
+        System.out.println("**** Logged event ******* : " + subject.getType());
+        //throw new RuntimeException("TEST");
     }
 
     @Override
     public void tickCallBack() {
-        System.out.println("**** COUNTER PRODUCE ******* : " + counterProduce);
-        System.out.println("**** COUNTER CONSUME ******* : " + counterConsume);
-        throw new RuntimeException("test");
+        System.out.println("LoggerDefaultStep");
     }
 
     @Override

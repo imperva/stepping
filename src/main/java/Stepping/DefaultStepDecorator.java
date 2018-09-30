@@ -1,21 +1,17 @@
 package Stepping;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 public class DefaultStepDecorator implements IStepDecorator {
-    private final IAlgoDecorator algoDecorator;
     protected Container container;
-    private IDecelerationStrategy decelerationStrategy;
     private int currentDecelerationTimeout = 0;
 
     private Q<ISubject> q = new Q<ISubject>();
     private Step step;
     private StepConfig stepConfig;
 
-    DefaultStepDecorator(Step step, IAlgoDecorator algoDecorator) {
-        this.algoDecorator = algoDecorator;
+    DefaultStepDecorator(Step step) {
         this.step = step;
     }
 
@@ -67,7 +63,8 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     private int calcDecelerationTimeout(int queuedItemsSize) {
-        if (this.decelerationStrategy == null)
+        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
+        if (decelerationStrategy == null)
             return 0;
         Date now = new Date();
         this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
@@ -82,26 +79,21 @@ public class DefaultStepDecorator implements IStepDecorator {
     @Override
     public void init() {
         step.init();
-        setDecelerationStrategy();
     }
 
-    private void setDecelerationStrategy() {
+    private IDecelerationStrategy solveDecelerationStrategy() {
         if (stepConfig == null) {
-            decelerationStrategy = new DefaultDecelerationStrategy();
-            return;
+            return new DefaultDecelerationStrategy();
         }
 
         if (!stepConfig.isEnableDecelerationStrategy()) {
-            decelerationStrategy = null;
-            return;
+            return null;
         }
 
         if (stepConfig.getDecelerationStrategy() != null) {
-            decelerationStrategy = stepConfig.getDecelerationStrategy();
-            return;
+            return stepConfig.getDecelerationStrategy();
         } else {
-            decelerationStrategy = new DefaultDecelerationStrategy();
-            return;
+            return new DefaultDecelerationStrategy();
         }
     }
 
@@ -134,16 +126,8 @@ public class DefaultStepDecorator implements IStepDecorator {
             tickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
-
-            close();
-            try {
-                algoDecorator.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-
+            container.<IExceptionHandler>getById(DefaultID.EXCEPTION_HANDLER.name()).handle(e);
             throw e;
-
         }
     }
 }

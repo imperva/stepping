@@ -1,9 +1,10 @@
 package Stepping;
 
-public enum DefaultID {
+enum DefaultID {
 
     SUBJECT_CONTAINER,
     EXTERNAL_DATA_CONSUMER,
-    EXTERNAL_DATA_PRODUCER
+    EXTERNAL_DATA_PRODUCER,
+    EXCEPTION_HANDLER
 
 }

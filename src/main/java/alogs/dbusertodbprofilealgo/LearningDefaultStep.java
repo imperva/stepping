@@ -33,7 +33,7 @@ public class LearningDefaultStep implements Step {
 
     @Override
     public void tickCallBack() {
-
+        System.out.println("LearningDefaultStep");
     }
 
     @Override

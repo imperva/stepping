@@ -33,7 +33,7 @@ public class KafkaMessengerWrapper implements IMessenger {
 
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         kafkaConsumer.shutdown();
         kafkaProducer.shutdown();
     }

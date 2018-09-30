@@ -4,11 +4,12 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
-public class DefaultAlgoDecorator extends IAlgoDecorator {
+public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHandler {
     private Container cntr = new Container();
     private IMessenger iMessenger;
     private Algo algo;
     private Running running;
+    private boolean isClosed = false;
 
     protected DefaultAlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -41,15 +42,14 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
         HashMap<String, Object> IoCMap = IoC();
         defaultIoCMap.putAll(IoCMap);
         DI(defaultIoCMap);
-        DI(this, this.getClass().getName());
+        DI(this, DefaultID.EXCEPTION_HANDLER.name());
     }
 
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
-            cntr.add(new DefaultStepDecorator(step,this));
+            cntr.add(new DefaultStepDecorator(step));
         }
     }
-
 
     private void registerShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
@@ -62,10 +62,8 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
         running.wakenProcessingUnit();
     }
 
-
     //todo Add abstract method IoC that each child will need to implement
     //todo Add iMessenger to ExternalDataConsumerDefaultStep and remove it from all steps
-
     private HashMap<String, Object> DefaultIoC() {
         HashMap<String, Object> objectHashMap = new HashMap<>();
         objectHashMap.put(DefaultID.SUBJECT_CONTAINER.name(), new SubjectContainer());
@@ -106,12 +104,25 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
 
     @Override
     public void close() {
-        for (Closeable closable : getContainer().<Closeable>getSonOf(Closeable.class)) {
-            try {
-                closable.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if(isClosed)
+                return;
+            List<Closeable> closeables = new ArrayList<>();
+            closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
+            closeables.addAll(getContainer().getSonOf(Running.class));
+            for (Closeable closable : closeables) {
+                try {
+                    closable.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            this.running.close();
+            this.iMessenger.close();
+        }catch (Exception e){
+
+        }finally {
+            isClosed=true;
         }
     }
 
@@ -194,5 +205,11 @@ public class DefaultAlgoDecorator extends IAlgoDecorator {
     @Override
     public void run() {
         tickCallBack();
+    }
+
+    @Override
+    public void handle(Exception e) {
+        System.out.println("Error: " + e.toString());
+        close();
     }
 }

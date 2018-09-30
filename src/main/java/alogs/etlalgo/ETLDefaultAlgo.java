@@ -17,7 +17,9 @@ public class ETLDefaultAlgo implements Algo {
 
     @Override
     public StepConfig getStepConfig() {
-        return null;
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableDecelerationStrategy(false);
+        return stepConfig;
     }
 
     @Override
@@ -44,6 +46,7 @@ public class ETLDefaultAlgo implements Algo {
         iocMap.put(EtlId.PRE_STEP, new PreProcessDefaultStep());
         iocMap.put(EtlId.AGGREGATION_STEP, new AggregationDefaultStep());
         iocMap.put(EtlId.LOGGER_STEP,new LoggerDefaultStep());
+        iocMap.put(EtlId.COUNTER_STEP,new InOutCounterDefaultStep());
         return iocMap;
     }
 
