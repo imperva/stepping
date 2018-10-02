@@ -71,22 +71,7 @@ public class DefaultStepDecorator implements IStepDecorator {
         return this.currentDecelerationTimeout;
     }
 
-    private StepConfig solveStepConfig() {
-        if (localStepConfig == null) {
-            System.out.println("solveStepConfig ****" + this.step.getClass().getName());
-            StepConfig localConfig = getLocalStepConfig();
-            if(localConfig != null)
-                 localStepConfig = localConfig;
-            else{
-                StepConfig conf = new StepConfig();
-                conf.setRunningAsDaemon(globalAlgoStepConfig.isRunningAsDaemon());
-                conf.setRunningInitialDelay(globalAlgoStepConfig.getRunningInitialDelay());
-                conf.setRunningPeriodicDelay(globalAlgoStepConfig.getRunningPeriodicDelay());
-                localStepConfig = conf;
-            }
-        }
-        return localStepConfig;
-    }
+
 
     @Override
     public void close() {
