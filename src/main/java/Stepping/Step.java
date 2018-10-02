@@ -1,6 +1,6 @@
 package Stepping;
 
-public interface  Step {
+public interface Step {
 
       void init();
 

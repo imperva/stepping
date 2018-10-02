@@ -18,6 +18,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     @Override
     public void setContainer(Container cntr) {
         container = cntr;
+        step.setContainer(cntr);
     }
 
     @Override
@@ -48,8 +49,8 @@ public class DefaultStepDecorator implements IStepDecorator {
                newDataArrivedCallBack(subject, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
             }
         }
-        decelerate(calcDecelerationTimeout(subjectList.size()));
         step.tickCallBack();
+        decelerate(calcDecelerationTimeout(subjectList.size()));
     }
 
     private void decelerate(int decelerationTimeout) {

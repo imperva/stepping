@@ -2,6 +2,8 @@ package alogs.etlalgo;
 
 import Stepping.*;
 
+import java.util.List;
+
 public class InOutCounterDefaultStep implements Step {
     private long counterProduce;
     private long counterConsume;
@@ -25,11 +27,11 @@ public class InOutCounterDefaultStep implements Step {
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         if(subject.getType().equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name())) {
-            counterProduce++;
+            counterProduce += ((List)subject.getData().getValue()).size();
         }
 
         if(subject.getType().equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
-           counterConsume++;
+           counterConsume += ((List)subject.getData().getValue()).size();
         }
     }
 

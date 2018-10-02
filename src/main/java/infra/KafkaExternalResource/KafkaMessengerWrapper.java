@@ -3,8 +3,6 @@ package infra.KafkaExternalResource;
 import Stepping.Data;
 import Stepping.IMessenger;
 
-import java.io.IOException;
-
 public class KafkaMessengerWrapper implements IMessenger {
     private KafkaConsumer kafkaConsumer;
     private KafkaProducer kafkaProducer;

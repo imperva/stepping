@@ -79,34 +79,34 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void tickCallBack() {
 
-        for (int u=0; u< 100000000; u++){
-            getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
-
-            if(u > 1000000 && u < 1000080) {
-                try {
-
-                    Thread.sleep(50000000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//            }else if(u > 10007 && u < 10100){
+//        for (int u=0; u< 100000000; u++){
+//            getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
+//
+//            if(u > 1000000 && u < 1000080) {
 //                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
+//
+//                    Thread.sleep(50000000);
+//                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
-//            }else if(u > 10100){
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+////            }else if(u > 10007 && u < 10100){
+////                try {
+////                    Thread.sleep(1000);
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                }
+////            }else if(u > 10100){
+////                try {
+////                    Thread.sleep(100);
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                }
+////            }
 //            }
-            }
-
-
-
-        }
+//
+//
+//
+//        }
 
         algo.tickCallBack();
     }
