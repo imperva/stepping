@@ -38,7 +38,7 @@ public class AggregationDefaultStep implements Step {
     @Override
     public void restate()  {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

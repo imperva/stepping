@@ -11,12 +11,8 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     private Running running;
     private boolean isClosed = false;
 
-    protected DefaultAlgoDecorator(Algo algo) {
+    DefaultAlgoDecorator(Algo algo) {
         this.algo = algo;
-        this.running = new Running(DefaultAlgoDecorator.class.getName(), this,
-                new Integer(SteppingProperties.getInstance().getProperty("stepping.default.algo.delay")),
-                new Integer(SteppingProperties.getInstance().getProperty("stepping.default.algo.initialdelay")),
-                new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.algo.daemon")));
     }
 
     @Override
@@ -83,11 +79,41 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
 
     @Override
     public void tickCallBack() {
+
+        for (int u=0; u< 100000000; u++){
+            getSubjectContainer().getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
+
+            if(u > 1000000 && u < 1000080) {
+                try {
+
+                    Thread.sleep(50000000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+//            }else if(u > 10007 && u < 10100){
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }else if(u > 10100){
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            }
+
+
+
+        }
+
         algo.tickCallBack();
     }
 
     @Override
-    public StepConfig getGlobalAlgoStepConfig() {
+    public GlobalAlgoStepConfig getGlobalAlgoStepConfig() {
         return algo.getGlobalAlgoStepConfig();
     }
 
@@ -105,7 +131,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     @Override
     public void close() {
         try {
-            if(isClosed)
+            if (isClosed)
                 return;
             List<Closeable> closeables = new ArrayList<>();
             closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
@@ -118,11 +144,12 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
                 }
             }
             this.running.close();
-            this.iMessenger.close();
-        }catch (Exception e){
+            if (iMessenger != null)
+                this.iMessenger.close();
+        } catch (Exception e) {
 
-        }finally {
-            isClosed=true;
+        } finally {
+            isClosed = true;
         }
     }
 
@@ -155,16 +182,24 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     }
 
     private void makeStepDecoratorRun() {
-        int delay = new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.delay"));
-        int initialDelay = new Integer(SteppingProperties.getInstance().getProperty("stepping.default.step.initialdelay"));
-        boolean isDaemon = new Boolean(SteppingProperties.getInstance().getProperty("stepping.default.step.daemon"));
+        GlobalAlgoStepConfig globConf = getGlobalAlgoStepConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+            int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
+            int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
+            boolean isDaemon = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().isRunningAsDaemon() : globConf.isRunningAsDaemon();
+
             cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
                     iStepDecorator,
                     delay,
                     initialDelay,
                     isDaemon));
         }
+
+
+        this.running = new Running(DefaultAlgoDecorator.class.getName(), this,
+                globConf.getRunningPeriodicDelay(),
+                globConf.getRunningInitialDelay(),
+                globConf.isRunningAsDaemon());
     }
 
 

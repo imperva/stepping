@@ -10,5 +10,5 @@ public interface IStepDecorator extends Step, Runnable, Closeable {
 
     Step getStep();
 
-    void setGlobalAlgoStepConfig(StepConfig stepConfig);
+    void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig);
 }

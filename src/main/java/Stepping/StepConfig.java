@@ -1,23 +1,37 @@
 package Stepping;
 
 public class StepConfig {
-   private IDecelerationStrategy decelerationStrategy = new DefaultDecelerationStrategy();
-   private boolean enableDecelerationStrategy = false;
-
-
-    public IDecelerationStrategy getDecelerationStrategy() {
-        return decelerationStrategy;
+    private int runningInitialDelay;
+    private int runningPeriodicDelay;
+    private boolean runningAsDaemon;
+    public StepConfig() {
+        SteppingProperties stepProp = SteppingProperties.getInstance();
+        runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
+        runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
+        runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.step.daemon"));
     }
 
-    public void setDecelerationStrategy(IDecelerationStrategy iDecelerationStrategy) {
-        this.decelerationStrategy = iDecelerationStrategy;
+    public int getRunningInitialDelay() {
+        return runningInitialDelay;
     }
 
-    public boolean isEnableDecelerationStrategy() {
-        return enableDecelerationStrategy;
+    public void setRunningInitialDelay(int runningInitialDelay) {
+        this.runningInitialDelay = runningInitialDelay;
     }
 
-    public void setEnableDecelerationStrategy(boolean enableDecelerationStrategy) {
-        this.enableDecelerationStrategy = enableDecelerationStrategy;
+    public int getRunningPeriodicDelay() {
+        return runningPeriodicDelay;
+    }
+
+    public void setRunningPeriodicDelay(int runningPeriodicDelay) {
+        this.runningPeriodicDelay = runningPeriodicDelay;
+    }
+
+    public boolean isRunningAsDaemon() {
+        return runningAsDaemon;
+    }
+
+    public void setRunningAsDaemon(boolean runningAsDaemon) {
+        this.runningAsDaemon = runningAsDaemon;
     }
 }

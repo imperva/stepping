@@ -1,6 +1,7 @@
 package alogs.dbusertodbprofilealgo;
 
 import Stepping.Algo;
+import Stepping.GlobalAlgoStepConfig;
 import Stepping.IMessenger;
 import Stepping.StepConfig;
 
@@ -14,7 +15,7 @@ public class DbUserAccessDbProfilerDefaultAlgo implements Algo {
     }
 
     @Override
-    public StepConfig getGlobalAlgoStepConfig() {
+    public GlobalAlgoStepConfig getGlobalAlgoStepConfig() {
         return null;
     }
 

@@ -8,7 +8,7 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     private Q<ISubject> q = new Q<ISubject>();
     private Step step;
-    private StepConfig globalAlgoStepConfig;
+    private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
 
     DefaultStepDecorator(Step step) {
@@ -62,7 +62,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     private int calcDecelerationTimeout(int queuedItemsSize) {
-        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy(solveStepConfig());
+        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
         if (decelerationStrategy == null)
             return 0;
         Date now = new Date();
@@ -74,7 +74,15 @@ public class DefaultStepDecorator implements IStepDecorator {
         if (localStepConfig == null) {
             System.out.println("solveStepConfig ****" + this.step.getClass().getName());
             StepConfig localConfig = getLocalStepConfig();
-            localStepConfig = localConfig != null ? localConfig : globalAlgoStepConfig;
+            if(localConfig != null)
+                 localStepConfig = localConfig;
+            else{
+                StepConfig conf = new StepConfig();
+                conf.setRunningAsDaemon(globalAlgoStepConfig.isRunningAsDaemon());
+                conf.setRunningInitialDelay(globalAlgoStepConfig.getRunningInitialDelay());
+                conf.setRunningPeriodicDelay(globalAlgoStepConfig.getRunningPeriodicDelay());
+                localStepConfig = conf;
+            }
         }
         return localStepConfig;
     }
@@ -89,19 +97,15 @@ public class DefaultStepDecorator implements IStepDecorator {
         step.init();
     }
 
-    private IDecelerationStrategy solveDecelerationStrategy(StepConfig stepConfig) {
-        if (stepConfig == null) {
-            return new DefaultDecelerationStrategy();
-        }
-
-        if (!stepConfig.isEnableDecelerationStrategy()) {
+    private IDecelerationStrategy solveDecelerationStrategy() {
+        if (!globalAlgoStepConfig.isEnableDecelerationStrategy()) {
             return null;
         }
 
-        if (stepConfig.getDecelerationStrategy() != null) {
-            return stepConfig.getDecelerationStrategy();
+        if (globalAlgoStepConfig.getDecelerationStrategy() != null) {
+            return globalAlgoStepConfig.getDecelerationStrategy();
         } else {
-            return new DefaultDecelerationStrategy();
+            return new DefaultLeakyBucketDecelerationStrategy();
         }
     }
 
@@ -123,7 +127,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void setGlobalAlgoStepConfig(StepConfig globalAlgoStepConfig) {
+    public void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig) {
         if(globalAlgoStepConfig == null)
             throw new RuntimeException("GlobalAlgoStepConfig is required");
         this.globalAlgoStepConfig = globalAlgoStepConfig;
