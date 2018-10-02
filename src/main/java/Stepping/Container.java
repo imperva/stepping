@@ -98,4 +98,14 @@ public class Container {
     public int size() {
         return objects.size();
     }
+
+    public boolean exist(String name) {
+        for (Identifiable identifiable : objects) {
+            if (identifiable.getId().equals(name)) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
 }

@@ -18,7 +18,7 @@ public class LearningDefaultStep implements Step {
 
     @Override
     public boolean isAttach(String subjectType) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjectType)) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subjectType)) {
            return true;
         }
         return false;
@@ -26,7 +26,7 @@ public class LearningDefaultStep implements Step {
 
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subject.getType())) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subject.getType())) {
             System.out.println("LearningDefaultStep: newDataArrivedSubject Arrived!");
         }
     }

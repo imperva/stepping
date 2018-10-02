@@ -16,7 +16,7 @@ public class InOutCounterDefaultStep implements Step {
 
     @Override
     public boolean isAttach(String subjectType) {
-        if(subjectType.equals(DefaultSubjectType.S_PUBLISH_DATA.name()) || subjectType.equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
+        if(subjectType.equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()) || subjectType.equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
            return true;
         }
         return false;
@@ -24,11 +24,11 @@ public class InOutCounterDefaultStep implements Step {
 
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if(subject.getType().equals(DefaultSubjectType.S_PUBLISH_DATA.name())) {
+        if(subject.getType().equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name())) {
             counterProduce++;
         }
 
-        if(subject.getType().equals(DefaultSubjectType.S_DATA_ARRIVED.name())) {
+        if(subject.getType().equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
            counterConsume++;
         }
     }

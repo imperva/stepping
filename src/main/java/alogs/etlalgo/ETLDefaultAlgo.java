@@ -28,11 +28,6 @@ public class ETLDefaultAlgo implements Algo {
     }
 
     @Override
-    public void setMessenger(IMessenger messenger) {
-
-    }
-
-    @Override
     public HashMap<String, Object> IoC() {
         //super.IoC();
 

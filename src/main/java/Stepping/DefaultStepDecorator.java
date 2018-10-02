@@ -45,7 +45,7 @@ public class DefaultStepDecorator implements IStepDecorator {
         List<ISubject> subjectList = q.take();
         if (subjectList.size() > 0) {
             for (ISubject subject : subjectList) {
-               newDataArrivedCallBack(subject, container.getById(DefaultID.SUBJECT_CONTAINER.name()));
+               newDataArrivedCallBack(subject, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
             }
         }
         decelerate(calcDecelerationTimeout(subjectList.size()));
@@ -140,7 +140,7 @@ public class DefaultStepDecorator implements IStepDecorator {
             tickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultID.EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
             throw e;
         }
     }

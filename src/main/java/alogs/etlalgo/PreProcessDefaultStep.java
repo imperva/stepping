@@ -6,7 +6,6 @@ import alogs.etlalgo.converters.EtlTuppleConverter;
 import alogs.etlalgo.dto.EtlTupple;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,7 @@ public class PreProcessDefaultStep implements Step {
     }
 
 //    public void attach(ISubject iSubject) {
-//        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(iSubject.getType())) {
+//        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(iSubject.getType())) {
 //            iSubject.attach(this);
 //        }
 //    }
@@ -58,7 +57,7 @@ public class PreProcessDefaultStep implements Step {
 
     @Override
     public boolean isAttach(String subjectType) {
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subjectType)) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subjectType)) {
            return true;
         }
         return false;
@@ -67,7 +66,7 @@ public class PreProcessDefaultStep implements Step {
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
 
-        if (DefaultSubjectType.S_DATA_ARRIVED.name().equals(subject.getType())) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subject.getType())) {
             System.out.println("PreProcessDefaultStep: newDataArrivedSubject Arrived!");
             List<JsonObject> data = (List<JsonObject>) subject.getData().getValue();
             List<EtlTupple> tupples = data.stream()

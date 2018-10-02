@@ -48,8 +48,8 @@ public class ExternalDataConsumerDefaultStep implements Step {
     public void tickCallBack() {
         Data data = iMessenger.fetching();
         if (data.getValue() != null) {
-            SubjectContainer subjectContainer = container.getById(DefaultID.SUBJECT_CONTAINER.name());
-            subjectContainer.<List<JsonObject>>getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(data);
+            SubjectContainer subjectContainer = container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
+            subjectContainer.<List<JsonObject>>getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(data);
         } else {
             System.out.println("No data received from external resource");
         }

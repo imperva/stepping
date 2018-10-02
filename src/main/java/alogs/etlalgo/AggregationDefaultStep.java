@@ -5,7 +5,6 @@ import alogs.etlalgo.dto.EtlTupple;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,7 +66,7 @@ public class AggregationDefaultStep implements Step {
         return false;
     }
 
-    //todo add subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(aggrTupples); to SubjectContainer?
+    //todo add subjectContainer.getByName(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()).setData(aggrTupples); to SubjectContainer?
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
         //* doing my stuff
@@ -79,7 +78,7 @@ public class AggregationDefaultStep implements Step {
                     .distinct()
                     .map(etlTupple -> gson.toJsonTree(etlTupple).getAsJsonObject())
                     .collect(Collectors.toList());
-            subjectContainer.getByName(DefaultSubjectType.S_PUBLISH_DATA.name()).setData(new Data(aggrTupples));
+            subjectContainer.getByName(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()).setData(new Data(aggrTupples));
         }
     }
 }

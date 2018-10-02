@@ -16,7 +16,7 @@ public class ExternalDataProducerDefaultStep implements Step {
 
     @Override
     public boolean isAttach(String subjectType) {
-        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(subjectType)) {
+        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(subjectType)) {
             return true;
         }
         return false;
@@ -25,7 +25,7 @@ public class ExternalDataProducerDefaultStep implements Step {
 
     @Override
     public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if (DefaultSubjectType.S_PUBLISH_DATA.name().equals(subject.getType())) {
+        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(subject.getType())) {
             iMessenger.emit(subject.getData());
         }
     }

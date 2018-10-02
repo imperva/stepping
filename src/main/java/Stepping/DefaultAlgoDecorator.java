@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
-public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHandler {
+public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private Container cntr = new Container();
     private IMessenger iMessenger;
     private Algo algo;
@@ -38,7 +38,8 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
         HashMap<String, Object> IoCMap = IoC();
         defaultIoCMap.putAll(IoCMap);
         DI(defaultIoCMap);
-        DI(this, DefaultID.EXCEPTION_HANDLER.name());
+        if (!cntr.exist(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()))
+            DI(this, DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     private void decorateSteps() {
@@ -58,21 +59,19 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
         running.wakenProcessingUnit();
     }
 
-    //todo Add abstract method IoC that each child will need to implement
-    //todo Add iMessenger to ExternalDataConsumerDefaultStep and remove it from all steps
     private HashMap<String, Object> DefaultIoC() {
         HashMap<String, Object> objectHashMap = new HashMap<>();
-        objectHashMap.put(DefaultID.SUBJECT_CONTAINER.name(), new SubjectContainer());
+        objectHashMap.put(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
 
-        objectHashMap.put(DefaultSubjectType.S_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.S_DATA_ARRIVED.name()));
-        objectHashMap.put(DefaultSubjectType.S_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.S_PUBLISH_DATA.name()));
+        objectHashMap.put(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
+        objectHashMap.put(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
         if (iMessenger != null) {
             ExternalDataConsumerDefaultStep externalDataConsumerStep = new ExternalDataConsumerDefaultStep();
             externalDataConsumerStep.setMessenger(iMessenger);
             ExternalDataProducerDefaultStep externalDataProducerStep = new ExternalDataProducerDefaultStep();
             externalDataProducerStep.setMessenger(iMessenger);
-            objectHashMap.put(DefaultID.EXTERNAL_DATA_CONSUMER.name(), externalDataConsumerStep);
-            objectHashMap.put(DefaultID.EXTERNAL_DATA_PRODUCER.name(), externalDataProducerStep);
+            objectHashMap.put(DefaultIoCID.STEPPING_EXTERNAL_DATA_CONSUMER.name(), externalDataConsumerStep);
+            objectHashMap.put(DefaultIoCID.STEPPING_EXTERNAL_DATA_PRODUCER.name(), externalDataProducerStep);
         }
         return objectHashMap;
     }
@@ -81,7 +80,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     public void tickCallBack() {
 
         for (int u=0; u< 100000000; u++){
-            getSubjectContainer().getByName(DefaultSubjectType.S_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
+            getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
 
             if(u > 1000000 && u < 1000080) {
                 try {
@@ -119,7 +118,6 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
 
     @Override
     public void setMessenger(IMessenger messenger) {
-        algo.setMessenger(iMessenger);
         this.iMessenger = messenger;
     }
 
@@ -212,7 +210,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     }
 
     private void attachSubjects() {
-        SubjectContainer subjectContainer = getContainer().getById(DefaultID.SUBJECT_CONTAINER.name());
+        SubjectContainer subjectContainer = getContainer().getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
 
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             for (ISubject subject : subjectContainer.getSubjectsList()) {
@@ -222,7 +220,7 @@ public class DefaultAlgoDecorator extends IAlgoDecorator implements IExceptionHa
     }
 
     protected SubjectContainer getSubjectContainer() {
-        return getContainer().getById(DefaultID.SUBJECT_CONTAINER.name());
+        return getContainer().getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
     }
 
     protected Container getContainer() {

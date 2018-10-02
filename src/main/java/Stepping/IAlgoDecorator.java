@@ -1,4 +1,5 @@
 package Stepping;
 
-public abstract class IAlgoDecorator implements Algo, Runnable  {
+public interface IAlgoDecorator extends Algo , Runnable {
+    void setMessenger(IMessenger messenger);
 }

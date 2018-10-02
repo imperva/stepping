@@ -7,8 +7,6 @@ public interface Algo extends Closeable {
 
     void init();
 
-    void setMessenger(IMessenger messenger);
-
     HashMap<String, Object> IoC();
 
     void tickCallBack();
