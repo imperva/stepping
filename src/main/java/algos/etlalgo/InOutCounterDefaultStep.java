@@ -1,4 +1,4 @@
-package alogs.etlalgo;
+package algos.etlalgo;
 
 import Stepping.*;
 
@@ -17,7 +17,7 @@ public class InOutCounterDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         if(subjectType.equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()) || subjectType.equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
            return true;
         }

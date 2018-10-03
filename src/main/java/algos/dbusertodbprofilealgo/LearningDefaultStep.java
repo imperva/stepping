@@ -1,4 +1,4 @@
-package alogs.dbusertodbprofilealgo;
+package algos.dbusertodbprofilealgo;
 
 import Stepping.*;
 public class LearningDefaultStep implements Step {
@@ -17,7 +17,7 @@ public class LearningDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subjectType)) {
            return true;
         }

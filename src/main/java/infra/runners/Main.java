@@ -1,7 +1,7 @@
 package infra.runners;
 
 import Stepping.Stepping;
-import alogs.etlalgo.ETLDefaultAlgo;
+import algos.etlalgo.ETLDefaultAlgo;
 import infra.AlgoId;
 import infra.ConfigurationBuilder;
 import infra.IdGenerator;

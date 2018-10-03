@@ -1,9 +1,7 @@
-package alogs.dbusertodbprofilealgo;
+package algos.dbusertodbprofilealgo;
 
 import Stepping.Algo;
 import Stepping.GlobalAlgoStepConfig;
-import Stepping.IMessenger;
-import Stepping.StepConfig;
 
 import java.util.HashMap;
 

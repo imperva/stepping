@@ -1,4 +1,4 @@
-package alogs.dbusertodbprofilealgo.dto;
+package algos.dbusertodbprofilealgo.dto;
 
 public interface DbUserProfileId {
 

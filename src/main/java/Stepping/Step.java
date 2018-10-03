@@ -4,7 +4,7 @@ public interface Step {
 
       void init();
 
-      boolean isAttach(String subjectType);
+      boolean followsSubject(String subjectType);
 
       void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
 

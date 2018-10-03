@@ -1,4 +1,4 @@
-package alogs.etlalgo.dto;
+package algos.etlalgo.dto;
 
 public interface EtlId {
 

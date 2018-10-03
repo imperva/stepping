@@ -1,7 +1,7 @@
-package alogs.etlalgo;
+package algos.etlalgo;
 
 import Stepping.*;
-import alogs.etlalgo.dto.EtlId;
+import algos.etlalgo.dto.EtlId;
 import java.util.HashMap;
 
 public class ETLDefaultAlgo implements Algo {

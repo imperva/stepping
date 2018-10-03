@@ -1,4 +1,4 @@
-package alogs.etlalgo;
+package algos.etlalgo;
 
 import Stepping.*;
 
@@ -12,7 +12,7 @@ public class LoggerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         return true;
     }
 
