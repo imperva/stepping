@@ -4,6 +4,8 @@ public class StepConfig {
     private int runningInitialDelay;
     private int runningPeriodicDelay;
     private boolean runningAsDaemon;
+    private int numOfNodes = 0;
+
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
@@ -33,5 +35,13 @@ public class StepConfig {
 
     public void setRunningAsDaemon(boolean runningAsDaemon) {
         this.runningAsDaemon = runningAsDaemon;
+    }
+
+    public int getNumOfNodes() {
+        return numOfNodes;
+    }
+
+    public void setNumOfNodes(int numOfNodes) {
+        this.numOfNodes = numOfNodes;
     }
 }
