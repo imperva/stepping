@@ -78,7 +78,7 @@ public class KafkaConsumer {
             }
             return new Data(allValues);
 
-        } catch (WakeupException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
