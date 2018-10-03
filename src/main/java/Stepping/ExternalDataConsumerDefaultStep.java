@@ -20,7 +20,7 @@ public class ExternalDataConsumerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         return false;
     }
 

@@ -1,7 +1,5 @@
 package algos;
 
-import alogs.etlalgo.ETLDefaultAlgo;
-
 public class test {
 
 

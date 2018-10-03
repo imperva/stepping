@@ -96,13 +96,13 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
-        return step.isAttach(subjectType);
+    public boolean followsSubject(String subjectType) {
+        return step.followsSubject(subjectType);
     }
 
     @Override
     public void attach(ISubject iSubject) {
-        boolean isAttached = isAttach(iSubject.getType());
+        boolean isAttached = followsSubject(iSubject.getType());
         if (isAttached)
             iSubject.attach(this);
     }

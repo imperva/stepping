@@ -1,6 +1,6 @@
-package alogs.etlalgo.converters;
+package algos.etlalgo.converters;
 
-import alogs.etlalgo.dto.EtlTupple;
+import algos.etlalgo.dto.EtlTuple;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -13,8 +13,8 @@ public class EtlTuppleConverter {
         gson = new Gson();
     }
 
-    public EtlTupple convert(JsonObject jsonObject) {
-        return gson.fromJson(jsonObject, EtlTupple.class);
+    public EtlTuple convert(JsonObject jsonObject) {
+        return gson.fromJson(jsonObject, EtlTuple.class);
     }
 
 }

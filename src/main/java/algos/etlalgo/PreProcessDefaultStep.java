@@ -1,9 +1,9 @@
-package alogs.etlalgo;
+package algos.etlalgo;
 
 
 import Stepping.*;
-import alogs.etlalgo.converters.EtlTuppleConverter;
-import alogs.etlalgo.dto.EtlTupple;
+import algos.etlalgo.converters.EtlTuppleConverter;
+import algos.etlalgo.dto.EtlTuple;
 import com.google.gson.JsonObject;
 
 import java.util.List;
@@ -56,7 +56,7 @@ public class PreProcessDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subjectType)) {
            return true;
         }
@@ -69,10 +69,10 @@ public class PreProcessDefaultStep implements Step {
         if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subject.getType())) {
             System.out.println("PreProcessDefaultStep: newDataArrivedSubject Arrived!");
             List<JsonObject> data = (List<JsonObject>) subject.getData().getValue();
-            List<EtlTupple> tupples = data.stream()
+            List<EtlTuple> tupples = data.stream()
                     .map(jsonObject -> etlTuppleConverter.convert(jsonObject))
                     .collect(Collectors.toList());
-            subjectContainer.<List<EtlTupple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
+            subjectContainer.<List<EtlTuple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
     }
 }

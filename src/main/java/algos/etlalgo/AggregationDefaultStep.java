@@ -1,7 +1,7 @@
-package alogs.etlalgo;
+package algos.etlalgo;
 
 import Stepping.*;
-import alogs.etlalgo.dto.EtlTupple;
+import algos.etlalgo.dto.EtlTuple;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -59,7 +59,7 @@ public class AggregationDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         if (subjectType.equals(SubjectType.AGGREGATION.name())) {
             return true;
         }
@@ -73,10 +73,10 @@ public class AggregationDefaultStep implements Step {
         if (subject.getType().equals(SubjectType.AGGREGATION.name())) {
             System.out.println("AggregationDefaultStep: preProcessedData Arrived!");
             System.out.println("AggregationDefaultStep: publishing data");
-            List<EtlTupple> tupples = (List<EtlTupple>) subject.getData().getValue();
+            List<EtlTuple> tupples = (List<EtlTuple>) subject.getData().getValue();
             List<JsonObject> aggrTupples = tupples.stream()
                     .distinct()
-                    .map(etlTupple -> gson.toJsonTree(etlTupple).getAsJsonObject())
+                    .map(etlTuple -> gson.toJsonTree(etlTuple).getAsJsonObject())
                     .collect(Collectors.toList());
             subjectContainer.getByName(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()).setData(new Data(aggrTupples));
         }

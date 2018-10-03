@@ -1,8 +1,8 @@
-package alogs.etlalgo.dto;
+package algos.etlalgo.dto;
 
 import java.util.Objects;
 
-public class EtlTupple {
+public class EtlTuple {
 
     private String osUser;
     private String srcIp;
@@ -98,18 +98,18 @@ public class EtlTupple {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EtlTupple)) return false;
-        EtlTupple etlTupple = (EtlTupple) o;
-        return Objects.equals(osUser, etlTupple.osUser) &&
-                Objects.equals(srcIp, etlTupple.srcIp) &&
-                Objects.equals(srcHost, etlTupple.srcHost) &&
-                Objects.equals(srcApp, etlTupple.srcApp) &&
-                Objects.equals(destIp, etlTupple.destIp) &&
-                Objects.equals(destHost, etlTupple.destHost) &&
-                Objects.equals(database, etlTupple.database) &&
-                Objects.equals(dbUser, etlTupple.dbUser) &&
-                Objects.equals(serviceType, etlTupple.serviceType) &&
-                Objects.equals(customerId, etlTupple.customerId);
+        if (!(o instanceof EtlTuple)) return false;
+        EtlTuple etlTuple = (EtlTuple) o;
+        return Objects.equals(osUser, etlTuple.osUser) &&
+                Objects.equals(srcIp, etlTuple.srcIp) &&
+                Objects.equals(srcHost, etlTuple.srcHost) &&
+                Objects.equals(srcApp, etlTuple.srcApp) &&
+                Objects.equals(destIp, etlTuple.destIp) &&
+                Objects.equals(destHost, etlTuple.destHost) &&
+                Objects.equals(database, etlTuple.database) &&
+                Objects.equals(dbUser, etlTuple.dbUser) &&
+                Objects.equals(serviceType, etlTuple.serviceType) &&
+                Objects.equals(customerId, etlTuple.customerId);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class ExternalDataProducerDefaultStep implements Step {
     }
 
     @Override
-    public boolean isAttach(String subjectType) {
+    public boolean followsSubject(String subjectType) {
         if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(subjectType)) {
             return true;
         }
