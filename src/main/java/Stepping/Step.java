@@ -17,6 +17,6 @@ public interface Step {
       void setContainer(Container cntr);
 
       default StepConfig getLocalStepConfig(){
-            return null;
+            return new StepConfig();
       }
 }
