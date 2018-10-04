@@ -24,9 +24,9 @@ public class ExternalDataProducerDefaultStep implements Step {
 
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(subject.getType())) {
-            iMessenger.emit(subject.getData());
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(data.getSubjectType())) {
+            iMessenger.emit(data);
         }
     }
 

@@ -40,7 +40,7 @@ public class ExternalDataConsumerDefaultStep implements Step {
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
 
     }
 
@@ -58,5 +58,12 @@ public class ExternalDataConsumerDefaultStep implements Step {
     public void setMessenger(IMessenger iMessenger) {
         this.iMessenger = iMessenger;
     }
+
+//    @Override
+//    public StepConfig getLocalStepConfig(){
+//        StepConfig stepConfig = new StepConfig();
+//        stepConfig.se
+//        return ;
+//    }
 
 }

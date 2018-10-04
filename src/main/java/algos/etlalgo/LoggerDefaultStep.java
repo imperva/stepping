@@ -17,8 +17,8 @@ public class LoggerDefaultStep implements Step {
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        System.out.println("**** Logged event ******* : " + subject.getType());
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        System.out.println("**** Logged event ******* : " + data.getSubjectType());
         //throw new RuntimeException("TEST");
     }
 
@@ -46,8 +46,5 @@ public class LoggerDefaultStep implements Step {
 
     }
 
-    @Override
-    public StepConfig getLocalStepConfig(){
-        return null;
-    }
+
 }

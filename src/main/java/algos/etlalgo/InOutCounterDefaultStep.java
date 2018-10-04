@@ -4,7 +4,7 @@ import Stepping.*;
 
 import java.util.List;
 
-public class InOutCounterDefaultStep implements Step {
+public class    InOutCounterDefaultStep implements Step {
     private long counterProduce;
     private long counterConsume;
 
@@ -25,13 +25,13 @@ public class InOutCounterDefaultStep implements Step {
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if(subject.getType().equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name())) {
-            counterProduce += ((List)subject.getData().getValue()).size();
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        if(data.getSubjectType().equals(DefaultSubjectType.STEPPING_PUBLISH_DATA.name())) {
+            counterProduce += ((List)data.getValue()).size();
         }
 
-        if(subject.getType().equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
-           counterConsume += ((List)subject.getData().getValue()).size();
+        if(data.getSubjectType().equals(DefaultSubjectType.STEPPING_DATA_ARRIVED.name())) {
+           counterConsume += ((List)data.getValue()).size();
         }
     }
 

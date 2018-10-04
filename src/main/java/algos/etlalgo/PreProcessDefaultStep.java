@@ -64,15 +64,21 @@ public class PreProcessDefaultStep implements Step {
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-
-        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subject.getType())) {
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(data.getSubjectType())) {
             System.out.println("PreProcessDefaultStep: newDataArrivedSubject Arrived!");
-            List<JsonObject> data = (List<JsonObject>) subject.getData().getValue();
-            List<EtlTuple> tupples = data.stream()
+            List<EtlTuple> tupples = ((List<JsonObject>)data.getValue()).stream()
                     .map(jsonObject -> etlTuppleConverter.convert(jsonObject))
                     .collect(Collectors.toList());
             subjectContainer.<List<EtlTuple>>getByName(SubjectType.AGGREGATION.name()).setData(new Data(tupples));
         }
     }
+
+//    @Override
+//    public StepConfig getLocalStepConfig(){
+//        StepConfig stepConfig = new StepConfig();
+//        stepConfig.setNumOfNodes(4);
+//        return stepConfig;
+//    }
+
 }

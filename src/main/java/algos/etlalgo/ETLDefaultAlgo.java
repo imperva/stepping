@@ -18,7 +18,7 @@ public class ETLDefaultAlgo implements Algo {
     @Override
     public GlobalAlgoStepConfig getGlobalAlgoStepConfig() {
         GlobalAlgoStepConfig stepConfig = new GlobalAlgoStepConfig();
-        stepConfig.setEnableDecelerationStrategy(true);
+        stepConfig.setEnableDecelerationStrategy(false);
         return stepConfig;
     }
 

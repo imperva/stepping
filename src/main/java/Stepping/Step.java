@@ -6,7 +6,7 @@ public interface Step {
 
       boolean followsSubject(String subjectType);
 
-      void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer);
+      void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer);
 
       void tickCallBack();
 

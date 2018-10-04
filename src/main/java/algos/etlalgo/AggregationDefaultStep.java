@@ -68,12 +68,12 @@ public class AggregationDefaultStep implements Step {
 
     //todo add subjectContainer.getByName(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()).setData(aggrTupples); to SubjectContainer?
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
         //* doing my stuff
-        if (subject.getType().equals(SubjectType.AGGREGATION.name())) {
+        if (data.getSubjectType().equals(SubjectType.AGGREGATION.name())) {
             System.out.println("AggregationDefaultStep: preProcessedData Arrived!");
             System.out.println("AggregationDefaultStep: publishing data");
-            List<EtlTuple> tupples = (List<EtlTuple>) subject.getData().getValue();
+            List<EtlTuple> tupples = (List<EtlTuple>) data.getValue();
             List<JsonObject> aggrTupples = tupples.stream()
                     .distinct()
                     .map(etlTuple -> gson.toJsonTree(etlTuple).getAsJsonObject())

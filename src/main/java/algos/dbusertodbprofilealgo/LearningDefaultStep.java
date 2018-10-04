@@ -4,12 +4,7 @@ import Stepping.*;
 public class LearningDefaultStep implements Step {
 
     public LearningDefaultStep() {
-
-        //super(LearningDefaultStep.class.getName());
     }
-
-
-
 
     @Override
     public void init() {
@@ -19,14 +14,14 @@ public class LearningDefaultStep implements Step {
     @Override
     public boolean followsSubject(String subjectType) {
         if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subjectType)) {
-           return true;
+            return true;
         }
         return false;
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(subject.getType())) {
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        if (DefaultSubjectType.STEPPING_DATA_ARRIVED.name().equals(data.getSubjectType())) {
             System.out.println("LearningDefaultStep: newDataArrivedSubject Arrived!");
         }
     }

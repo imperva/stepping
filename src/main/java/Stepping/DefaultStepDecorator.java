@@ -1,15 +1,16 @@
 package Stepping;
+
 import java.util.Date;
 import java.util.List;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
     private int currentDecelerationTimeout = 0;
-
-    private Q<ISubject> q = new Q<ISubject>();
+    private Q<Data> q = new Q<Data>();
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
+    private String subjectDistributionID = "global";
 
     DefaultStepDecorator(Step step) {
         this.step = step;
@@ -32,21 +33,21 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void newDataArrivedCallBack(ISubject subject, SubjectContainer subjectContainer) {
-        step.newDataArrivedCallBack(subject, subjectContainer);
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+        step.newDataArrivedCallBack(data, subjectContainer);
     }
 
     @Override
-    public void newDataArrived(ISubject subject) {
-        q.queue(subject);
+    public void newDataArrived(Data data) {
+        q.queue(data);
     }
 
     @Override
     public void tickCallBack() {
-        List<ISubject> subjectList = q.take();
+        List<Data> subjectList = q.take();
         if (subjectList.size() > 0) {
-            for (ISubject subject : subjectList) {
-               newDataArrivedCallBack(subject, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+            for (Data data : subjectList) {
+               newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
             }
         }
         step.tickCallBack();
@@ -68,10 +69,10 @@ public class DefaultStepDecorator implements IStepDecorator {
             return 0;
         Date now = new Date();
         this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
+        if (currentDecelerationTimeout > 0)
+            System.out.println(this.step.getClass().getName() + " calcDecelerationTimeout: " + currentDecelerationTimeout);
         return this.currentDecelerationTimeout;
     }
-
-
 
     @Override
     public void close() {
@@ -80,6 +81,9 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void init() {
+        int numOfNodes = getLocalStepConfig().getNumOfNodes();
+        if(numOfNodes > 0)
+            setDistributionNodeID(this.getClass().getName());
         step.init();
     }
 
@@ -133,7 +137,20 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public StepConfig getLocalStepConfig(){
-        return step.getLocalStepConfig();
+        localStepConfig = step.getLocalStepConfig();
+        if(localStepConfig == null)
+            throw new RuntimeException("Is required");
+        return localStepConfig;
+    }
+
+    @Override
+    public void setDistributionNodeID(String name) {
+        this.subjectDistributionID = name;
+    }
+
+    @Override
+    public String getDistributionNodeID() {
+        return subjectDistributionID;
     }
 }
 

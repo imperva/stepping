@@ -18,18 +18,13 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void init() {
         registerIoC();
-
         decorateSteps();
         initSteps();
         makeStepDecoratorRun();
-
         initSubjects();
-
         registerShutdownHook();
         attachSubjects();
-
         restate();
-
         wakenAllProcessingUnit();
     }
 
@@ -37,6 +32,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         HashMap<String, Object> defaultIoCMap = DefaultIoC();
         HashMap<String, Object> IoCMap = IoC();
         defaultIoCMap.putAll(IoCMap);
+
         DI(defaultIoCMap);
         if (!cntr.exist(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()))
             DI(this, DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name());
@@ -44,7 +40,15 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
-            cntr.add(new DefaultStepDecorator(step));
+            DefaultStepDecorator defaultStepDecorator = new DefaultStepDecorator(step);
+            cntr.add(defaultStepDecorator);
+
+            int numofnodes = defaultStepDecorator.getLocalStepConfig().getNumOfNodes();
+            if (numofnodes > 0) {
+                for (int i = 1; i <= numofnodes-1; i++) {
+                    cntr.add(new DefaultStepDecorator(step));
+                }
+            }
         }
     }
 
@@ -78,12 +82,21 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public void tickCallBack() {
-
-//        for (int u=0; u< 100000000; u++){
-//            getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
-//
-//            if(u > 1000000 && u < 1000080) {
-//                try {
+//        List<Integer> xx = new ArrayList<>();
+//        for (int u=0; u< 298; u++) {
+//            xx.add(u);
+//        }
+//        getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(xx));
+//       for (int u=0; u< 100000000; u++) {
+//           try {
+//               Thread.sleep(2000);
+//           } catch (InterruptedException e) {
+//               e.printStackTrace();
+//           }
+//           getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
+//       }
+// //       if(u > 1000000 && u < 1000080) {
+        //            try {
 //
 //                    Thread.sleep(50000000);
 //                } catch (Exception e) {
@@ -229,6 +242,10 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private <T> void DI(T obj, String id) {
         cntr.add(obj, id);
+    }
+
+    private <T> void DI(T obj) {
+        cntr.add(obj);
     }
 
     private void DI(HashMap<String, Object> objs) {
