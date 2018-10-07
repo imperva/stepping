@@ -112,6 +112,7 @@ public class Subject implements ISubject {
         }
     }
 
+    //todo - very expensive - fix
     static <T> List<List<T>> chopped(List<T> list, final int L) {
         List<List<T>> parts = new ArrayList<List<T>>();
         final int N = list.size();

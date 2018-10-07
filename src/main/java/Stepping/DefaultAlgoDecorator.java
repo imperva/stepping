@@ -17,15 +17,21 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public void init() {
-        registerIoC();
-        decorateSteps();
-        initSteps();
-        makeStepDecoratorRun();
-        initSubjects();
-        registerShutdownHook();
-        attachSubjects();
-        restate();
-        wakenAllProcessingUnit();
+        try {
+            registerIoC();
+            decorateSteps();
+            duplicateNodes();
+            initSteps();
+            initRunning();
+            initSubjects();
+            registerShutdownHook();
+            attachSubjects();
+            restate();
+
+            wakenRunningUnits();
+        } catch (Exception e) {
+            close();
+        }
     }
 
     private void registerIoC() {
@@ -42,11 +48,15 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             DefaultStepDecorator defaultStepDecorator = new DefaultStepDecorator(step);
             cntr.add(defaultStepDecorator);
+        }
+    }
 
-            int numofnodes = defaultStepDecorator.getLocalStepConfig().getNumOfNodes();
-            if (numofnodes > 0) {
-                for (int i = 1; i <= numofnodes-1; i++) {
-                    cntr.add(new DefaultStepDecorator(step));
+    private void duplicateNodes(){
+        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+            int numOfNodes = iStepDecorator.getLocalStepConfig().getNumOfNodes();
+            if (numOfNodes > 0) {
+                for (int i = 1; i <= numOfNodes - 1; i++) {
+                    cntr.add(new DefaultStepDecorator(iStepDecorator));
                 }
             }
         }
@@ -56,13 +66,14 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
-    private void wakenAllProcessingUnit() {
+    private void wakenRunningUnits() {
         for (Running running : cntr.<Running>getSonOf(Running.class)) {
-            running.wakenProcessingUnit();
+            running.awake();
         }
-        running.wakenProcessingUnit();
+        running.awake();
     }
 
+    //todo create a dedicated IoC object. don't work directly with lists
     private HashMap<String, Object> DefaultIoC() {
         HashMap<String, Object> objectHashMap = new HashMap<>();
         objectHashMap.put(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
@@ -192,7 +203,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         });
     }
 
-    private void makeStepDecoratorRun() {
+    private void initRunning() {
         GlobalAlgoStepConfig globConf = getGlobalAlgoStepConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
@@ -206,13 +217,11 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     isDaemon));
         }
 
-
         this.running = new Running(DefaultAlgoDecorator.class.getName(), this,
                 globConf.getRunningPeriodicDelay(),
                 globConf.getRunningInitialDelay(),
                 globConf.isRunningAsDaemon());
     }
-
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {

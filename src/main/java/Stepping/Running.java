@@ -32,7 +32,7 @@ public class Running implements Closeable {
         this.runnable = runnable;
     }
 
-    protected void wakenProcessingUnit() {
+    protected void awake() {
         synchronized (Running.class) {
             if (scheduledFuture == null) {
                 ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
