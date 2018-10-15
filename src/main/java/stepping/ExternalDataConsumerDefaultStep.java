@@ -59,11 +59,11 @@ public class ExternalDataConsumerDefaultStep implements Step {
         this.iMessenger = iMessenger;
     }
 
-//    @Override
-//    public StepConfig getLocalStepConfig(){
-//        StepConfig stepConfig = new StepConfig();
-//        stepConfig.se
-//        return ;
-//    }
+   @Override
+   public StepConfig getLocalStepConfig(){
+       StepConfig stepConfig = new StepConfig();
+       stepConfig.setEnableDecelerationStrategy(false);
+       return stepConfig;
+   }
 
 }

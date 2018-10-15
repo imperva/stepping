@@ -5,13 +5,14 @@ public class GlobalAlgoStepConfig {
     private int runningPeriodicDelay;
     private boolean runningAsDaemon;
     private IDecelerationStrategy decelerationStrategy = new DefaultLeakyBucketDecelerationStrategy();
-    private boolean enableDecelerationStrategy = false;
+    private boolean enableDecelerationStrategy;
 
     public GlobalAlgoStepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.algo.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.algo.delay"));
         runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.algo.daemon"));
+        enableDecelerationStrategy = new Boolean(stepProp.getProperty("stepping.default.algo.enable.deceleration"));
     }
 
     public IDecelerationStrategy getDecelerationStrategy() {

@@ -2,6 +2,7 @@ package stepping;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
@@ -44,14 +45,15 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void tickCallBack() {
-        List<Data> subjectList = q.take();
-        if (subjectList.size() > 0) {
-            for (Data data : subjectList) {
+        List<Data> dataList = q.take();
+        if (dataList.size() > 0) {
+            for (Data data : dataList) {
                newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
             }
         }
         step.tickCallBack();
-        decelerate(calcDecelerationTimeout(subjectList.size()));
+        int size = dataList.stream().mapToInt((data)-> data.getSize()).sum();
+        decelerate(calcDecelerationTimeout(size));
     }
 
     private void decelerate(int decelerationTimeout) {
@@ -88,7 +90,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     private IDecelerationStrategy solveDecelerationStrategy() {
-        if (!globalAlgoStepConfig.isEnableDecelerationStrategy()) {
+        if (!globalAlgoStepConfig.isEnableDecelerationStrategy() || !getLocalStepConfig().isEnableDecelerationStrategy()) {
             return null;
         }
 

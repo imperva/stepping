@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.imperva.cbstream</groupId>
+    <groupId>com.imperva</groupId>
     <artifactId>stepping</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -37,6 +37,17 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>libs-release-local</id>
+            <url>https://il-mavenrep-lp1/libs-release-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshot-local</id>
+            <url>https://il-mavenrep-lp1/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 <build>
     <plugins>

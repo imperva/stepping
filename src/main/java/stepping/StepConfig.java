@@ -5,12 +5,14 @@ public class StepConfig {
     private int runningPeriodicDelay;
     private boolean runningAsDaemon;
     private int numOfNodes = 0;
+    private boolean enableDecelerationStrategy;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
         runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.step.daemon"));
+        enableDecelerationStrategy = new Boolean(stepProp.getProperty("stepping.default.step.enable.deceleration"));
     }
 
     public int getRunningInitialDelay() {
@@ -43,5 +45,14 @@ public class StepConfig {
 
     public void setNumOfNodes(int numOfNodes) {
         this.numOfNodes = numOfNodes;
+    }
+
+
+    public boolean isEnableDecelerationStrategy() {
+        return enableDecelerationStrategy;
+    }
+
+    public void setEnableDecelerationStrategy(boolean enableDecelerationStrategy) {
+        this.enableDecelerationStrategy = enableDecelerationStrategy;
     }
 }

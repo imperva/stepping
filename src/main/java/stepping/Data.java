@@ -1,5 +1,8 @@
 package stepping;
 
+
+import java.util.List;
+
 /**
  * Created by gabi.beyo on 12/13/2017.
  */
@@ -7,6 +10,7 @@ public class Data {
 
     private Object value;
     private String subjectType;
+    private int size;
 
     public Data(Object value) { this(value, null);
 
@@ -26,6 +30,12 @@ public class Data {
 
     public void setValue(Object value) {
         this.value = value;
+        if(value != null){
+            if(value instanceof List)
+                size = ((List)value).size();
+            else
+                size = 1;
+        }
     }
 
     public String getSubjectType() {
@@ -34,5 +44,10 @@ public class Data {
 
     public void setSubjectType(String subjectType) {
         this.subjectType = subjectType;
+    }
+
+
+    public int getSize() {
+        return size;
     }
 }
