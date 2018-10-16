@@ -20,9 +20,6 @@ public class Running implements Closeable {
     private boolean daemon;
     private Runnable runnable;
 
-//    protected Running(String id, Runnable runnable) { this(id, runnable,100,100,false);
-//
-//    }
 
     protected Running(String id, Runnable runnable, int delay, int initialdelay, boolean daemon) {
         this.id = id;

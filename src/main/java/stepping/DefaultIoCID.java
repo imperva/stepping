@@ -1,6 +1,6 @@
 package stepping;
 
-enum DefaultIoCID {
+public enum DefaultIoCID {
     STEPPING_SUBJECT_CONTAINER,
     STEPPING_EXTERNAL_DATA_CONSUMER,
     STEPPING_EXTERNAL_DATA_PRODUCER,

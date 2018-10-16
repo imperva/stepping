@@ -6,7 +6,7 @@ import java.util.*;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private Container cntr = new Container();
-    private IMessenger iMessenger;
+
     private Algo algo;
     private Running running;
     private boolean isClosed = false;
@@ -30,16 +30,20 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
             wakenRunningUnits();
         } catch (Exception e) {
+
+            System.out.println(e);
             close();
         }
     }
 
     private void registerIoC() {
-        HashMap<String, Object> defaultIoCMap = DefaultIoC();
-        HashMap<String, Object> IoCMap = IoC();
-        defaultIoCMap.putAll(IoCMap);
+        ContainerRegistrar builtinRegistration = builtinContainerRegistration();
 
-        DI(defaultIoCMap);
+        ContainerRegistrar objectsRegistration = containerRegistration();
+
+        DI(builtinRegistration.getRegistered());
+        DI(objectsRegistration.getRegistered());
+
         if (!cntr.exist(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()))
             DI(this, DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name());
     }
@@ -73,65 +77,18 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         running.awake();
     }
 
-    //todo create a dedicated IoC object. don't work directly with lists
-    private HashMap<String, Object> DefaultIoC() {
-        HashMap<String, Object> objectHashMap = new HashMap<>();
-        objectHashMap.put(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
+    private ContainerRegistrar builtinContainerRegistration() {
+        ContainerRegistrar containerRegistrar = new ContainerRegistrar();
+        containerRegistrar.add(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
 
-        objectHashMap.put(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
-        objectHashMap.put(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
-        if (iMessenger != null) {
-            ExternalDataConsumerDefaultStep externalDataConsumerStep = new ExternalDataConsumerDefaultStep();
-            externalDataConsumerStep.setMessenger(iMessenger);
-            ExternalDataProducerDefaultStep externalDataProducerStep = new ExternalDataProducerDefaultStep();
-            externalDataProducerStep.setMessenger(iMessenger);
-            objectHashMap.put(DefaultIoCID.STEPPING_EXTERNAL_DATA_CONSUMER.name(), externalDataConsumerStep);
-            objectHashMap.put(DefaultIoCID.STEPPING_EXTERNAL_DATA_PRODUCER.name(), externalDataProducerStep);
-        }
-        return objectHashMap;
+        containerRegistrar.add(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
+        containerRegistrar.add(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
+
+        return containerRegistrar;
     }
 
     @Override
     public void tickCallBack() {
-//        List<Integer> xx = new ArrayList<>();
-//        for (int u=0; u< 298; u++) {
-//            xx.add(u);
-//        }
-//        getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(xx));
-//       for (int u=0; u< 100000000; u++) {
-//           try {
-//               Thread.sleep(2000);
-//           } catch (InterruptedException e) {
-//               e.printStackTrace();
-//           }
-//           getSubjectContainer().getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(new Data(new ArrayList<>()));
-//       }
-// //       if(u > 1000000 && u < 1000080) {
-        //            try {
-//
-//                    Thread.sleep(50000000);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-////            }else if(u > 10007 && u < 10100){
-////                try {
-////                    Thread.sleep(1000);
-////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-////                }
-////            }else if(u > 10100){
-////                try {
-////                    Thread.sleep(100);
-////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-////                }
-////            }
-//            }
-//
-//
-//
-//        }
-
         algo.tickCallBack();
     }
 
@@ -140,14 +97,10 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         return algo.getGlobalAlgoStepConfig();
     }
 
-    @Override
-    public void setMessenger(IMessenger messenger) {
-        this.iMessenger = messenger;
-    }
 
     @Override
-    public HashMap<String, Object> IoC() {
-        return algo.IoC();
+    public ContainerRegistrar containerRegistration() {
+        return algo.containerRegistration();
     }
 
     @Override
@@ -166,8 +119,6 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 }
             }
             this.running.close();
-            if (iMessenger != null)
-                this.iMessenger.close();
         } catch (Exception e) {
 
         } finally {

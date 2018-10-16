@@ -7,7 +7,7 @@ public interface Algo extends Closeable {
 
     void init();
 
-    HashMap<String, Object> IoC();
+    ContainerRegistrar containerRegistration();
 
     void tickCallBack();
 
