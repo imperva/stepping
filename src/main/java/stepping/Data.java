@@ -16,9 +16,6 @@ public class Data {
 
     }
 
-    public Data() {
-    }
-
     public Data(Object value, String type) {
         setValue(value);
         setSubjectType(type);
