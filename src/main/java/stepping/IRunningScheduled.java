@@ -1,48 +1,36 @@
 package stepping;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
-public class Running extends IRunning {
+public class IRunningScheduled extends IRunning {
 
-    private Future future;
-    static ExecutorService executorService = Executors.newCachedThreadPool();
 
-    protected Running(String id, Runnable runnable) {
+    private Integer delay;
+    private Integer initialdelay;
+    private String id;
+    ScheduledFuture scheduledFuture;
+    static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(100);
+
+    protected IRunningScheduled(String id, int delay, int initialdelay, Runnable runnable) {
         this.id = id;
+        this.delay = delay;
+        this.initialdelay = initialdelay;
+
         this.runnable = runnable;
     }
 
     protected Future<?> awake() {
-        if (runnable != null) {
-            this.future = executorService.submit(runnable);
-            return future;
-        }
-        return null;
+        this.scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, TimeUnit.MILLISECONDS);
+        return scheduledFuture;
     }
+
+
 
     @Override
     public void close() {
-        close(future, executorService);
+        close(scheduledFuture, scheduledExecutorService);
     }
 }
-
-
-
-
-
-
-
-
-
-//                            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4, r -> {
-//                                Thread t = Executors.defaultThreadFactory().newThread(r);
-//                                t.setDaemon(daemon);
-//                                t.setContextClassLoader(null);
-//                                t.setName(id);
-//                                return t;
-//                            });
 
 
 //                if (step.getLocalStepConfig().isEnableTickCallback()) {

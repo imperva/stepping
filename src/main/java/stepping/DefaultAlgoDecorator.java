@@ -8,7 +8,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private Container cntr = new Container();
 
     private Algo algo;
-    private Running running;
+    private IRunning running;
     private boolean isClosed = false;
 
     DefaultAlgoDecorator(Algo algo) {
@@ -71,10 +71,11 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     private void wakenRunningUnits() {
-        for (Running running : cntr.<Running>getSonOf(Running.class)) {
+        for (IRunning running : cntr.<IRunning>getSonOf(IRunning.class)) {
             running.awake();
         }
-        running.awake();
+        if (running != null)
+            running.awake();
     }
 
     private ContainerRegistrar builtinContainerRegistration() {
@@ -110,7 +111,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 return;
             List<Closeable> closeables = new ArrayList<>();
             closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
-            closeables.addAll(getContainer().getSonOf(Running.class));
+            closeables.addAll(getContainer().getSonOf(IRunning.class));
             for (Closeable closable : closeables) {
                 try {
                     closable.close();
@@ -159,25 +160,37 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
             int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
-            boolean isDaemon = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().isRunningAsDaemon() : globConf.isRunningAsDaemon();
+
+            if(iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
+                cntr.add(new IRunningScheduled(iStepDecorator.getStep().getClass().getName(),
+                        delay,
+                        initialDelay,
+                        () -> {
+                            iStepDecorator.tickCallBack();
+                        }));
+            }
 
             cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
-                    iStepDecorator,
-                    delay,
-                    initialDelay,
-                    isDaemon));
+                    () -> {
+                        iStepDecorator.dataListener();
+                    }));
+
+
         }
 
-        this.running = new Running(DefaultAlgoDecorator.class.getName(), this,
-                globConf.getRunningPeriodicDelay(),
-                globConf.getRunningInitialDelay(),
-                globConf.isRunningAsDaemon());
+        if(this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
+            this.running = new IRunningScheduled(DefaultAlgoDecorator.class.getName(),
+                    globConf.getRunningPeriodicDelay(),
+                    globConf.getRunningInitialDelay(),
+                    () -> {
+                        this.tickCallBack();
+                    });
+        }
     }
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init();
-            step.setContainer(cntr);
+            step.init(cntr);
             step.setGlobalAlgoStepConfig(getGlobalAlgoStepConfig());
         }
     }
@@ -212,10 +225,6 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         objs.forEach((s, o) -> DI(o, s));
     }
 
-//    @Override
-//    public void run() {
-//        tickCallBack();
-//    }
 
     @Override
     public void handle(Exception e) {
