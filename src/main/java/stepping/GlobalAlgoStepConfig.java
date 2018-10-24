@@ -6,6 +6,7 @@ public class GlobalAlgoStepConfig {
     private boolean runningAsDaemon;
     private IDecelerationStrategy decelerationStrategy = new DefaultLeakyBucketDecelerationStrategy();
     private boolean enableDecelerationStrategy;
+    private boolean enableTickCallback;
 
     public GlobalAlgoStepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -13,6 +14,8 @@ public class GlobalAlgoStepConfig {
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.algo.delay"));
         runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.algo.daemon"));
         enableDecelerationStrategy = new Boolean(stepProp.getProperty("stepping.default.algo.enable.deceleration"));
+        enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.algo.enable.tickcallback"));
+
     }
 
     public IDecelerationStrategy getDecelerationStrategy() {
@@ -53,5 +56,13 @@ public class GlobalAlgoStepConfig {
 
     public void setRunningAsDaemon(boolean runningAsDaemon) {
         this.runningAsDaemon = runningAsDaemon;
+    }
+
+    public boolean isEnableTickCallback() {
+        return enableTickCallback;
+    }
+
+    public void setEnableTickCallback(boolean enableTickCallback) {
+        this.enableTickCallback = enableTickCallback;
     }
 }

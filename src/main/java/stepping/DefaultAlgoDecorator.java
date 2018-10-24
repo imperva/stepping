@@ -212,10 +212,10 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         objs.forEach((s, o) -> DI(o, s));
     }
 
-    @Override
-    public void run() {
-        tickCallBack();
-    }
+//    @Override
+//    public void run() {
+//        tickCallBack();
+//    }
 
     @Override
     public void handle(Exception e) {

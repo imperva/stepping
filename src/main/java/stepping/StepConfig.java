@@ -6,6 +6,7 @@ public class StepConfig {
     private boolean runningAsDaemon;
     private int numOfNodes = 0;
     private boolean enableDecelerationStrategy;
+    private boolean enableTickCallback;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -13,6 +14,7 @@ public class StepConfig {
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
         runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.step.daemon"));
         enableDecelerationStrategy = new Boolean(stepProp.getProperty("stepping.default.step.enable.deceleration"));
+        enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
     }
 
     public int getRunningInitialDelay() {
@@ -54,5 +56,13 @@ public class StepConfig {
 
     public void setEnableDecelerationStrategy(boolean enableDecelerationStrategy) {
         this.enableDecelerationStrategy = enableDecelerationStrategy;
+    }
+
+    public boolean isEnableTickCallback() {
+        return enableTickCallback;
+    }
+
+    public void setEnableTickCallback(boolean enableTickCallback) {
+        this.enableTickCallback = enableTickCallback;
     }
 }

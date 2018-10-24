@@ -45,15 +45,15 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void tickCallBack() {
-        List<Data> dataList = q.take();
-        if (dataList.size() > 0) {
-            for (Data data : dataList) {
-               newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
-            }
-        }
+//        List<Data> dataList = q.take();
+//        if (dataList.size() > 0) {
+//            for (Data data : dataList) {
+//               newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+//            }
+//        }
         step.tickCallBack();
-        int size = dataList.stream().mapToInt((data)-> data.getSize()).sum();
-        decelerate(calcDecelerationTimeout(size));
+//        int size = dataList.stream().mapToInt((data) -> data.getSize()).sum();
+//        decelerate(calcDecelerationTimeout(size));
     }
 
     private void decelerate(int decelerationTimeout) {
@@ -84,7 +84,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     @Override
     public void init() {
         int numOfNodes = getLocalStepConfig().getNumOfNodes();
-        if(numOfNodes > 0)
+        if (numOfNodes > 0)
             setDistributionNodeID(this.getClass().getName());
         step.init();
     }
@@ -120,27 +120,27 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig) {
-        if(globalAlgoStepConfig == null)
+        if (globalAlgoStepConfig == null)
             throw new RuntimeException("GlobalAlgoStepConfig is required");
         this.globalAlgoStepConfig = globalAlgoStepConfig;
 
     }
 
-    @Override
-    public void run() {
-        try {
-            tickCallBack();
-        } catch (Exception e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
-            throw e;
-        }
-    }
+//    @Override
+//    public void run() {
+//        try {
+//            tickCallBack();
+//        } catch (Exception e) {
+//            System.out.println("EXCEPTION");
+//            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+//            throw e;
+//        }
+//    }
 
     @Override
-    public StepConfig getLocalStepConfig(){
+    public StepConfig getLocalStepConfig() {
         localStepConfig = step.getLocalStepConfig();
-        if(localStepConfig == null)
+        if (localStepConfig == null)
             throw new RuntimeException("Is required");
         return localStepConfig;
     }
@@ -153,6 +153,21 @@ public class DefaultStepDecorator implements IStepDecorator {
     @Override
     public String getDistributionNodeID() {
         return subjectDistributionID;
+    }
+
+    @Override
+    public void dataListener() {
+        try {
+            while (true) {
+                Data data = q.take();
+                if (data != null) {
+                    newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+        }
     }
 }
 
