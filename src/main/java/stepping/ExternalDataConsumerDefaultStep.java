@@ -48,7 +48,7 @@
 //    public void tickCallBack() {
 //        Data data = iMessenger.fetching();
 //        if (data.getValue() != null) {
-//            SubjectContainer subjectContainer = container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
+//            SubjectContainer subjectContainer = container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
 //            subjectContainer.<List<JsonObject>>getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(data);
 //        } else {
 //            System.out.println("No data received from external resource");

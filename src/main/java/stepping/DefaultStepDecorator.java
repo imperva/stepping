@@ -2,7 +2,6 @@ package stepping;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
@@ -15,12 +14,6 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     DefaultStepDecorator(Step step) {
         this.step = step;
-    }
-
-    @Override
-    public void setContainer(Container cntr) {
-        container = cntr;
-        step.setContainer(cntr);
     }
 
     @Override
@@ -48,7 +41,7 @@ public class DefaultStepDecorator implements IStepDecorator {
         List<Data> dataList = q.take();
         if (dataList.size() > 0) {
             for (Data data : dataList) {
-               newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+               newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
             }
         }
         step.tickCallBack();
@@ -82,11 +75,12 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void init() {
+    public void init(Container cntr) {
+        this.container = cntr;
         int numOfNodes = getLocalStepConfig().getNumOfNodes();
         if(numOfNodes > 0)
             setDistributionNodeID(this.getClass().getName());
-        step.init();
+        step.init(container);
     }
 
     private IDecelerationStrategy solveDecelerationStrategy() {
@@ -132,7 +126,7 @@ public class DefaultStepDecorator implements IStepDecorator {
             tickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
             throw e;
         }
     }

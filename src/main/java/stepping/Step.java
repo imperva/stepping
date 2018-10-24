@@ -2,7 +2,7 @@ package stepping;
 
 public interface Step {
 
-      void init();
+      void init(Container cntr);
 
       boolean followsSubject(String subjectType);
 
@@ -13,8 +13,6 @@ public interface Step {
       void restate();
 
       void shuttingDown();
-
-      void setContainer(Container cntr);
 
       default StepConfig getLocalStepConfig(){
             return new StepConfig();

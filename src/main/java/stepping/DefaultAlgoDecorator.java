@@ -44,8 +44,8 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         DI(builtinRegistration.getRegistered());
         DI(objectsRegistration.getRegistered());
 
-        if (!cntr.exist(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()))
-            DI(this, DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name());
+        if (!cntr.exist(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()))
+            DI(this, DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     private void decorateSteps() {
@@ -79,7 +79,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private ContainerRegistrar builtinContainerRegistration() {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-        containerRegistrar.add(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
+        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
 
         containerRegistrar.add(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
@@ -176,14 +176,13 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init();
-            step.setContainer(cntr);
+            step.init(cntr);
             step.setGlobalAlgoStepConfig(getGlobalAlgoStepConfig());
         }
     }
 
     private void attachSubjects() {
-        SubjectContainer subjectContainer = getContainer().getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
+        SubjectContainer subjectContainer = getContainer().getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
 
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             for (ISubject subject : subjectContainer.getSubjectsList()) {
@@ -193,7 +192,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     protected SubjectContainer getSubjectContainer() {
-        return getContainer().getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name());
+        return getContainer().getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
     }
 
     protected Container getContainer() {
