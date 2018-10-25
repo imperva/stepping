@@ -161,24 +161,34 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
             int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
 
-            if(iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
+            boolean tickCallBackThreads = iStepDecorator.getLocalStepConfig().isEnableTickCallbackSync();
+
+            Action dataListenerFunction;
+            Action tickCallbackFunction;
+            if (tickCallBackThreads) {
+                dataListenerFunction = iStepDecorator::dataListenerThreadSafe;
+                tickCallbackFunction = iStepDecorator::tickCallBackThreadSafe;
+            } else {
+                dataListenerFunction = iStepDecorator::dataListener;
+                tickCallbackFunction = iStepDecorator::tickCallBack;
+            }
+
+            if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
                 cntr.add(new IRunningScheduled(iStepDecorator.getStep().getClass().getName(),
                         delay,
                         initialDelay,
                         () -> {
-                            iStepDecorator.tickCallBack();
+                            tickCallbackFunction.execute();
                         }));
             }
 
             cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
                     () -> {
-                        iStepDecorator.dataListener();
+                        dataListenerFunction.execute();
                     }));
-
-
         }
 
-        if(this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
+        if (this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
             this.running = new IRunningScheduled(DefaultAlgoDecorator.class.getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
@@ -230,5 +240,9 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     public void handle(Exception e) {
         System.out.println("Error: " + e.toString());
         close();
+    }
+
+    interface Action {
+        void execute();
     }
 }

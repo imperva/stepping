@@ -17,4 +17,8 @@ public interface IStepDecorator extends Step, Closeable {
     String getDistributionNodeID();
 
     void dataListener();
+
+    void tickCallBackThreadSafe();
+
+    void dataListenerThreadSafe();
 }

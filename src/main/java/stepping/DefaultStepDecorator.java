@@ -1,9 +1,5 @@
 package stepping;
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
     private Q<Data> q = new Q<>();
@@ -11,6 +7,8 @@ public class DefaultStepDecorator implements IStepDecorator {
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "global";
+    private Object tickCallBackDataListenerLocker = new Object();
+
 
     DefaultStepDecorator(Step step) {
         this.step = step;
@@ -37,10 +35,50 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void tickCallBackThreadSafe() {
+        synchronized (tickCallBackDataListenerLocker) {
+            tickCallBack();
+        }
+    }
+
+    @Override
     public void tickCallBack() {
         try {
             step.tickCallBack();
         } catch (Exception e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+        }
+    }
+
+    @Override
+    public void dataListener() {
+        try {
+            while (true) {
+                Data data = q.take();
+                if (data != null) {
+                    newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+        }
+    }
+
+    @Override
+    public void dataListenerThreadSafe() {
+        try {
+            while (true) {
+                Data data = q.take();
+
+                if (data != null) {
+                    synchronized (tickCallBackDataListenerLocker) {
+                        newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
             System.out.println("EXCEPTION");
             container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
@@ -103,20 +141,7 @@ public class DefaultStepDecorator implements IStepDecorator {
         return subjectDistributionID;
     }
 
-    @Override
-    public void dataListener() {
-        try {
-            while (true) {
-                Data data = q.take();
-                if (data != null) {
-                    newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
-                }
-            }
-        } catch (InterruptedException e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
-        }
-    }
+
 }
 
 //        int size = dataList.stream().mapToInt((data) -> data.getSize()).sum();

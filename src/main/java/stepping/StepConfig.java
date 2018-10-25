@@ -3,15 +3,17 @@ package stepping;
 public class StepConfig {
     private int runningInitialDelay;
     private int runningPeriodicDelay;
-
     private int numOfNodes = 0;
     private boolean enableTickCallback;
+    private boolean enableTickCallbackSync;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
+        enableTickCallbackSync = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback.sync"));
+
     }
 
     public int getRunningInitialDelay() {
@@ -44,5 +46,13 @@ public class StepConfig {
 
     public void setEnableTickCallback(boolean enableTickCallback) {
         this.enableTickCallback = enableTickCallback;
+    }
+
+    public boolean isEnableTickCallbackSync() {
+        return enableTickCallbackSync;
+    }
+
+    public void setEnableTickCallbackSync(boolean enableTickCallbackSync) {
+        this.enableTickCallbackSync = enableTickCallbackSync;
     }
 }
