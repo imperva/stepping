@@ -2,7 +2,7 @@ package stepping;
 
 import java.io.Closeable;
 
-public interface IStepDecorator extends Step, Runnable, Closeable {
+public interface IStepDecorator extends Step, Closeable {
 
     void newDataArrived(Data data);
 
@@ -15,4 +15,10 @@ public interface IStepDecorator extends Step, Runnable, Closeable {
     void setDistributionNodeID(String name);
 
     String getDistributionNodeID();
+
+    void dataListener();
+
+    void tickCallBackThreadSafe();
+
+    void dataListenerThreadSafe();
 }

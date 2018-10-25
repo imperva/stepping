@@ -1,65 +1,82 @@
 package stepping;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
-public class Running implements Closeable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Running.class);
+public class Running extends IRunning {
 
-    private ScheduledFuture scheduledFuture;
-    private ScheduledExecutorService scheduledExecutorService;
-    private int delay;
-    private int initialdelay;
-    private String id;
-    private boolean daemon;
-    private Runnable runnable;
+    private Future future;
+    static ExecutorService executorService = Executors.newCachedThreadPool();
 
-
-    protected Running(String id, Runnable runnable, int delay, int initialdelay, boolean daemon) {
+    protected Running(String id, Runnable runnable) {
         this.id = id;
-        this.delay = delay;
-        this.initialdelay = initialdelay;
-        this.daemon = daemon;
         this.runnable = runnable;
     }
 
-    protected void awake() {
-        synchronized (Running.class) {
-            if (scheduledFuture == null) {
-                ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor(r -> {
-                    Thread t = Executors.defaultThreadFactory().newThread(r);
-                    t.setDaemon(daemon);
-                    t.setContextClassLoader(null);
-                    t.setName(id);
-                    return t;
-                });
-
-                this.scheduledFuture = es.scheduleWithFixedDelay(this.runnable::run, initialdelay, delay, TimeUnit.MILLISECONDS);
-                this.scheduledExecutorService = es;
-            }
+    protected Future<?> awake() {
+        if (runnable != null) {
+            this.future = executorService.submit(runnable);
+            return future;
         }
+        return null;
     }
 
     @Override
     public void close() {
-        try {
-            LOGGER.info("Try close Stepping orchestrator gracefully. ID:" + id);
-            if (scheduledFuture != null && !scheduledFuture.isDone() && !scheduledFuture.isCancelled()) {
-                LOGGER.info("Start Closing Stepping orchestrator Process");
-                boolean isCanceled = scheduledFuture.cancel(true);
-                LOGGER.trace("Stepping orchestrator Future canceled successfully?: " + isCanceled);
-                scheduledExecutorService.shutdownNow();
-                LOGGER.trace("Stepping orchestrator ScheduledExecutorService shutted down");
-                LOGGER.info("Finish closing Stepping orchestrator");
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed closing Stepping orchestrator", e);
-        }
+        close(future, executorService);
     }
 }
+
+
+
+
+
+
+
+
+
+//                            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4, r -> {
+//                                Thread t = Executors.defaultThreadFactory().newThread(r);
+//                                t.setDaemon(daemon);
+//                                t.setContextClassLoader(null);
+//                                t.setName(id);
+//                                return t;
+//                            });
+
+
+//                if (step.getLocalStepConfig().isEnableTickCallback()) {
+//                    synchronized (IRunning.class) {
+//                        if (tickCallBackScheduledFuture == null) {
+//                            ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+//                                Thread t = Executors.defaultThreadFactory().newThread(r);
+//                                t.setDaemon(daemon);
+//                                t.setContextClassLoader(null);
+//                                t.setName(id);
+//                                return t;
+//                            });
+//
+//                            this.tickCallBackScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(this.step::tickCallBack, initialdelay, delay, TimeUnit.MILLISECONDS);
+//                            this.tickCallbackScheduledExecutorService = scheduledExecutorService;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+//        if(algo != null){
+//            synchronized (IRunning.class) {
+//                if (tickCallBackScheduledFuture == null) {
+//                    ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+//                        Thread t = Executors.defaultThreadFactory().newThread(r);
+//                        t.setDaemon(daemon);
+//                        t.setContextClassLoader(null);
+//                        t.setName(id);
+//                        return t;
+//                    });
+//
+//                    this.algoTickCallBackScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(this.algo::tickCallBack, initialdelay, delay, TimeUnit.MILLISECONDS);
+//                    this.algoTickCallbackScheduledExecutorService = scheduledExecutorService;
+//                }
+//            }
+//        }

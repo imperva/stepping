@@ -1,16 +1,20 @@
 package stepping;
 
+<<<<<<< HEAD
 import java.util.Date;
 import java.util.List;
 
+=======
+>>>>>>> improve_performance
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
-    private int currentDecelerationTimeout = 0;
-    private Q<Data> q = new Q<Data>();
+    private Q<Data> q = new Q<>();
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
-    private String subjectDistributionID = "global";
+    private String subjectDistributionID = "default";
+    private Object tickCallBackDataListenerLocker = new Object();
+
 
     DefaultStepDecorator(Step step) {
         this.step = step;
@@ -37,36 +41,61 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void tickCallBackThreadSafe() {
+        synchronized (tickCallBackDataListenerLocker) {
+            tickCallBack();
+        }
+    }
+
+    @Override
     public void tickCallBack() {
+<<<<<<< HEAD
         List<Data> dataList = q.take();
         if (dataList.size() > 0) {
             for (Data data : dataList) {
                newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
             }
-        }
-        step.tickCallBack();
-        int size = dataList.stream().mapToInt((data)-> data.getSize()).sum();
-        decelerate(calcDecelerationTimeout(size));
-    }
-
-    private void decelerate(int decelerationTimeout) {
+=======
         try {
-            if (decelerationTimeout > 0)
-                Thread.sleep(decelerationTimeout);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            step.tickCallBack();
+        } catch (Exception e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+>>>>>>> improve_performance
         }
     }
 
-    private int calcDecelerationTimeout(int queuedItemsSize) {
-        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
-        if (decelerationStrategy == null)
-            return 0;
-        Date now = new Date();
-        this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
-        if (currentDecelerationTimeout > 0)
-            System.out.println(this.step.getClass().getName() + " calcDecelerationTimeout: " + currentDecelerationTimeout);
-        return this.currentDecelerationTimeout;
+    @Override
+    public void dataListener() {
+        try {
+            while (true) {
+                Data data = q.take();
+                if (data != null) {
+                    newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+        }
+    }
+
+    @Override
+    public void dataListenerThreadSafe() {
+        try {
+            while (true) {
+                Data data = q.take();
+
+                if (data != null) {
+                    synchronized (tickCallBackDataListenerLocker) {
+                        newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("EXCEPTION");
+            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+        }
     }
 
     @Override
@@ -76,10 +105,15 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void init(Container cntr) {
+<<<<<<< HEAD
         this.container = cntr;
+=======
+        //todo why here?
+>>>>>>> improve_performance
         int numOfNodes = getLocalStepConfig().getNumOfNodes();
-        if(numOfNodes > 0)
+        if (numOfNodes > 0)
             setDistributionNodeID(this.getClass().getName());
+<<<<<<< HEAD
         step.init(container);
     }
 
@@ -93,6 +127,10 @@ public class DefaultStepDecorator implements IStepDecorator {
         } else {
             return new DefaultLeakyBucketDecelerationStrategy();
         }
+=======
+        step.init(cntr);
+        this.container = cntr;
+>>>>>>> improve_performance
     }
 
     @Override
@@ -114,13 +152,14 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig) {
-        if(globalAlgoStepConfig == null)
+        if (globalAlgoStepConfig == null)
             throw new RuntimeException("GlobalAlgoStepConfig is required");
         this.globalAlgoStepConfig = globalAlgoStepConfig;
 
     }
 
     @Override
+<<<<<<< HEAD
     public void run() {
         try {
             tickCallBack();
@@ -133,8 +172,11 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public StepConfig getLocalStepConfig(){
+=======
+    public StepConfig getLocalStepConfig() {
+>>>>>>> improve_performance
         localStepConfig = step.getLocalStepConfig();
-        if(localStepConfig == null)
+        if (localStepConfig == null)
             throw new RuntimeException("Is required");
         return localStepConfig;
     }
@@ -148,5 +190,42 @@ public class DefaultStepDecorator implements IStepDecorator {
     public String getDistributionNodeID() {
         return subjectDistributionID;
     }
+
+
 }
+
+//        int size = dataList.stream().mapToInt((data) -> data.getSize()).sum();
+//        decelerate(calcDecelerationTimeout(size));
+
+//    private void decelerate(int decelerationTimeout) {
+//        try {
+//            if (decelerationTimeout > 0)
+//                Thread.sleep(decelerationTimeout);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+//    private int calcDecelerationTimeout(int queuedItemsSize) {
+//        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
+//        if (decelerationStrategy == null)
+//            return 0;
+//        Date now = new Date();
+//        this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
+//        if (currentDecelerationTimeout > 0)
+//            System.out.println(this.step.getClass().getName() + " calcDecelerationTimeout: " + currentDecelerationTimeout);
+//        return this.currentDecelerationTimeout;
+//    }
+
+//    private IDecelerationStrategy solveDecelerationStrategy() {
+//        if (!globalAlgoStepConfig.isEnableDecelerationStrategy() || !getLocalStepConfig().isEnableDecelerationStrategy()) {
+//            return null;
+//        }
+//
+//        if (globalAlgoStepConfig.getDecelerationStrategy() != null) {
+//            return globalAlgoStepConfig.getDecelerationStrategy();
+//        } else {
+//            return new DefaultLeakyBucketDecelerationStrategy();
+//        }
+//     }
 

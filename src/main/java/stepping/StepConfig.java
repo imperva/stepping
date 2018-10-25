@@ -3,16 +3,17 @@ package stepping;
 public class StepConfig {
     private int runningInitialDelay;
     private int runningPeriodicDelay;
-    private boolean runningAsDaemon;
     private int numOfNodes = 0;
-    private boolean enableDecelerationStrategy;
+    private boolean enableTickCallback;
+    private boolean enableTickCallbackSync;
+    private IDistributionStrategy distributionStrategy = new AllDistributionStrategy();
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
-        runningAsDaemon = new Boolean(stepProp.getProperty("stepping.default.step.daemon"));
-        enableDecelerationStrategy = new Boolean(stepProp.getProperty("stepping.default.step.enable.deceleration"));
+        enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
+        enableTickCallbackSync = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback.sync"));
     }
 
     public int getRunningInitialDelay() {
@@ -31,14 +32,6 @@ public class StepConfig {
         this.runningPeriodicDelay = runningPeriodicDelay;
     }
 
-    public boolean isRunningAsDaemon() {
-        return runningAsDaemon;
-    }
-
-    public void setRunningAsDaemon(boolean runningAsDaemon) {
-        this.runningAsDaemon = runningAsDaemon;
-    }
-
     public int getNumOfNodes() {
         return numOfNodes;
     }
@@ -47,12 +40,27 @@ public class StepConfig {
         this.numOfNodes = numOfNodes;
     }
 
-
-    public boolean isEnableDecelerationStrategy() {
-        return enableDecelerationStrategy;
+    public boolean isEnableTickCallback() {
+        return enableTickCallback;
     }
 
-    public void setEnableDecelerationStrategy(boolean enableDecelerationStrategy) {
-        this.enableDecelerationStrategy = enableDecelerationStrategy;
+    public void setEnableTickCallback(boolean enableTickCallback) {
+        this.enableTickCallback = enableTickCallback;
+    }
+
+    public boolean isEnableTickCallbackSync() {
+        return enableTickCallbackSync;
+    }
+
+    public void setEnableTickCallbackSync(boolean enableTickCallbackSync) {
+        this.enableTickCallbackSync = enableTickCallbackSync;
+    }
+
+    public IDistributionStrategy getDistributionStrategy() {
+        return distributionStrategy;
+    }
+
+    public void setDistributionStrategy(IDistributionStrategy distributionStrategy) {
+        this.distributionStrategy = distributionStrategy;
     }
 }
