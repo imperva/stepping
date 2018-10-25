@@ -7,10 +7,6 @@ import java.util.concurrent.*;
 
 abstract class IRunning implements Closeable {
     static final Logger LOGGER = LoggerFactory.getLogger(IRunning.class);
-
-
-
-
     String id;
     Runnable runnable;
     protected abstract Future<?> awake();

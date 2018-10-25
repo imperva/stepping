@@ -174,7 +174,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             }
 
             if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
-                cntr.add(new IRunningScheduled(iStepDecorator.getStep().getClass().getName(),
+                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName(),
                         delay,
                         initialDelay,
                         () -> {
@@ -189,7 +189,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
 
         if (this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
-            this.running = new IRunningScheduled(DefaultAlgoDecorator.class.getName(),
+            this.running = new RunningScheduled(DefaultAlgoDecorator.class.getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     () -> {

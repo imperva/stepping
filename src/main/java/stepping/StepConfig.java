@@ -6,6 +6,7 @@ public class StepConfig {
     private int numOfNodes = 0;
     private boolean enableTickCallback;
     private boolean enableTickCallbackSync;
+    private IDistributionStrategy distributionStrategy = new AllDistributionStrategy();
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -13,7 +14,6 @@ public class StepConfig {
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
         enableTickCallbackSync = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback.sync"));
-
     }
 
     public int getRunningInitialDelay() {
@@ -54,5 +54,13 @@ public class StepConfig {
 
     public void setEnableTickCallbackSync(boolean enableTickCallbackSync) {
         this.enableTickCallbackSync = enableTickCallbackSync;
+    }
+
+    public IDistributionStrategy getDistributionStrategy() {
+        return distributionStrategy;
+    }
+
+    public void setDistributionStrategy(IDistributionStrategy distributionStrategy) {
+        this.distributionStrategy = distributionStrategy;
     }
 }

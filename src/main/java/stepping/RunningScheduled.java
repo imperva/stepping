@@ -2,20 +2,17 @@ package stepping;
 
 import java.util.concurrent.*;
 
-public class IRunningScheduled extends IRunning {
-
-
+public class RunningScheduled extends IRunning {
     private Integer delay;
     private Integer initialdelay;
     private String id;
-    ScheduledFuture scheduledFuture;
-    static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(100);
+    private ScheduledFuture scheduledFuture;
+    private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    protected IRunningScheduled(String id, int delay, int initialdelay, Runnable runnable) {
+    protected RunningScheduled(String id, int delay, int initialdelay, Runnable runnable) {
         this.id = id;
         this.delay = delay;
         this.initialdelay = initialdelay;
-
         this.runnable = runnable;
     }
 
@@ -23,8 +20,6 @@ public class IRunningScheduled extends IRunning {
         this.scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, TimeUnit.MILLISECONDS);
         return scheduledFuture;
     }
-
-
 
     @Override
     public void close() {

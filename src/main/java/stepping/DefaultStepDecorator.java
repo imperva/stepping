@@ -6,7 +6,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
-    private String subjectDistributionID = "global";
+    private String subjectDistributionID = "default";
     private Object tickCallBackDataListenerLocker = new Object();
 
 
@@ -91,6 +91,7 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void init(Container cntr) {
+        //todo why here?
         int numOfNodes = getLocalStepConfig().getNumOfNodes();
         if (numOfNodes > 0)
             setDistributionNodeID(this.getClass().getName());
