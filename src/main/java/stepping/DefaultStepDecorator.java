@@ -1,11 +1,5 @@
 package stepping;
 
-<<<<<<< HEAD
-import java.util.Date;
-import java.util.List;
-
-=======
->>>>>>> improve_performance
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
     private Q<Data> q = new Q<>();
@@ -49,19 +43,11 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void tickCallBack() {
-<<<<<<< HEAD
-        List<Data> dataList = q.take();
-        if (dataList.size() > 0) {
-            for (Data data : dataList) {
-               newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
-            }
-=======
         try {
             step.tickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
->>>>>>> improve_performance
+            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
     }
 
@@ -71,12 +57,12 @@ public class DefaultStepDecorator implements IStepDecorator {
             while (true) {
                 Data data = q.take();
                 if (data != null) {
-                    newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                    newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
                 }
             }
         } catch (InterruptedException e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
     }
 
@@ -88,13 +74,13 @@ public class DefaultStepDecorator implements IStepDecorator {
 
                 if (data != null) {
                     synchronized (tickCallBackDataListenerLocker) {
-                        newDataArrivedCallBack(data, container.getById(DefaultIoCID.STEPPING_SUBJECT_CONTAINER.name()));
+                        newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
                     }
                 }
             }
         } catch (InterruptedException e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultIoCID.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
     }
 
@@ -105,33 +91,14 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void init(Container cntr) {
-<<<<<<< HEAD
         this.container = cntr;
-=======
         //todo why here?
->>>>>>> improve_performance
         int numOfNodes = getLocalStepConfig().getNumOfNodes();
         if (numOfNodes > 0)
             setDistributionNodeID(this.getClass().getName());
-<<<<<<< HEAD
         step.init(container);
     }
 
-    private IDecelerationStrategy solveDecelerationStrategy() {
-        if (!globalAlgoStepConfig.isEnableDecelerationStrategy() || !getLocalStepConfig().isEnableDecelerationStrategy()) {
-            return null;
-        }
-
-        if (globalAlgoStepConfig.getDecelerationStrategy() != null) {
-            return globalAlgoStepConfig.getDecelerationStrategy();
-        } else {
-            return new DefaultLeakyBucketDecelerationStrategy();
-        }
-=======
-        step.init(cntr);
-        this.container = cntr;
->>>>>>> improve_performance
-    }
 
     @Override
     public boolean followsSubject(String subjectType) {
@@ -159,22 +126,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-<<<<<<< HEAD
-    public void run() {
-        try {
-            tickCallBack();
-        } catch (Exception e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
-            throw e;
-        }
-    }
-
-    @Override
     public StepConfig getLocalStepConfig(){
-=======
-    public StepConfig getLocalStepConfig() {
->>>>>>> improve_performance
         localStepConfig = step.getLocalStepConfig();
         if (localStepConfig == null)
             throw new RuntimeException("Is required");
