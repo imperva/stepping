@@ -1,14 +1,18 @@
 package stepping;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Subject implements ISubject {
-    private HashMap<String, List<IStepDecorator>> iSteps = new HashMap<String, List<IStepDecorator>>();
-
+    private ConcurrentHashMap<SubjectKey, List<IStepDecorator>> iSteps = new ConcurrentHashMap<>();
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private String type;
     private Data data;
+
+    //todo why needed?
     private Container cntr;
-    private Object locker = new Object();
 
     public Subject(String type) {
         this.type = type;
@@ -20,43 +24,38 @@ public class Subject implements ISubject {
     }
 
     @Override
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    @Override
     public Data getData() {
-        return data;
+        Data d = null;
+        readWriteLock.readLock().lock();
+        d = this.data;
+        readWriteLock.readLock().unlock();
+        return d;
     }
 
     @Override
-    public void publish() {
-        Iterator<Map.Entry<String, List<IStepDecorator>>> iterator = iSteps.<String, List<IStepDecorator>>entrySet().iterator();
+    public void publish(Data data) {
+        data.setSubjectType(this.type);
+        Iterator<Map.Entry<SubjectKey, List<IStepDecorator>>> iterator = iSteps.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String, List<IStepDecorator>> pair = iterator.next();
-            StepConfig stepConfig =  pair.getValue().get(0).getLocalStepConfig();
-            stepConfig.getDistributionStrategy().distribute(pair.getValue(), this.data);
+            Map.Entry<SubjectKey, List<IStepDecorator>> pair = iterator.next();
+            pair.getKey().getiDistributionStrategy().distribute(pair.getValue(), data);
         }
+
+        readWriteLock.writeLock().lock();
+        this.data = data;
+        readWriteLock.writeLock().unlock();
     }
 
     @Override
     public void attach(IStepDecorator step) {
-        List<IStepDecorator> distributionList = iSteps.get(step.getDistributionNodeID());
+        SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), step.getLocalStepConfig().getDistributionStrategy());
+        List<IStepDecorator> distributionList = iSteps.get(subjectKey);
         if (distributionList != null) {
             distributionList.add(step);
         } else {
-            List<IStepDecorator> newDistributionList = new ArrayList<IStepDecorator>();
+            List<IStepDecorator> newDistributionList = new ArrayList<>();
             newDistributionList.add(step);
-            iSteps.put(step.getDistributionNodeID(), newDistributionList);
-        }
-    }
-
-    @Override
-    public void setData(Data data) {
-        synchronized (locker) {
-            this.data = data;
-            this.data.setSubjectType(this.type);
-            publish();
+            iSteps.put(subjectKey, newDistributionList);
         }
     }
 
@@ -68,5 +67,53 @@ public class Subject implements ISubject {
     @Override
     public void setContainer(Container container) {
         this.cntr = container;
+    }
+
+    class SubjectKey{
+        private String distributionNodeID;
+        private IDistributionStrategy iDistributionStrategy;
+
+        public SubjectKey(String distributionNodeID, IDistributionStrategy distributionStrategy) {
+            this.distributionNodeID = distributionNodeID;
+            this.iDistributionStrategy = distributionStrategy;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+
+            if (o == this) return true;
+            if (!(o instanceof SubjectKey)) {
+                return false;
+            }
+
+            SubjectKey subjectKey = (SubjectKey) o;
+
+            return subjectKey.distributionNodeID.equals(this.distributionNodeID);
+        }
+
+        //Idea from effective Java : Item 9
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 31 * result + this.distributionNodeID.hashCode();
+
+            return result;
+        }
+
+        public IDistributionStrategy getiDistributionStrategy() {
+            return iDistributionStrategy;
+        }
+
+        public void setiDistributionStrategy(IDistributionStrategy iDistributionStrategy) {
+            this.iDistributionStrategy = iDistributionStrategy;
+        }
+
+        public String getDistributionNodeID() {
+            return distributionNodeID;
+        }
+
+        public void setDistributionNodeID(String distributionNodeID) {
+            this.distributionNodeID = distributionNodeID;
+        }
     }
 }

@@ -2,12 +2,9 @@ package stepping;
 
 public interface ISubject {
    String getType();
-   void setType(String type);
-   void setData(Data data);
    Data getData();
-   //List<IStepDecorator> getSubscribers();
    void attach(IStepDecorator o);
-   void publish();
+   void publish(Data data);
    Container getContainer() ;
    void setContainer(Container container);
 }
