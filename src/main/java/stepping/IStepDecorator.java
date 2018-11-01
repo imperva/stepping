@@ -1,10 +1,17 @@
 package stepping;
 
+
+
 import java.io.Closeable;
 
 public interface IStepDecorator extends Step, Closeable {
 
     void newDataArrived(Data data);
+
+
+    default void tickCallBack() {
+        throw new RuntimeException("tickCallBack not implemented");
+    }
 
     void attach(ISubject iSubject);
 
@@ -18,7 +25,5 @@ public interface IStepDecorator extends Step, Closeable {
 
     void dataListener();
 
-    void tickCallBackThreadSafe();
 
-    void dataListenerThreadSafe();
 }

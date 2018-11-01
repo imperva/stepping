@@ -1,14 +1,19 @@
 package stepping;
 
+import java.util.HashMap;
+import java.util.List;
+
 public interface Step {
 
       void init(Container cntr);
 
       boolean followsSubject(String subjectType);
 
-      void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer);
+      void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer, Shutter shutter);
 
-      void tickCallBack();
+      default void tickCallBack(Shutter shutter) {
+            throw new RuntimeException("tickCallBack not implemented");
+      }
 
       void restate();
 

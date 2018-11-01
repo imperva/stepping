@@ -7,7 +7,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private Object tickCallBackDataListenerLocker = new Object();
+    private Shutter shutter = new Shutter();
 
 
     DefaultStepDecorator(Step step) {
@@ -25,8 +25,8 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
-        step.newDataArrivedCallBack(data, subjectContainer);
+    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer,Shutter shutter) {
+        step.newDataArrivedCallBack(data, subjectContainer, shutter);
     }
 
     @Override
@@ -35,16 +35,14 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void tickCallBackThreadSafe() {
-        synchronized (tickCallBackDataListenerLocker) {
-            tickCallBack();
-        }
+    public void tickCallBack() {
+        tickCallBack(shutter);
     }
 
     @Override
-    public void tickCallBack() {
+    public void tickCallBack(Shutter shutter) {
         try {
-            step.tickCallBack();
+            step.tickCallBack(shutter);
         } catch (Exception e) {
             System.out.println("EXCEPTION");
             container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
@@ -57,7 +55,7 @@ public class DefaultStepDecorator implements IStepDecorator {
             while (true) {
                 Data data = q.take();
                 if (data != null) {
-                    newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
+                    newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()),shutter);
                 }
             }
         } catch (InterruptedException e) {
@@ -66,23 +64,6 @@ public class DefaultStepDecorator implements IStepDecorator {
         }
     }
 
-    @Override
-    public void dataListenerThreadSafe() {
-        try {
-            while (true) {
-                Data data = q.take();
-
-                if (data != null) {
-                    synchronized (tickCallBackDataListenerLocker) {
-                        newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
-        }
-    }
 
     @Override
     public void close() {
@@ -146,38 +127,4 @@ public class DefaultStepDecorator implements IStepDecorator {
 
 }
 
-//        int size = dataList.stream().mapToInt((data) -> data.getSize()).sum();
-//        decelerate(calcDecelerationTimeout(size));
-
-//    private void decelerate(int decelerationTimeout) {
-//        try {
-//            if (decelerationTimeout > 0)
-//                Thread.sleep(decelerationTimeout);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private int calcDecelerationTimeout(int queuedItemsSize) {
-//        IDecelerationStrategy decelerationStrategy = solveDecelerationStrategy();
-//        if (decelerationStrategy == null)
-//            return 0;
-//        Date now = new Date();
-//        this.currentDecelerationTimeout = decelerationStrategy.decelerate(now, queuedItemsSize, this.currentDecelerationTimeout);
-//        if (currentDecelerationTimeout > 0)
-//            System.out.println(this.step.getClass().getName() + " calcDecelerationTimeout: " + currentDecelerationTimeout);
-//        return this.currentDecelerationTimeout;
-//    }
-
-//    private IDecelerationStrategy solveDecelerationStrategy() {
-//        if (!globalAlgoStepConfig.isEnableDecelerationStrategy() || !getLocalStepConfig().isEnableDecelerationStrategy()) {
-//            return null;
-//        }
-//
-//        if (globalAlgoStepConfig.getDecelerationStrategy() != null) {
-//            return globalAlgoStepConfig.getDecelerationStrategy();
-//        } else {
-//            return new DefaultLeakyBucketDecelerationStrategy();
-//        }
-//     }
 

@@ -2,14 +2,11 @@ package stepping;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Subject implements ISubject {
     private ConcurrentHashMap<SubjectKey, List<IStepDecorator>> iSteps = new ConcurrentHashMap<>();
-    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private String type;
-    private Data data;
+    private volatile Data data;
 
     //todo why needed?
     private Container cntr;
@@ -25,11 +22,7 @@ public class Subject implements ISubject {
 
     @Override
     public Data getData() {
-        Data d = null;
-        readWriteLock.readLock().lock();
-        d = this.data;
-        readWriteLock.readLock().unlock();
-        return d;
+        return this.data;
     }
 
     @Override
@@ -40,15 +33,15 @@ public class Subject implements ISubject {
             Map.Entry<SubjectKey, List<IStepDecorator>> pair = iterator.next();
             pair.getKey().getiDistributionStrategy().distribute(pair.getValue(), data);
         }
-
-        readWriteLock.writeLock().lock();
         this.data = data;
-        readWriteLock.writeLock().unlock();
     }
 
     @Override
     public void attach(IStepDecorator step) {
-        SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), step.getLocalStepConfig().getDistributionStrategy());
+        IDistributionStrategy distributionStrategy =  step.getLocalStepConfig().getDistributionStrategy();
+        if(distributionStrategy == null)
+            throw new RuntimeException("IDistributionStrategy missing");
+        SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), distributionStrategy);
         List<IStepDecorator> distributionList = iSteps.get(subjectKey);
         if (distributionList != null) {
             distributionList.add(step);
@@ -91,12 +84,10 @@ public class Subject implements ISubject {
             return subjectKey.distributionNodeID.equals(this.distributionNodeID);
         }
 
-        //Idea from effective Java : Item 9
         @Override
         public int hashCode() {
             int result = 17;
             result = 31 * result + this.distributionNodeID.hashCode();
-
             return result;
         }
 

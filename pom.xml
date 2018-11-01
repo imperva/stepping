@@ -45,8 +45,8 @@
             <url>https://il-mavenrep-lp1/libs-release-local</url>
         </repository>
         <snapshotRepository>
-            <id>libs-snapshot-local</id>
-            <url>https://il-mavenrep-lp1/libs-snapshot-local</url>
+            <id>libs-shutter-local</id>
+            <url>https://il-mavenrep-lp1/libs-shutter-local</url>
         </snapshotRepository>
     </distributionManagement>
 

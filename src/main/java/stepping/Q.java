@@ -9,7 +9,9 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by gabi.beyo on 1/31/2018.
  */
 public class Q<T> {
-    private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<T>();
+
+    //todo use ConcurrentLinkedQueue ??
+    private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<>();
 
     public T peek() {
         return blockingQueue.peek();
@@ -33,11 +35,6 @@ public class Q<T> {
         return data;
     }
 
-//    public List<T> take(int max) {
-//        List<T> incidents = new ArrayList<>();
-//        blockingQueue.drainTo(incidents, max);
-//        return incidents;
-//    }
 
     public int size() {
         return blockingQueue.size();
@@ -47,3 +44,4 @@ public class Q<T> {
         blockingQueue.clear();
     }
 }
+

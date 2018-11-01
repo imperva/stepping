@@ -161,31 +161,17 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
             int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
 
-            boolean tickCallBackThreads = iStepDecorator.getLocalStepConfig().isEnableTickCallbackSync();
-
-            Action dataListenerFunction;
-            Action tickCallbackFunction;
-            if (tickCallBackThreads) {
-                dataListenerFunction = iStepDecorator::dataListenerThreadSafe;
-                tickCallbackFunction = iStepDecorator::tickCallBackThreadSafe;
-            } else {
-                dataListenerFunction = iStepDecorator::dataListener;
-                tickCallbackFunction = iStepDecorator::tickCallBack;
-            }
-
             if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
                 cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName(),
                         delay,
                         initialDelay,
                         () -> {
-                            tickCallbackFunction.execute();
+                            iStepDecorator.tickCallBack();
                         }));
             }
 
             cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
-                    () -> {
-                        dataListenerFunction.execute();
-                    }));
+                    iStepDecorator::dataListener));
         }
 
         if (this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
@@ -240,9 +226,5 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     public void handle(Exception e) {
         System.out.println("Error: " + e.toString());
         close();
-    }
-
-    interface Action {
-        void execute();
     }
 }
