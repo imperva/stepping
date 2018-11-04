@@ -15,7 +15,7 @@ public class StepConfig {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
-        runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit"));
+        runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit").toUpperCase());
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
     }
 
