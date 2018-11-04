@@ -1,8 +1,12 @@
 package stepping;
 
+import java.sql.Struct;
+import java.util.concurrent.TimeUnit;
+
 public class StepConfig {
     private int runningInitialDelay;
     private int runningPeriodicDelay;
+    private TimeUnit runningPeriodicDelayUnit;
     private int numOfNodes = 0;
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new AllDistributionStrategy();
@@ -11,6 +15,7 @@ public class StepConfig {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
+        runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit"));
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
     }
 
@@ -52,5 +57,13 @@ public class StepConfig {
 
     public void setDistributionStrategy(IDistributionStrategy distributionStrategy) {
         this.distributionStrategy = distributionStrategy;
+    }
+
+    public TimeUnit getRunningPeriodicDelayUnit() {
+        return runningPeriodicDelayUnit;
+    }
+
+    public void setRunningPeriodicDelayUnit(TimeUnit runningPeriodicDelayUnit) {
+        this.runningPeriodicDelayUnit = runningPeriodicDelayUnit;
     }
 }

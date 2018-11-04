@@ -3,6 +3,7 @@ package stepping;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private Container cntr = new Container();
@@ -165,6 +166,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName(),
                         delay,
                         initialDelay,
+                        iStepDecorator.getLocalStepConfig().getRunningPeriodicDelayUnit(),
                         () -> {
                             iStepDecorator.tickCallBack();
                         }));
@@ -178,6 +180,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             this.running = new RunningScheduled(DefaultAlgoDecorator.class.getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
+                    TimeUnit.MILLISECONDS,
                     () -> {
                         this.tickCallBack();
                     });

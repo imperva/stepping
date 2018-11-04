@@ -8,8 +8,6 @@
     <artifactId>stepping</artifactId>
     <version>2.5-SNAPSHOT</version>
 
-
-
     <dependencies>
         <dependency>
             <groupId>org.apache.kafka</groupId>
