@@ -6,7 +6,7 @@ public interface Step {
 
       boolean followsSubject(String subjectType);
 
-      void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer, Shutter shutter);
+      void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer, Shutter shutter);
 
       default void tickCallBack(Shutter shutter) {
             throw new RuntimeException("tickCallBack not implemented");

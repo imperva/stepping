@@ -25,7 +25,6 @@ public class Subject implements ISubject {
     @Override
     public void publish(Object message) {
         Data data = new Data(message);
-        data.setSubjectType(this.type);
         publish(data);
     }
 
@@ -35,7 +34,7 @@ public class Subject implements ISubject {
         Iterator<Map.Entry<SubjectKey, List<IStepDecorator>>> iterator = iSteps.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<SubjectKey, List<IStepDecorator>> pair = iterator.next();
-            pair.getKey().getiDistributionStrategy().distribute(pair.getValue(), data);
+            pair.getKey().getiDistributionStrategy().distribute(pair.getValue(), data, this.getType());
         }
         this.data = data;
     }

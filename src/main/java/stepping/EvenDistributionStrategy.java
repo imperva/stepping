@@ -5,7 +5,7 @@ import java.util.List;
 
 public class EvenDistributionStrategy implements IDistributionStrategy {
     @Override
-    public void distribute(List<IStepDecorator> iStepDecorators, Data data) {
+    public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
         try {
 
             if (!(data.getValue() instanceof List))
@@ -20,7 +20,7 @@ public class EvenDistributionStrategy implements IDistributionStrategy {
                 chopped.remove(chopped.size() - 1);
             }
             for (int u = 0; u < iStepDecorators.size(); u++) {
-                iStepDecorators.get(u).newDataArrived(new Data(chopped.get(u), data.getSubjectType()));
+                iStepDecorators.get(u).newDataArrived(new Data(chopped.get(u)), subjectType);
             }
         } catch (Exception e) {
             System.out.println("");

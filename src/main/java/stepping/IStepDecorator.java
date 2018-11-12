@@ -6,7 +6,7 @@ import java.io.Closeable;
 
 public interface IStepDecorator extends Step, Closeable {
 
-    void newDataArrived(Data data);
+    void newDataArrived(Data data, String subjectType);
 
 
     default void tickCallBack() {

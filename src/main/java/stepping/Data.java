@@ -8,25 +8,19 @@ import java.util.List;
  */
 public class Data {
     //todo thread safe
-    private Object value;
-    private String subjectType;
+    private final Object value;
+
     private int size;
-
-    public Data(Object value) { this(value, null);
-
-    }
-
-    public Data(Object value, String type) {
-        setValue(value);
-        setSubjectType(type);
+    public Data(Object value) {
+        this.value = value;
+        calcSize(value);
     }
 
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    private void calcSize(Object value) {
         if(value != null){
             if(value instanceof List)
                 size = ((List)value).size();
@@ -34,15 +28,6 @@ public class Data {
                 size = 1;
         }
     }
-
-    public String getSubjectType() {
-        return subjectType;
-    }
-
-    public void setSubjectType(String subjectType) {
-        this.subjectType = subjectType;
-    }
-
 
     public int getSize() {
         return size;

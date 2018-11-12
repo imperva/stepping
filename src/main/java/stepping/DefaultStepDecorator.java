@@ -2,7 +2,7 @@ package stepping;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container; //todo threadsafe ?
-    private Q<Data> q = new Q<>(); //todo threadsafe ?
+    private Q<Message> q = new Q<>(); //todo threadsafe ?
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
@@ -25,13 +25,13 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer,Shutter shutter) {
-        step.newDataArrivedCallBack(data, subjectContainer, shutter);
+    public void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer,Shutter shutter) {
+        step.newDataArrivedCallBack(data, subjectType, subjectContainer, shutter);
     }
 
     @Override
-    public void newDataArrived(Data data) {
-        q.queue(data);
+    public void newDataArrived(Data data, String subjectType) {
+        q.queue(new Message(data,subjectType));
     }
 
     @Override
@@ -53,9 +53,9 @@ public class DefaultStepDecorator implements IStepDecorator {
     public void dataListener() {
         try {
             while (true) {
-                Data data = q.take();
-                if (data != null) {
-                    newDataArrivedCallBack(data, container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()),shutter);
+                Message message = q.take();
+                if (message != null && message.getData() != null) {
+                    newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()),shutter);
                 }
             }
         } catch (InterruptedException e) {
