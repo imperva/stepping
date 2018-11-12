@@ -7,7 +7,7 @@ import java.util.List;
  * Created by gabi.beyo on 12/13/2017.
  */
 public class Data {
-
+    //todo thread safe
     private Object value;
     private String subjectType;
     private int size;

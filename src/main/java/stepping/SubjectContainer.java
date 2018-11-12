@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubjectContainer {
-    private List<ISubject> subjectsList = new ArrayList<ISubject>();
+    //todo threadsafe ?
+    private List<ISubject> subjectsList = new ArrayList<>();
 
 
     public List<ISubject> getSubjectsList() {

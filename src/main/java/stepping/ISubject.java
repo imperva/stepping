@@ -5,6 +5,5 @@ public interface ISubject {
    Data getData();
    void attach(IStepDecorator o);
    void publish(Data data);
-   Container getContainer() ;
-   void setContainer(Container container);
+   void publish(Object message);
 }

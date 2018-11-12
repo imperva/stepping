@@ -1,8 +1,8 @@
 package stepping;
 
 public class DefaultStepDecorator implements IStepDecorator {
-    protected Container container;
-    private Q<Data> q = new Q<>();
+    protected Container container; //todo threadsafe ?
+    private Q<Data> q = new Q<>(); //todo threadsafe ?
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
@@ -110,7 +110,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     public StepConfig getLocalStepConfig(){
         localStepConfig = step.getLocalStepConfig();
         if (localStepConfig == null)
-            throw new RuntimeException("Is required");
+            throw new RuntimeException("LocalStepConfig is required");
         return localStepConfig;
     }
 

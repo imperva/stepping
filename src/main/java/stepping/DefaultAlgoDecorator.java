@@ -132,7 +132,6 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (Subject subject : getContainer().<Subject>getTypeOf(Subject.class)) {
             SubjectContainer subjectContainer = getSubjectContainer();
             subjectContainer.add(subject);
-            subject.setContainer(cntr);
         }
     }
 

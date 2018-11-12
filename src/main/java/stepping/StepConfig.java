@@ -1,6 +1,5 @@
 package stepping;
 
-import java.sql.Struct;
 import java.util.concurrent.TimeUnit;
 
 public class StepConfig {

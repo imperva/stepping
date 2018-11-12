@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Container {
-
+    //todo threadsafe?
     private List<Identifiable> objects = new ArrayList<>();
 
     public Container() {
