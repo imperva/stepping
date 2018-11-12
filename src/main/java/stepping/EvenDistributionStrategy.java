@@ -6,26 +6,20 @@ import java.util.List;
 public class EvenDistributionStrategy implements IDistributionStrategy {
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
-        try {
+        if (!(data.getValue() instanceof List))
+            throw new RuntimeException("EvenDistributionStrategy not supported");
 
-            if (!(data.getValue() instanceof List))
-                throw new RuntimeException("EvenDistributionStrategy not supported");
+        List dataToDistribute = ((List) data.getValue());
+        int chunks = Math.floorDiv(dataToDistribute.size(), iStepDecorators.size());
 
-            List dataToDistribute = ((List) data.getValue());
-            int chunks = Math.floorDiv(dataToDistribute.size(), iStepDecorators.size());
-
-            List<List> chopped = chopped(dataToDistribute, chunks);
-            if (chopped.size() > iStepDecorators.size()) {
-                chopped.get(chopped.size() - 2).addAll(chopped.get(chopped.size() - 1));
-                chopped.remove(chopped.size() - 1);
-            }
-            for (int u = 0; u < iStepDecorators.size(); u++) {
-                iStepDecorators.get(u).newDataArrived(new Data(chopped.get(u)), subjectType);
-            }
-        } catch (Exception e) {
-            System.out.println("");
+        List<List> chopped = chopped(dataToDistribute, chunks);
+        if (chopped.size() > iStepDecorators.size()) {
+            chopped.get(chopped.size() - 2).addAll(chopped.get(chopped.size() - 1));
+            chopped.remove(chopped.size() - 1);
         }
-
+        for (int u = 0; u < iStepDecorators.size(); u++) {
+            iStepDecorators.get(u).newDataArrived(new Data(chopped.get(u)), subjectType);
+        }
     }
 
     //todo - very expensive - fix
