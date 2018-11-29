@@ -2,11 +2,12 @@ package stepping;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Container {
-    //todo threadsafe?
-    private List<Identifiable> objects = new ArrayList<>();
+
+    private List<Identifiable> objects = new CopyOnWriteArrayList<>();
 
     public Container() {
     }

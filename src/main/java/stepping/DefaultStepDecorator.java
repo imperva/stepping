@@ -1,5 +1,7 @@
 package stepping;
 
+import java.util.concurrent.CountDownLatch;
+
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container; //todo threadsafe ?
     private Q<Message> q = new Q<>(); //todo threadsafe ?
@@ -55,7 +57,13 @@ public class DefaultStepDecorator implements IStepDecorator {
             while (true) {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
-                    newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()),shutter);
+                    if (!message.getSubjectType().equals("Timeout")) {
+                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()), shutter);
+                    } else {
+                        tickCallBack();
+                      // CountDownLatch countDownLatch =  (CountDownLatch) message.getData().getValue();
+                      // countDownLatch.countDown();
+                    }
                 }
             }
         } catch (InterruptedException e) {

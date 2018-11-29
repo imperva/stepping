@@ -1,11 +1,10 @@
 package stepping;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SubjectContainer {
-    //todo threadsafe ?
-    private List<ISubject> subjectsList = new ArrayList<>();
+    private List<ISubject> subjectsList = new CopyOnWriteArrayList<>();
 
 
     public List<ISubject> getSubjectsList() {

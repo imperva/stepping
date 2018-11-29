@@ -1,6 +1,8 @@
 package stepping;
 
 import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -8,6 +10,7 @@ public class Shutter {
     private volatile ConcurrentHashMap<String, DataCloneable> snapshots = new ConcurrentHashMap<>();
 
     Shutter add(String key, DataCloneable cloneable) {
+
         if (cloneable == null)
             throw new InvalidParameterException();
         snapshots.put(key, cloneable);

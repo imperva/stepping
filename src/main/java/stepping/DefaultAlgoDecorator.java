@@ -3,6 +3,7 @@ package stepping;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
@@ -162,12 +163,19 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
 
             if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
-                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName(),
+
+                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName() + "tick",
                         delay,
                         initialDelay,
                         iStepDecorator.getLocalStepConfig().getRunningPeriodicDelayUnit(),
                         () -> {
-                            iStepDecorator.tickCallBack();
+                            //CountDownLatch countDownLatch = new CountDownLatch(1);
+                            iStepDecorator.newDataArrived(new Data(new Object()), "Timeout");
+                          //  try {
+                              //  countDownLatch.await();
+                           // } catch (InterruptedException e) {
+                           //     e.printStackTrace();
+                           // }
                         }));
             }
 
