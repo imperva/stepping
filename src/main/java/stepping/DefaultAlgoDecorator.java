@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
@@ -163,19 +165,22 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
 
             if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
-
+                CyclicBarrier cb = new CyclicBarrier(2);
                 cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName() + "tick",
                         delay,
                         initialDelay,
                         iStepDecorator.getLocalStepConfig().getRunningPeriodicDelayUnit(),
                         () -> {
-                            //CountDownLatch countDownLatch = new CountDownLatch(1);
-                            iStepDecorator.newDataArrived(new Data(new Object()), "Timeout");
-                          //  try {
-                              //  countDownLatch.await();
-                           // } catch (InterruptedException e) {
-                           //     e.printStackTrace();
-                           // }
+                           //CountDownLatch countDownLatch = new CountDownLatch(1);
+                            iStepDecorator.newDataArrived(new Data(cb), "Timeout");
+                            try {
+                                System.out.println("Inside Tickcallback before waiting 5 s");
+                                Thread.sleep(5000);
+                                cb.await();
+                                //countDownLatch.await();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }));
             }
 

@@ -1,6 +1,9 @@
 package stepping;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Semaphore;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container; //todo threadsafe ?
@@ -60,9 +63,20 @@ public class DefaultStepDecorator implements IStepDecorator {
                     if (!message.getSubjectType().equals("Timeout")) {
                         newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()), shutter);
                     } else {
+                        System.out.println("Timeout message arrived & processing");
                         tickCallBack();
-                      // CountDownLatch countDownLatch =  (CountDownLatch) message.getData().getValue();
-                      // countDownLatch.countDown();
+                        System.out.println("Timeout message arrived & processing");
+
+                        CyclicBarrier cb =  (CyclicBarrier)message.getData().getValue();
+                        try {
+                            System.out.println("waiting for the 5s to finish");
+                            cb.await();
+                            System.out.println("done waiting");
+                        } catch (BrokenBarrierException e) {
+                            e.printStackTrace();
+                        }
+                        //CountDownLatch countDownLatch =  (CountDownLatch) message.getData().getValue();
+                       //countDownLatch.countDown();
                     }
                 }
             }
