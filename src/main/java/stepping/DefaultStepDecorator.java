@@ -27,8 +27,8 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer) {
-        step.newDataArrivedCallBack(data, subjectType, subjectContainer);
+    public void newDataArrivedCallBack(Data data, String subjectType, Shouter shouter) {
+        step.newDataArrivedCallBack(data, subjectType, shouter);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class DefaultStepDecorator implements IStepDecorator {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
                     if (!message.getSubjectType().equals(DefaultSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
-                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
+                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name()));
                     } else {
                         tickCallBack();
                         CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();

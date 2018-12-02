@@ -48,6 +48,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         DI(builtinRegistration.getRegistered());
         DI(objectsRegistration.getRegistered());
 
+
         if (!cntr.exist(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()))
             DI(this, DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
@@ -84,11 +85,12 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private ContainerRegistrar builtinContainerRegistration() {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name(), new SubjectContainer());
+        SubjectContainer subjectContainer = new SubjectContainer();
+        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
 
         containerRegistrar.add(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
-
+        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name(), subjectContainer);
         return containerRegistrar;
     }
 

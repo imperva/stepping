@@ -6,7 +6,7 @@ public interface Step {
 
       boolean followsSubject(String subjectType);
 
-      void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer);
+      void newDataArrivedCallBack(Data data, String subjectType, Shouter shouter);
 
       default void tickCallBack() {
             throw new RuntimeException("tickCallBack not implemented");
