@@ -10,7 +10,6 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class Q<T> {
 
-    //todo use ConcurrentLinkedQueue ??
     private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<>();
 
     public T peek() {

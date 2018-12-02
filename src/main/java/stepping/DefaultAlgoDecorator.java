@@ -87,10 +87,10 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
         SubjectContainer subjectContainer = new SubjectContainer();
         containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
+        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer));
 
         containerRegistrar.add(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
-        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name(), subjectContainer);
         return containerRegistrar;
     }
 

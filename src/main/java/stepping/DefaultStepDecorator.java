@@ -4,8 +4,8 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 public class DefaultStepDecorator implements IStepDecorator {
-    protected Container container; //todo threadsafe ?
-    private Q<Message> q = new Q<>(); //todo threadsafe ?
+    protected Container container;
+    private Q<Message> q = new Q<>();
     private Step step;
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
