@@ -1,9 +1,7 @@
 package stepping;
 
 import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
 
 public class DefaultStepDecorator implements IStepDecorator {
     protected Container container; //todo threadsafe ?
@@ -12,7 +10,6 @@ public class DefaultStepDecorator implements IStepDecorator {
     private GlobalAlgoStepConfig globalAlgoStepConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private Shutter shutter = new Shutter();
 
 
     DefaultStepDecorator(Step step) {
@@ -30,8 +27,8 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer,Shutter shutter) {
-        step.newDataArrivedCallBack(data, subjectType, subjectContainer, shutter);
+    public void newDataArrivedCallBack(Data data, String subjectType, SubjectContainer subjectContainer) {
+        step.newDataArrivedCallBack(data, subjectType, subjectContainer);
     }
 
     @Override
@@ -41,13 +38,8 @@ public class DefaultStepDecorator implements IStepDecorator {
 
     @Override
     public void tickCallBack() {
-        tickCallBack(shutter);
-    }
-
-    @Override
-    public void tickCallBack(Shutter shutter) {
         try {
-            step.tickCallBack(shutter);
+            step.tickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
             container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
@@ -60,27 +52,16 @@ public class DefaultStepDecorator implements IStepDecorator {
             while (true) {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
-                    if (!message.getSubjectType().equals("Timeout")) {
-                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()), shutter);
+                    if (!message.getSubjectType().equals(DefaultSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name()));
                     } else {
-                        System.out.println("Timeout message arrived & processing");
                         tickCallBack();
-                        System.out.println("Timeout message arrived & processing");
-
-                        CyclicBarrier cb =  (CyclicBarrier)message.getData().getValue();
-                        try {
-                            System.out.println("waiting for the 5s to finish");
-                            cb.await();
-                            System.out.println("done waiting");
-                        } catch (BrokenBarrierException e) {
-                            e.printStackTrace();
-                        }
-                        //CountDownLatch countDownLatch =  (CountDownLatch) message.getData().getValue();
-                       //countDownLatch.countDown();
+                        CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();
+                        cb.await();
                     }
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             System.out.println("EXCEPTION");
             container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }

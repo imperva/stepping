@@ -166,20 +166,16 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
             if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
                 CyclicBarrier cb = new CyclicBarrier(2);
-                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName() + "tick",
+                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName() + "tickcallback",
                         delay,
                         initialDelay,
                         iStepDecorator.getLocalStepConfig().getRunningPeriodicDelayUnit(),
                         () -> {
-                           //CountDownLatch countDownLatch = new CountDownLatch(1);
-                            iStepDecorator.newDataArrived(new Data(cb), "Timeout");
                             try {
-                                System.out.println("Inside Tickcallback before waiting 5 s");
-                                Thread.sleep(5000);
+                                iStepDecorator.newDataArrived(new Data(cb), DefaultSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
                                 cb.await();
-                                //countDownLatch.await();
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                handle(e);
                             }
                         }));
             }
