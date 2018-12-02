@@ -24,7 +24,11 @@ public class Subject implements ISubject {
 
     @Override
     public void publish(Object message) {
-        Data data = new Data(message);
+        Data data = null;
+        if (!(message instanceof Data))
+             data = new Data(message);
+        else
+            data = (Data)message;
         publish(data);
     }
 
