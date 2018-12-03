@@ -14,7 +14,7 @@ public interface IStepDecorator extends Step, Closeable {
 
     void queueSubjectUpdate(Data data, String subjectType);
 
-    void attachTo(ISubject iSubject);
+    void followSubject(ISubject iSubject);
 
     Step getStep();
 

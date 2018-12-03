@@ -206,7 +206,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             for (ISubject subject : subjectContainer.getSubjectsList()) {
-                iStepDecorator.attachTo(subject);
+                iStepDecorator.followSubject(subject);
             }
         }
     }

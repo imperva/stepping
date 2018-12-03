@@ -90,7 +90,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void attachTo(ISubject iSubject) {
+    public void followSubject(ISubject iSubject) {
         boolean isAttached = followsSubject(iSubject.getType());
         if (isAttached)
             iSubject.attach(this);

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SubjectContainer {
-
+    //todo improve performance (O)N + merge with global Container
     private List<ISubject> subjectsList = new CopyOnWriteArrayList<>();
 
 
