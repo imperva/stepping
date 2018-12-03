@@ -1,17 +1,21 @@
 package stepping;
 
-public class Shouter {
-    private SubjectContainer subjectContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public Shouter(SubjectContainer subjectContainer) {
-        this.subjectContainer = subjectContainer;
-    }
+ public class Shouter {
+     static final Logger LOGGER = LoggerFactory.getLogger(IRunning.class);
+     private SubjectContainer subjectContainer;
 
-    public void shout(String subjectType, Object value) {
-        subjectContainer.getByName(subjectType).publish(value);
-    }
+     public Shouter(SubjectContainer subjectContainer) {
+         this.subjectContainer = subjectContainer;
+     }
 
-    public void shout(String subjectType, Data value) {
-        subjectContainer.getByName(subjectType).publish(value);
-    }
-}
+     public void shout(String subjectType, Object value) {
+         subjectContainer.getByName(subjectType).publish(value);
+     }
+
+     public void shout(String subjectType, Data value) {
+         subjectContainer.getByName(subjectType).publish(value);
+     }
+ }

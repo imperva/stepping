@@ -1,11 +1,11 @@
 package stepping;
 
-public class GlobalAlgoStepConfig {
+public class AlgoConfig {
     private int runningInitialDelay;
     private int runningPeriodicDelay;
     private boolean enableTickCallback;
 
-    public GlobalAlgoStepConfig() {
+    public AlgoConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
         runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.algo.initialdelay"));
         runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.algo.delay"));

@@ -6,8 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Container {
-
-    private List<Identifiable> objects = new CopyOnWriteArrayList<>();
+    //todo - queries are very slow
+    private volatile List<Identifiable> objects = new CopyOnWriteArrayList<>();
 
     public Container() {
     }

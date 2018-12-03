@@ -1,7 +1,6 @@
 package stepping;
 
 import java.io.Closeable;
-import java.util.HashMap;
 
 public interface Algo extends Closeable {
 
@@ -9,7 +8,7 @@ public interface Algo extends Closeable {
 
     ContainerRegistrar containerRegistration();
 
-    void tickCallBack();
+    void onTickCallBack();
 
-    GlobalAlgoStepConfig getGlobalAlgoStepConfig();
+    AlgoConfig getConfig();
 }

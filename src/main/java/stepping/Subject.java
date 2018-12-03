@@ -29,7 +29,7 @@ public class Subject implements ISubject {
              data = new Data(message);
         else
             data = (Data)message;
-        publish(data);
+         publish(data);
     }
 
 
@@ -45,7 +45,7 @@ public class Subject implements ISubject {
 
     @Override
     public void attach(IStepDecorator step) {
-        IDistributionStrategy distributionStrategy = step.getLocalStepConfig().getDistributionStrategy();
+        IDistributionStrategy distributionStrategy = step.getConfig().getDistributionStrategy();
         if (distributionStrategy == null)
             throw new RuntimeException("IDistributionStrategy missing");
         SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), distributionStrategy);

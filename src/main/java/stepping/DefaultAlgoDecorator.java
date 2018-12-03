@@ -3,9 +3,7 @@ package stepping;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
@@ -22,17 +20,17 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void init() {
         try {
-            registerIoC();
+            fillContainer();
             decorateSteps();
             duplicateNodes();
             initSteps();
-            initRunning();
-            initSubjects();
+            initRunners();
+            initSubjectContainer();
             registerShutdownHook();
             attachSubjects();
             restate();
 
-            wakenRunningUnits();
+            wakenRunners();
         } catch (Exception e) {
 
             System.out.println(e);
@@ -40,7 +38,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void registerIoC() {
+    private void fillContainer() {
         ContainerRegistrar builtinRegistration = builtinContainerRegistration();
 
         ContainerRegistrar objectsRegistration = containerRegistration();
@@ -49,8 +47,8 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         DI(objectsRegistration.getRegistered());
 
 
-        if (!cntr.exist(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()))
-            DI(this, DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name());
+        if (!cntr.exist(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()))
+            DI(this, BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     private void decorateSteps() {
@@ -62,10 +60,12 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void duplicateNodes(){
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            int numOfNodes = iStepDecorator.getLocalStepConfig().getNumOfNodes();
+            int numOfNodes = iStepDecorator.getConfig().getNumOfNodes();
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
-                    cntr.add(new DefaultStepDecorator(iStepDecorator));
+                    DefaultStepDecorator defaultStepDecorator = new DefaultStepDecorator(iStepDecorator.getStep());
+                    defaultStepDecorator.setDistributionNodeID(defaultStepDecorator.getClass().getName());
+                    cntr.add(defaultStepDecorator);
                 }
             }
         }
@@ -75,7 +75,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
-    private void wakenRunningUnits() {
+    private void wakenRunners() {
         for (IRunning running : cntr.<IRunning>getSonOf(IRunning.class)) {
             running.awake();
         }
@@ -86,22 +86,22 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private ContainerRegistrar builtinContainerRegistration() {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
         SubjectContainer subjectContainer = new SubjectContainer();
-        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
-        containerRegistrar.add(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer));
+        containerRegistrar.add(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
+        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer));
 
-        containerRegistrar.add(DefaultSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()));
-        containerRegistrar.add(DefaultSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(DefaultSubjectType.STEPPING_PUBLISH_DATA.name()));
+        containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
+        containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
         return containerRegistrar;
     }
 
     @Override
-    public void tickCallBack() {
-        algo.tickCallBack();
+    public void onTickCallBack() {
+        algo.onTickCallBack();
     }
 
     @Override
-    public GlobalAlgoStepConfig getGlobalAlgoStepConfig() {
-        return algo.getGlobalAlgoStepConfig();
+    public AlgoConfig getConfig() {
+        return algo.getConfig();
     }
 
 
@@ -133,9 +133,9 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void initSubjects() {
+    private void initSubjectContainer() {
+        SubjectContainer subjectContainer = getSubjectContainer();
         for (Subject subject : getContainer().<Subject>getTypeOf(Subject.class)) {
-            SubjectContainer subjectContainer = getSubjectContainer();
             subjectContainer.add(subject);
         }
     }
@@ -144,9 +144,9 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         List<Thread> threads = new ArrayList<>();
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Thread thread = new Thread(() -> {
-                step.restate();
+                step.onRestate();
             });
-            thread.setName("restate: " + step.getClass().getName());
+            thread.setName("onRestate: " + step.getClass().getName());
             thread.start();
             threads.add(thread);
         }
@@ -160,21 +160,21 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         });
     }
 
-    private void initRunning() {
-        GlobalAlgoStepConfig globConf = getGlobalAlgoStepConfig();
+    private void initRunners() {
+        AlgoConfig globConf = getConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            int delay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
-            int initialDelay = iStepDecorator.getStep().getLocalStepConfig() != null ? iStepDecorator.getStep().getLocalStepConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
 
-            if (iStepDecorator.getLocalStepConfig().isEnableTickCallback()) {
+            String runnerID = iStepDecorator.getStep().getClass().getName();
+
+            if (iStepDecorator.getConfig().isEnableTickCallback()) {
+                int delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
+                int initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
-                cntr.add(new RunningScheduled(iStepDecorator.getStep().getClass().getName() + "tickcallback",
-                        delay,
-                        initialDelay,
-                        iStepDecorator.getLocalStepConfig().getRunningPeriodicDelayUnit(),
+                TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
+                cntr.add(new RunningScheduled(runnerID + "tickcallback", delay, initialDelay, timeUnit,
                         () -> {
                             try {
-                                iStepDecorator.newDataArrived(new Data(cb), DefaultSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
+                                iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
                                 cb.await();
                             } catch (Exception e) {
                                 handle(e);
@@ -182,40 +182,37 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                         }));
             }
 
-            cntr.add(new Running(iStepDecorator.getStep().getClass().getName(),
-                    iStepDecorator::dataListener));
+            cntr.add(new Running(runnerID, iStepDecorator::openDataSink));
         }
 
-        if (this.getGlobalAlgoStepConfig().isEnableTickCallback()) {
+        if (this.getConfig().isEnableTickCallback()) {
             this.running = new RunningScheduled(DefaultAlgoDecorator.class.getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
-                    () -> {
-                        this.tickCallBack();
-                    });
+                    this::onTickCallBack);
         }
     }
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             step.init(cntr);
-            step.setGlobalAlgoStepConfig(getGlobalAlgoStepConfig());
+            step.setAlgoConfig(getConfig());
         }
     }
 
     private void attachSubjects() {
-        SubjectContainer subjectContainer = getContainer().getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
+        SubjectContainer subjectContainer = getContainer().getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
 
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             for (ISubject subject : subjectContainer.getSubjectsList()) {
-                iStepDecorator.attach(subject);
+                iStepDecorator.attachTo(subject);
             }
         }
     }
 
     protected SubjectContainer getSubjectContainer() {
-        return getContainer().getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
+        return getContainer().getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
     }
 
     protected Container getContainer() {

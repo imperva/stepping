@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Created by gabi.beyo on 1/31/2018.
  */
-public class Q<T> {
+class Q<T> {
 
     private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<>();
 
@@ -16,30 +16,30 @@ public class Q<T> {
         return blockingQueue.peek();
     }
 
-    public void queue(T incident) {
-        blockingQueue.add(incident);
+    void queue(T item) {
+        blockingQueue.add(item);
 
     }
 
-    public void queue(List<T> incidents) {
-        blockingQueue.addAll(incidents);
+    void queue(List<T> items) {
+        blockingQueue.addAll(items);
     }
 
-    public boolean contains() {
+    boolean contains() {
         return !blockingQueue.isEmpty();
     }
 
-    public T take() throws InterruptedException {
+    T take() throws InterruptedException {
         T data = blockingQueue.take();
         return data;
     }
 
 
-    public int size() {
+    int size() {
         return blockingQueue.size();
     }
 
-    public void clear() {
+    void clear() {
         blockingQueue.clear();
     }
 }

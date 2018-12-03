@@ -18,7 +18,7 @@ public class EvenDistributionStrategy implements IDistributionStrategy {
             chopped.remove(chopped.size() - 1);
         }
         for (int u = 0; u < iStepDecorators.size(); u++) {
-            iStepDecorators.get(u).newDataArrived(new Data(chopped.get(u)), subjectType);
+            iStepDecorators.get(u).queueSubjectUpdate(new Data(chopped.get(u)), subjectType);
         }
     }
 

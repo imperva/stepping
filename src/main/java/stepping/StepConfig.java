@@ -8,7 +8,7 @@ public class StepConfig {
     private TimeUnit runningPeriodicDelayUnit;
     private int numOfNodes = 0;
     private boolean enableTickCallback;
-    private IDistributionStrategy distributionStrategy = new AllDistributionStrategy();
+    private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();

@@ -6,24 +6,24 @@ import java.io.Closeable;
 
 public interface IStepDecorator extends Step, Closeable {
 
-    void newDataArrived(Data data, String subjectType);
+    void init(Container cntr);
 
-
-    default void tickCallBack() {
-        throw new RuntimeException("tickCallBack not implemented");
+    default void onTickCallBack() {
+        throw new RuntimeException("onTickCallBack not implemented");
     }
 
-    void attach(ISubject iSubject);
+    void queueSubjectUpdate(Data data, String subjectType);
+
+    void attachTo(ISubject iSubject);
 
     Step getStep();
 
-    void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig);
+    void setAlgoConfig(AlgoConfig algoConfig);
 
     void setDistributionNodeID(String name);
 
     String getDistributionNodeID();
 
-    void dataListener();
-
+    void openDataSink();
 
 }

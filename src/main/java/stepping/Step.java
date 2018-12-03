@@ -2,21 +2,21 @@ package stepping;
 
 public interface Step {
 
-      void init(Container cntr);
+      void init(Container cntr, Shouter shouter);
 
       boolean followsSubject(String subjectType);
 
-      void newDataArrivedCallBack(Data data, String subjectType, Shouter shouter);
-
-      default void tickCallBack() {
-            throw new RuntimeException("tickCallBack not implemented");
-      }
-
-      void restate();
-
-      void shuttingDown();
-
-      default StepConfig getLocalStepConfig(){
+      default StepConfig getConfig(){
             return new StepConfig();
       }
+
+      void onSubjectUpdate(Data data, String subjectType);
+
+      default void onTickCallBack() {
+            throw new RuntimeException("onTickCallBack not implemented");
+      }
+
+      void onRestate();
+
+      void onKill();
 }

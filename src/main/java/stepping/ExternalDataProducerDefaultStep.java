@@ -16,7 +16,7 @@
 //
 //    @Override
 //    public boolean followsSubject(String subjectType) {
-//        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(subjectType)) {
+//        if (BuiltinSubjectType.STEPPING_PUBLISH_DATA.name().equals(subjectType)) {
 //            return true;
 //        }
 //        return false;
@@ -24,24 +24,24 @@
 //
 //
 //    @Override
-//    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
-//        if (DefaultSubjectType.STEPPING_PUBLISH_DATA.name().equals(data.getSubjectType())) {
+//    public void onSubjectUpdate(Data data, SubjectContainer subjectContainer) {
+//        if (BuiltinSubjectType.STEPPING_PUBLISH_DATA.name().equals(data.getSubjectType())) {
 //            iMessenger.emit(data);
 //        }
 //    }
 //
 //    @Override
-//    public void tickCallBack() {
+//    public void onTickCallBack() {
 //
 //    }
 //
 //    @Override
-//    public void restate() {
+//    public void onRestate() {
 //
 //    }
 //
 //    @Override
-//    public void shuttingDown() {
+//    public void onKill() {
 //
 //    }
 //

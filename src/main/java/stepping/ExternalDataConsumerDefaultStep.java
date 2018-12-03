@@ -25,12 +25,12 @@
 //    }
 //
 //    @Override
-//    public void restate() {
+//    public void onRestate() {
 //
 //    }
 //
 //    @Override
-//    public void shuttingDown() {
+//    public void onKill() {
 //
 //    }
 //
@@ -40,16 +40,16 @@
 //    }
 //
 //    @Override
-//    public void newDataArrivedCallBack(Data data, SubjectContainer subjectContainer) {
+//    public void onSubjectUpdate(Data data, SubjectContainer subjectContainer) {
 //
 //    }
 //
 //    @Override
-//    public void tickCallBack() {
+//    public void onTickCallBack() {
 //        Data data = iMessenger.fetching();
 //        if (data.getValue() != null) {
-//            SubjectContainer subjectContainer = container.getById(DefaultContainerRegistrarTypes.STEPPING_SUBJECT_CONTAINER.name());
-//            subjectContainer.<List<JsonObject>>getByName(DefaultSubjectType.STEPPING_DATA_ARRIVED.name()).setData(data);
+//            SubjectContainer subjectContainer = container.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
+//            subjectContainer.<List<JsonObject>>getByName(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()).setData(data);
 //        } else {
 //            System.out.println("No data received from external resource");
 //        }
@@ -60,7 +60,7 @@
 //    }
 //
 //   @Override
-//   public StepConfig getLocalStepConfig(){
+//   public StepConfig getConfig(){
 //       StepConfig stepConfig = new StepConfig();
 //       stepConfig.setEnableDecelerationStrategy(false);
 //       return stepConfig;

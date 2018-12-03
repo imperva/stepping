@@ -7,7 +7,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     protected Container container;
     private Q<Message> q = new Q<>();
     private Step step;
-    private GlobalAlgoStepConfig globalAlgoStepConfig;
+    private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
 
@@ -17,45 +17,45 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void restate() {
-        step.restate();
+    public void onRestate() {
+        step.onRestate();
     }
 
     @Override
-    public void shuttingDown() {
-        step.shuttingDown();
+    public void onKill() {
+        step.onKill();
     }
 
     @Override
-    public void newDataArrivedCallBack(Data data, String subjectType, Shouter shouter) {
-        step.newDataArrivedCallBack(data, subjectType, shouter);
+    public void onSubjectUpdate(Data data, String subjectType) {
+        step.onSubjectUpdate(data, subjectType);
     }
 
     @Override
-    public void newDataArrived(Data data, String subjectType) {
-        q.queue(new Message(data,subjectType));
+    public void queueSubjectUpdate(Data data, String subjectType) {
+        q.queue(new Message(data, subjectType));
     }
 
     @Override
-    public void tickCallBack() {
+    public void onTickCallBack() {
         try {
-            step.tickCallBack();
+            step.onTickCallBack();
         } catch (Exception e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
     }
 
     @Override
-    public void dataListener() {
+    public void openDataSink() {
         try {
             while (true) {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
-                    if (!message.getSubjectType().equals(DefaultSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
-                        newDataArrivedCallBack(message.getData(), message.getSubjectType(), container.getById(DefaultContainerRegistrarTypes.STEPPING_SHOUTER.name()));
+                    if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+                        onSubjectUpdate(message.getData(), message.getSubjectType());
                     } else {
-                        tickCallBack();
+                        onTickCallBack();
                         CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();
                         cb.await();
                     }
@@ -63,26 +63,26 @@ public class DefaultStepDecorator implements IStepDecorator {
             }
         } catch (InterruptedException | BrokenBarrierException e) {
             System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(DefaultContainerRegistrarTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            container.<IExceptionHandler>getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
         }
     }
 
 
     @Override
     public void close() {
-        shuttingDown();
+        onKill();
     }
 
     @Override
     public void init(Container cntr) {
-        this.container = cntr;
-        //todo why here?
-        int numOfNodes = getLocalStepConfig().getNumOfNodes();
-        if (numOfNodes > 0)
-            setDistributionNodeID(this.getClass().getName());
-        step.init(container);
+        init(cntr, cntr.getById(BuiltinTypes.STEPPING_SHOUTER.name()));
     }
 
+    @Override
+    public void init(Container cntr, Shouter shouter) {
+        container = cntr;
+        step.init(container, shouter);
+    }
 
     @Override
     public boolean followsSubject(String subjectType) {
@@ -90,7 +90,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void attach(ISubject iSubject) {
+    public void attachTo(ISubject iSubject) {
         boolean isAttached = followsSubject(iSubject.getType());
         if (isAttached)
             iSubject.attach(this);
@@ -102,16 +102,15 @@ public class DefaultStepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void setGlobalAlgoStepConfig(GlobalAlgoStepConfig globalAlgoStepConfig) {
-        if (globalAlgoStepConfig == null)
-            throw new RuntimeException("GlobalAlgoStepConfig is required");
-        this.globalAlgoStepConfig = globalAlgoStepConfig;
-
+    public void setAlgoConfig(AlgoConfig algoConfig) {
+        if (algoConfig == null)
+            throw new RuntimeException("AlgoConfig is required");
+        this.algoConfig = algoConfig;
     }
 
     @Override
-    public StepConfig getLocalStepConfig(){
-        localStepConfig = step.getLocalStepConfig();
+    public StepConfig getConfig() {
+        localStepConfig = step.getConfig();
         if (localStepConfig == null)
             throw new RuntimeException("LocalStepConfig is required");
         return localStepConfig;
@@ -126,8 +125,6 @@ public class DefaultStepDecorator implements IStepDecorator {
     public String getDistributionNodeID() {
         return subjectDistributionID;
     }
-
-
 }
 
 
