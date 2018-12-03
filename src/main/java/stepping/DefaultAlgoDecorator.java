@@ -1,5 +1,8 @@
 package stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -7,8 +10,9 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
-    private Container cntr = new Container();
+    static final Logger LOGGER = LoggerFactory.getLogger(DefaultAlgoDecorator.class);
 
+    private Container cntr = new Container();
     private Algo algo;
     private IRunning running;
     private boolean isClosed = false;
@@ -45,10 +49,6 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
         DI(builtinRegistration.getRegistered());
         DI(objectsRegistration.getRegistered());
-
-
-        if (!cntr.exist(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()))
-            DI(this, BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     private void decorateSteps() {
@@ -88,6 +88,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         SubjectContainer subjectContainer = new SubjectContainer();
         containerRegistrar.add(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
         containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer));
+        containerRegistrar.add(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name(), this);
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
@@ -233,8 +234,17 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
 
     @Override
-    public void handle(Exception e) {
-        System.out.println("Error: " + e.toString());
+    public boolean handle(Exception e) {
+        LOGGER.error(e.getMessage());
+        List<IExceptionHandler> exceptionHandlers = cntr.getSonOf(IExceptionHandler.class);
+        if(exceptionHandlers != null){
+            for (IExceptionHandler handler: exceptionHandlers) {
+                boolean isExceptionHandled = handler.handle(e);
+                if(isExceptionHandled)
+                    return true;
+            }
+        }
         close();
+        return true;
     }
 }

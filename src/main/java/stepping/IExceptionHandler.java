@@ -2,5 +2,5 @@ package stepping;
 
 
 public interface IExceptionHandler {
-    void handle(Exception e);
+    boolean handle(Exception e);
 }
