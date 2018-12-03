@@ -1,7 +1,5 @@
 package stepping;
 
-import java.util.UUID;
-
 public interface ISubject {
    String getType();
    Data getData();
