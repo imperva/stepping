@@ -3,7 +3,7 @@ package stepping;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class DefaultStepDecorator implements IStepDecorator {
+public class StepDecorator implements IStepDecorator {
     protected Container container;
     private Q<Message> q = new Q<>();
     private Step step;
@@ -12,7 +12,7 @@ public class DefaultStepDecorator implements IStepDecorator {
     private String subjectDistributionID = "default";
 
 
-    DefaultStepDecorator(Step step) {
+    StepDecorator(Step step) {
         this.step = step;
     }
 

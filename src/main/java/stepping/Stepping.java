@@ -7,7 +7,7 @@ public class Stepping {
     private List<Algo> algos = new ArrayList<Algo>();
 
     public Stepping register(Algo iAlgo) {
-        IAlgoDecorator algo = new DefaultAlgoDecorator(iAlgo);
+        IAlgoDecorator algo = new AlgoDecorator(iAlgo);
         algos.add(algo);
 
         return this;

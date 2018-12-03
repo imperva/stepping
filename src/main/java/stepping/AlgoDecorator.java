@@ -9,15 +9,15 @@ import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
-public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
-    static final Logger LOGGER = LoggerFactory.getLogger(DefaultAlgoDecorator.class);
+public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
+    static final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
 
     private Container cntr = new Container();
     private Algo algo;
     private IRunning running;
     private boolean isClosed = false;
 
-    DefaultAlgoDecorator(Algo algo) {
+    AlgoDecorator(Algo algo) {
         this.algo = algo;
     }
 
@@ -53,8 +53,8 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
-            DefaultStepDecorator defaultStepDecorator = new DefaultStepDecorator(step);
-            cntr.add(defaultStepDecorator);
+            StepDecorator stepDecorator = new StepDecorator(step);
+            cntr.add(stepDecorator);
         }
     }
 
@@ -63,9 +63,9 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             int numOfNodes = iStepDecorator.getConfig().getNumOfNodes();
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
-                    DefaultStepDecorator defaultStepDecorator = new DefaultStepDecorator(iStepDecorator.getStep());
-                    defaultStepDecorator.setDistributionNodeID(defaultStepDecorator.getClass().getName());
-                    cntr.add(defaultStepDecorator);
+                    StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
+                    stepDecorator.setDistributionNodeID(stepDecorator.getClass().getName());
+                    cntr.add(stepDecorator);
                 }
             }
         }
@@ -187,7 +187,7 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.running = new RunningScheduled(DefaultAlgoDecorator.class.getName(),
+            this.running = new RunningScheduled(AlgoDecorator.class.getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
@@ -235,7 +235,6 @@ public class DefaultAlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public boolean handle(Exception e) {
-        LOGGER.error(e.getMessage());
         List<IExceptionHandler> exceptionHandlers = cntr.getSonOf(IExceptionHandler.class);
         if(exceptionHandlers != null){
             for (IExceptionHandler handler: exceptionHandlers) {
