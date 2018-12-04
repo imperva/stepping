@@ -138,6 +138,7 @@ public class StepDecorator implements IStepDecorator {
     public void close() {
         logger.info("Closing Step - " + getStep().getClass().getName());
         onKill();
+        Thread.currentThread().interrupt();
     }
 }
 

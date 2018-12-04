@@ -1,9 +1,8 @@
 package stepping;
 
-import org.apache.kafka.common.protocol.types.Field;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -13,9 +12,10 @@ import java.util.concurrent.TimeUnit;
 public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     static final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
 
-    private Container cntr = new Container();
+    private volatile Container cntr = new Container();
     private Algo algo;
     private IRunning running;
+    private volatile CyclicBarrier cb;
     private boolean isClosed = false;
 
     AlgoDecorator(Algo algo) {
@@ -47,6 +47,8 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
             logger.debug("Run Steps...");
             wakenRunners();
+
+            algo.init();
         } catch (Exception e) {
             logger.error("Algo initialization FAILED", e);
             close();
@@ -69,7 +71,7 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void duplicateNodes(){
+    private void duplicateNodes() {
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             int numOfNodes = iStepDecorator.getConfig().getNumOfNodes();
             if (numOfNodes > 0) {
@@ -131,6 +133,8 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 return;
 
             }
+//            if (this.cb != null)
+//                cb.reset();
             List<Closeable> closeables = new ArrayList<>();
             closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
             closeables.addAll(getContainer().getSonOf(IRunning.class));
@@ -139,7 +143,7 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 try {
                     closable.close();
                 } catch (IOException e) {
-                   logger.error("Failed to close a closeable object, continuing with the next one");
+                    logger.error("Failed to close a closeable object, continuing with the next one");
                 }
             }
             this.running.close();
@@ -184,11 +188,12 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             String runnerID = iStepDecorator.getStep().getClass().getName();
 
             if (iStepDecorator.getConfig().isEnableTickCallback()) {
-                int delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
-                int initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
+                long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
+                long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
+                this.cb = cb;
                 TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
-                cntr.add(new RunningScheduled(runnerID + "tickcallback", delay, initialDelay, timeUnit,
+                cntr.add(new RunningScheduled(delay, initialDelay, timeUnit,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -203,7 +208,7 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.running = new RunningScheduled(AlgoDecorator.class.getName(),
+            this.running = new RunningScheduled(
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
@@ -253,18 +258,18 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     public boolean handle(Exception e) {
 
         String error = "Exception Detected";
-        if(e instanceof SteppingException)
-            error += " in Step - " + ((SteppingException)e).getStepId();
-        if(e instanceof DistributionException)
-            error += " while distributing Subject - " + ((DistributionException)e).getSubjectType();
+        if (e instanceof SteppingException)
+            error += " in Step - " + ((SteppingException) e).getStepId();
+        if (e instanceof DistributionException)
+            error += " while distributing Subject - " + ((DistributionException) e).getSubjectType();
         logger.error(error, e);
 
         List<IExceptionHandler> exceptionHandlers = cntr.getSonOf(IExceptionHandler.class);
-        if(exceptionHandlers != null && !exceptionHandlers.isEmpty()){
+        if (exceptionHandlers != null && !exceptionHandlers.isEmpty()) {
             logger.debug("Forwarding exception to custom ExceptionHandlers");
-            for (IExceptionHandler handler: exceptionHandlers) {
+            for (IExceptionHandler handler : exceptionHandlers) {
                 boolean isExceptionHandled = handler.handle(e);
-                if(isExceptionHandled)
+                if (isExceptionHandled)
                     return true;
             }
         }

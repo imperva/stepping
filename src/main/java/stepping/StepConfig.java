@@ -3,8 +3,8 @@ package stepping;
 import java.util.concurrent.TimeUnit;
 
 public class StepConfig {
-    private int runningInitialDelay;
-    private int runningPeriodicDelay;
+    private long runningInitialDelay;
+    private long runningPeriodicDelay;
     private TimeUnit runningPeriodicDelayUnit;
     private int numOfNodes = 0;
     private boolean enableTickCallback;
@@ -12,13 +12,13 @@ public class StepConfig {
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
-        runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.step.initialdelay"));
-        runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.step.delay"));
+        runningInitialDelay = new Long(stepProp.getProperty("stepping.default.step.initialdelay"));
+        runningPeriodicDelay = new Long(stepProp.getProperty("stepping.default.step.delay"));
         runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit").toUpperCase());
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
     }
 
-    public int getRunningInitialDelay() {
+    public long getRunningInitialDelay() {
         return runningInitialDelay;
     }
 
@@ -26,7 +26,7 @@ public class StepConfig {
         this.runningInitialDelay = runningInitialDelay;
     }
 
-    public int getRunningPeriodicDelay() {
+    public long getRunningPeriodicDelay() {
         return runningPeriodicDelay;
     }
 

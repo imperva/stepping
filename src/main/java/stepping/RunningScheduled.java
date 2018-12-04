@@ -3,15 +3,13 @@ package stepping;
 import java.util.concurrent.*;
 
  class RunningScheduled extends IRunning {
-     private Integer delay;
-     private Integer initialdelay;
-     private String id;
+     private long delay;
+     private long initialdelay;
      private ScheduledFuture scheduledFuture;
      private TimeUnit timeUnit;
-     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new RunningThreadFactory());
 
-     protected RunningScheduled(String id, int delay, int initialdelay, TimeUnit timeUnit, Runnable runnable) {
-         this.id = id;
+     protected RunningScheduled(long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
          this.delay = delay;
          this.initialdelay = initialdelay;
          this.runnable = runnable;

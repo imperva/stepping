@@ -1,18 +1,18 @@
 package stepping;
 
 public class AlgoConfig {
-    private int runningInitialDelay;
-    private int runningPeriodicDelay;
+    private long runningInitialDelay;
+    private long runningPeriodicDelay;
     private boolean enableTickCallback;
 
     public AlgoConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
-        runningInitialDelay = new Integer(stepProp.getProperty("stepping.default.algo.initialdelay"));
-        runningPeriodicDelay = new Integer(stepProp.getProperty("stepping.default.algo.delay"));
+        runningInitialDelay = new Long(stepProp.getProperty("stepping.default.algo.initialdelay"));
+        runningPeriodicDelay = new Long(stepProp.getProperty("stepping.default.algo.delay"));
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.algo.enable.tickcallback"));
     }
 
-    public int getRunningInitialDelay() {
+    public long getRunningInitialDelay() {
         return runningInitialDelay;
     }
 
@@ -20,7 +20,7 @@ public class AlgoConfig {
         this.runningInitialDelay = runningInitialDelay;
     }
 
-    public int getRunningPeriodicDelay() {
+    public long getRunningPeriodicDelay() {
         return runningPeriodicDelay;
     }
 

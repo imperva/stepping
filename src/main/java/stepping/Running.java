@@ -4,10 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
- class Running extends IRunning {
-
+class Running extends IRunning {
      private Future future;
-     static ExecutorService executorService = Executors.newCachedThreadPool();
+     static ExecutorService executorService = Executors.newCachedThreadPool(new RunningThreadFactory());
 
      protected Running(String id, Runnable runnable) {
          this.id = id;
@@ -19,7 +18,7 @@ import java.util.concurrent.Future;
              this.future = executorService.submit(runnable);
              return future;
          }
-         return null;
+         throw new RuntimeException("Can't awake empty Runnable");
      }
 
      @Override
