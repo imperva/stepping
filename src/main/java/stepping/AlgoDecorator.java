@@ -1,5 +1,6 @@
 package stepping;
 
+import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,20 +25,30 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void init() {
         try {
+            logger.info("Initializing Algo...");
+            logger.info("Populating container...");
             fillContainer();
+            logger.info("Decorating Steps...");
             decorateSteps();
+            logger.info("Duplicating Parallel Nodes Steps...");
             duplicateNodes();
+            logger.info("Initializing Steps...");
             initSteps();
+            logger.info("Initializing Runners...");
             initRunners();
+            logger.info("Initializing Subjects...");
             initSubjectContainer();
+            logger.info("Register ShutdownHook...");
             registerShutdownHook();
+            logger.info("Attach Subjects to Followers...");
             attachSubjects();
+            logger.info("Starting Restate stage...");
             restate();
 
+            logger.debug("Run Steps...");
             wakenRunners();
         } catch (Exception e) {
-
-            System.out.println(e);
+            logger.error("Algo initialization FAILED", e);
             close();
         }
     }
@@ -87,8 +98,8 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
         SubjectContainer subjectContainer = new SubjectContainer();
         containerRegistrar.add(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
-        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer));
         containerRegistrar.add(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name(), this);
+        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer, this));
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
@@ -114,21 +125,26 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void close() {
         try {
-            if (isClosed)
+            logger.info("Try close entire Algo players");
+            if (isClosed) {
+                logger.debug("Algo already closed");
                 return;
+
+            }
             List<Closeable> closeables = new ArrayList<>();
             closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
             closeables.addAll(getContainer().getSonOf(IRunning.class));
+            logger.debug(closeables.size() + " closeables found");
             for (Closeable closable : closeables) {
                 try {
                     closable.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   logger.error("Failed to close a closeable object, continuing with the next one");
                 }
             }
             this.running.close();
         } catch (Exception e) {
-
+            logger.error("Failed to close Algo");
         } finally {
             isClosed = true;
         }
@@ -235,14 +251,24 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public boolean handle(Exception e) {
+
+        String error = "Exception Detected";
+        if(e instanceof SteppingException)
+            error += " in Step - " + ((SteppingException)e).getStepId();
+        if(e instanceof DistributionException)
+            error += " while distributing Subject - " + ((DistributionException)e).getSubjectType();
+        logger.error(error, e);
+
         List<IExceptionHandler> exceptionHandlers = cntr.getSonOf(IExceptionHandler.class);
-        if(exceptionHandlers != null){
+        if(exceptionHandlers != null && !exceptionHandlers.isEmpty()){
+            logger.debug("Forwarding exception to custom ExceptionHandlers");
             for (IExceptionHandler handler: exceptionHandlers) {
                 boolean isExceptionHandled = handler.handle(e);
                 if(isExceptionHandled)
                     return true;
             }
         }
+        logger.debug("Forwarding responsibility to Main ExceptionHandler");
         close();
         return true;
     }

@@ -1,15 +1,20 @@
 package stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 public class StepDecorator implements IStepDecorator {
+    static final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
     protected Container container;
     private Q<Message> q = new Q<>();
     private Step step;
     private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
+    private IExceptionHandler rootExceptionHabdler;
 
 
     StepDecorator(Step step) {
@@ -17,7 +22,21 @@ public class StepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void init(Container cntr) {
+        init(cntr, cntr.getById(BuiltinTypes.STEPPING_SHOUTER.name()));
+    }
+
+    @Override
+    public void init(Container cntr, Shouter shouter) {
+        logger.debug("Initializing Step - " + getStep().getClass().getName());
+        container = cntr;
+        step.init(container, shouter);
+        rootExceptionHabdler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
+    }
+
+    @Override
     public void onRestate() {
+        logger.info("Start Restate phase for Step - " + getStep().getClass().getName());
         step.onRestate();
     }
 
@@ -41,14 +60,14 @@ public class StepDecorator implements IStepDecorator {
         try {
             step.onTickCallBack();
         } catch (Exception e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e));
         }
     }
 
     @Override
     public void openDataSink() {
         try {
+            logger.info("Opening DataSing for Step - " + getStep().getClass().getName());
             while (true) {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
@@ -62,43 +81,32 @@ public class StepDecorator implements IStepDecorator {
                 }
             }
         } catch (InterruptedException | BrokenBarrierException e) {
-            System.out.println("EXCEPTION");
-            container.<IExceptionHandler>getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name()).handle(e);
+            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e));
         }
     }
 
 
     @Override
-    public void close() {
-        onKill();
-    }
-
-    @Override
-    public void init(Container cntr) {
-        init(cntr, cntr.getById(BuiltinTypes.STEPPING_SHOUTER.name()));
-    }
-
-    @Override
-    public void init(Container cntr, Shouter shouter) {
-        container = cntr;
-        step.init(container, shouter);
-    }
-
-    @Override
     public boolean followsSubject(String subjectType) {
-        return step.followsSubject(subjectType);
+        boolean isFollowSubject = step.followsSubject(subjectType);
+        return isFollowSubject;
     }
 
     @Override
     public void followSubject(ISubject iSubject) {
-        boolean isAttached = followsSubject(iSubject.getType());
-        if (isAttached)
-            iSubject.attach(this);
+        try {
+            boolean isAttached = followsSubject(iSubject.getType());
+            if (isAttached)
+                iSubject.attach(this);
+        } catch (Exception e) {
+            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e));
+        }
     }
 
     @Override
     public Step getStep() {
         return step;
+
     }
 
     @Override
@@ -124,6 +132,12 @@ public class StepDecorator implements IStepDecorator {
     @Override
     public String getDistributionNodeID() {
         return subjectDistributionID;
+    }
+
+    @Override
+    public void close() {
+        logger.info("Closing Step - " + getStep().getClass().getName());
+        onKill();
     }
 }
 

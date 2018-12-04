@@ -14,7 +14,7 @@ class SteppingProperties extends Properties {
     private String propertiesRelativeFileLocation = "stepping.properties";
     private static SteppingProperties SteppingProperties;
 
-    static SteppingProperties getInstance() {
+    static synchronized SteppingProperties getInstance() {
         if (SteppingProperties == null) {
             SteppingProperties = new SteppingProperties();
             return SteppingProperties;

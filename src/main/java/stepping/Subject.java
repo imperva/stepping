@@ -35,12 +35,14 @@ public class Subject implements ISubject {
 
     @Override
     public void publish(Data data) {
+
         Iterator<Map.Entry<SubjectKey, List<IStepDecorator>>> iterator = iSteps.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<SubjectKey, List<IStepDecorator>> pair = iterator.next();
             pair.getKey().getiDistributionStrategy().distribute(pair.getValue(), data, this.getType());
         }
         this.data = data;
+
     }
 
     @Override

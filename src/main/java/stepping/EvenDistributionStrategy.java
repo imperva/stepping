@@ -3,6 +3,7 @@ package stepping;
 import java.util.ArrayList;
 import java.util.List;
 
+//todo - very expensive - fix
 public class EvenDistributionStrategy implements IDistributionStrategy {
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
@@ -22,7 +23,6 @@ public class EvenDistributionStrategy implements IDistributionStrategy {
         }
     }
 
-    //todo - very expensive - fix
     private  <T> List<List<T>> chopped(List<T> list, final int L) {
         List<List<T>> parts = new ArrayList<List<T>>();
         final int N = list.size();
