@@ -14,7 +14,7 @@ public class StepDecorator implements IStepDecorator {
     private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private IExceptionHandler rootExceptionHabdler;
+    private IExceptionHandler rootExceptionHandler;
 
 
     StepDecorator(Step step) {
@@ -31,7 +31,7 @@ public class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getClass().getName());
         container = cntr;
         step.init(container, shouter);
-        rootExceptionHabdler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
+        rootExceptionHandler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     @Override
@@ -52,7 +52,19 @@ public class StepDecorator implements IStepDecorator {
 
     @Override
     public void queueSubjectUpdate(Data data, String subjectType) {
-        q.queue(new Message(data, subjectType));
+        try {
+            Message message = new Message(data, subjectType);
+            q.queue(message);
+
+            if (message.getData().isAsync()) {
+                SubjectContainer subjectContainer = container.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
+                int numOfSubscribers = subjectContainer.getByName(subjectType).getNumOfSubscribers(this);
+                DataSync dtSync = new DataSync(data, numOfSubscribers + 1);
+                dtSync.waiting();
+            }
+        } catch (Exception e) {
+            rootExceptionHandler.handle(new SteppingException(getStep().getClass().getName(), "Message Delivery FAILED", e));
+        }
     }
 
     @Override
@@ -60,7 +72,7 @@ public class StepDecorator implements IStepDecorator {
         try {
             step.onTickCallBack();
         } catch (Exception e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e));
+            rootExceptionHandler.handle(new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e));
         }
     }
 
@@ -70,18 +82,26 @@ public class StepDecorator implements IStepDecorator {
             logger.info("Opening DataSing for Step - " + getStep().getClass().getName());
             while (true) {
                 Message message = q.take();
-                if (message != null && message.getData() != null) {
-                    if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
-                        onSubjectUpdate(message.getData(), message.getSubjectType());
-                    } else {
-                        onTickCallBack();
-                        CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();
-                        cb.await();
-                    }
+                if (message == null || message.getData() == null) {
+                    continue;
                 }
+
+                if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+                    onSubjectUpdate(message.getData(), message.getSubjectType());
+                } else {
+                    onTickCallBack();
+                    CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();
+                    cb.await();
+                }
+
+                if (message.getData() instanceof DataSync) {
+                    DataSync dtSync = (DataSync) message.getData();
+                    dtSync.waiting();
+                }
+
             }
         } catch (InterruptedException | BrokenBarrierException e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e));
+            rootExceptionHandler.handle(new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e));
         }
     }
 
@@ -99,14 +119,13 @@ public class StepDecorator implements IStepDecorator {
             if (isAttached)
                 iSubject.attach(this);
         } catch (Exception e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e));
+            rootExceptionHandler.handle(new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e));
         }
     }
 
     @Override
     public Step getStep() {
         return step;
-
     }
 
     @Override

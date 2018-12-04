@@ -35,7 +35,6 @@ public class Subject implements ISubject {
 
     @Override
     public void publish(Data data) {
-
         Iterator<Map.Entry<SubjectKey, List<IStepDecorator>>> iterator = iSteps.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<SubjectKey, List<IStepDecorator>> pair = iterator.next();
@@ -59,6 +58,11 @@ public class Subject implements ISubject {
             newDistributionList.add(step);
             iSteps.put(subjectKey, newDistributionList);
         }
+    }
+
+    @Override
+    public int getNumOfSubscribers(IStepDecorator step){
+       return iSteps.get(new SubjectKey(step.getDistributionNodeID(), step.getConfig().getDistributionStrategy())).size();
     }
 
     private class SubjectKey {

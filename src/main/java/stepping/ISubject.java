@@ -6,4 +6,5 @@ public interface ISubject {
    void attach(IStepDecorator o);
    void publish(Data data);
    void publish(Object message);
+   int getNumOfSubscribers(IStepDecorator step);
 }
