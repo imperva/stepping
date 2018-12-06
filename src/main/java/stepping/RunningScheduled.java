@@ -7,7 +7,7 @@ import java.util.concurrent.*;
      private long initialdelay;
      private ScheduledFuture scheduledFuture;
      private TimeUnit timeUnit;
-     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new RunningThreadFactory());
+     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
      protected RunningScheduled(long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
          this.delay = delay;
