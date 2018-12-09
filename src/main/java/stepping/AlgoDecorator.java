@@ -15,7 +15,6 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private volatile Container cntr = new Container();
     private Algo algo;
     private IRunning running;
-    private volatile CyclicBarrier cb;
     private boolean isClosed = false;
     private final Object closingLock = new Object();
 
@@ -170,7 +169,6 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
                 long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
-                this.cb = cb;
                 TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
                 cntr.add(new RunningScheduled("Step TickCallBack - " + iStepDecorator.getStep().getClass().getName(), delay, initialDelay, timeUnit,
                         () -> {
