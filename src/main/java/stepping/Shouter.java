@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
              logger.trace("Shouting update on " + subjectType);
              subjectContainer.getByName(subjectType).publish(value);
          } catch (Exception e) {
-             rootExceptionHandler.handle(new DistributionException(subjectType, "Distribution FAILED", e));
+             rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
          }
      }
 
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
              logger.trace("Shouting update on " + subjectType);
              subjectContainer.getByName(subjectType).publish(value);
          } catch (Exception e) {
-             rootExceptionHandler.handle(new DistributionException(subjectType, "Distribution FAILED", e));
+             rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
          }
      }
  }

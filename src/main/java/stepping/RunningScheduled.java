@@ -6,10 +6,11 @@ import java.util.concurrent.*;
      private long delay;
      private long initialdelay;
      private ScheduledFuture scheduledFuture;
+     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
      private TimeUnit timeUnit;
-     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new RunningThreadFactory());
 
-     protected RunningScheduled(long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
+     protected RunningScheduled(String id, long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
+         this.id = id;
          this.delay = delay;
          this.initialdelay = initialdelay;
          this.runnable = runnable;
@@ -18,11 +19,12 @@ import java.util.concurrent.*;
 
      protected Future<?> awake() {
          this.scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
+         scheduledExecutorServices.add(scheduledExecutorService);
          return scheduledFuture;
      }
 
      @Override
      public void close() {
-         close(scheduledFuture, scheduledExecutorService);
+         close(scheduledFuture);
      }
  }

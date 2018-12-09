@@ -31,7 +31,7 @@ public class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getClass().getName());
         container = cntr;
         step.init(container, shouter);
-        rootExceptionHabdler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
+        //rootExceptionHabdler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     @Override
@@ -60,14 +60,14 @@ public class StepDecorator implements IStepDecorator {
         try {
             step.onTickCallBack();
         } catch (Exception e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e));
+            throw new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e);
         }
     }
 
     @Override
     public void openDataSink() {
         try {
-            logger.info("Opening DataSing for Step - " + getStep().getClass().getName());
+            logger.info("Opening DataSink for Step - " + getStep().getClass().getName());
             while (true) {
                 Message message = q.take();
                 if (message != null && message.getData() != null) {
@@ -81,10 +81,11 @@ public class StepDecorator implements IStepDecorator {
                 }
             }
         } catch (InterruptedException | BrokenBarrierException e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e));
+            throw new SteppingSystemException(e);
+        } catch (Exception e) {
+            throw new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e);
         }
     }
-
 
     @Override
     public boolean followsSubject(String subjectType) {
@@ -99,14 +100,13 @@ public class StepDecorator implements IStepDecorator {
             if (isAttached)
                 iSubject.attach(this);
         } catch (Exception e) {
-            rootExceptionHabdler.handle(new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e));
+            throw new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e);
         }
     }
 
     @Override
     public Step getStep() {
         return step;
-
     }
 
     @Override
@@ -136,9 +136,8 @@ public class StepDecorator implements IStepDecorator {
 
     @Override
     public void close() {
-        logger.info("Closing Step - " + getStep().getClass().getName());
+        logger.info("Forwarding Kill handling to Step impl- " + getStep().getClass().getName());
         onKill();
-        Thread.currentThread().interrupt();
     }
 }
 

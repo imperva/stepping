@@ -1,14 +1,14 @@
 package stepping;
 
-public class DistributionException extends RuntimeException {
+public class SteppingDistributionException extends SteppingSystemException {
     private final String subjectType;
 
-    DistributionException(String subjectType, Exception e) {
+    SteppingDistributionException(String subjectType, Exception e) {
         super(e);
         this.subjectType = subjectType;
     }
 
-    DistributionException(String subjectType, String message, Exception e) {
+    SteppingDistributionException(String subjectType, String message, Exception e) {
         super(message, e);
         this.subjectType = subjectType;
     }

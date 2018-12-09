@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
-public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
+public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     static final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
 
     private volatile Container cntr = new Container();
@@ -17,6 +17,7 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private IRunning running;
     private volatile CyclicBarrier cb;
     private boolean isClosed = false;
+    private final Object closingLock = new Object();
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -48,10 +49,11 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.debug("Run Steps...");
             wakenRunners();
 
+
             algo.init();
         } catch (Exception e) {
             logger.error("Algo initialization FAILED", e);
-            close();
+            handle(e);
         }
     }
 
@@ -100,7 +102,6 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
         SubjectContainer subjectContainer = new SubjectContainer();
         containerRegistrar.add(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
-        containerRegistrar.add(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name(), this);
         containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer, this));
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
@@ -124,36 +125,6 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         return algo.containerRegistration();
     }
 
-    @Override
-    public void close() {
-        try {
-            logger.info("Try close entire Algo players");
-            if (isClosed) {
-                logger.debug("Algo already closed");
-                return;
-
-            }
-//            if (this.cb != null)
-//                cb.reset();
-            List<Closeable> closeables = new ArrayList<>();
-            closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
-            closeables.addAll(getContainer().getSonOf(IRunning.class));
-            logger.debug(closeables.size() + " closeables found");
-            for (Closeable closable : closeables) {
-                try {
-                    closable.close();
-                } catch (IOException e) {
-                    logger.error("Failed to close a closeable object, continuing with the next one");
-                }
-            }
-            this.running.close();
-        } catch (Exception e) {
-            logger.error("Failed to close Algo");
-        } finally {
-            isClosed = true;
-        }
-    }
-
     private void initSubjectContainer() {
         SubjectContainer subjectContainer = getSubjectContainer();
         for (Subject subject : getContainer().<Subject>getTypeOf(Subject.class)) {
@@ -168,6 +139,14 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 step.onRestate();
             });
             thread.setName("onRestate: " + step.getClass().getName());
+            thread.setUncaughtExceptionHandler((t, e) -> {
+                if (e instanceof Exception) {
+                    Exception ex = (Exception) e;
+                    logger.error("OnRestate phase FAILED", ex);
+                    handle(ex);
+                    System.exit(1);
+                }
+            });
             thread.start();
             threads.add(thread);
         }
@@ -176,8 +155,9 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             try {
                 t.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Exception while waiting for restate phase to complete");
             }
+
         });
     }
 
@@ -185,7 +165,6 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         AlgoConfig globConf = getConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
 
-            String runnerID = iStepDecorator.getStep().getClass().getName();
 
             if (iStepDecorator.getConfig().isEnableTickCallback()) {
                 long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
@@ -193,7 +172,7 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 CyclicBarrier cb = new CyclicBarrier(2);
                 this.cb = cb;
                 TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
-                cntr.add(new RunningScheduled(delay, initialDelay, timeUnit,
+                cntr.add(new RunningScheduled("Step TickCallBack - " + iStepDecorator.getStep().getClass().getName(), delay, initialDelay, timeUnit,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -204,15 +183,28 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                         }));
             }
 
-            cntr.add(new Running(runnerID, iStepDecorator::openDataSink));
+            String runnerID = "Step DataSink - " + iStepDecorator.getStep().getClass().getName();
+            cntr.add(new Running(runnerID, () -> {
+                try {
+                    iStepDecorator.openDataSink();
+                } catch (Exception e) {
+                    handle(e);
+                }
+            }));
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.running = new RunningScheduled(
+            this.running = new RunningScheduled("Algo TickCallback - " + algo.getClass().getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
-                    this::onTickCallBack);
+                    () -> {
+                        try {
+                            onTickCallBack();
+                        } catch (Exception e) {
+                            handle(e);
+                        }
+                    });
         }
     }
 
@@ -256,25 +248,94 @@ public class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public boolean handle(Exception e) {
+        synchronized (closingLock) {
+            if (isClosed)
+                return true;
+            String error = "Exception Detected";
+            logger.error(error, e);
+            close();
 
-        String error = "Exception Detected";
-        if (e instanceof SteppingException)
-            error += " in Step - " + ((SteppingException) e).getStepId();
-        if (e instanceof DistributionException)
-            error += " while distributing Subject - " + ((DistributionException) e).getSubjectType();
-        logger.error(error, e);
-
-        List<IExceptionHandler> exceptionHandlers = cntr.getSonOf(IExceptionHandler.class);
-        if (exceptionHandlers != null && !exceptionHandlers.isEmpty()) {
-            logger.debug("Forwarding exception to custom ExceptionHandlers");
-            for (IExceptionHandler handler : exceptionHandlers) {
-                boolean isExceptionHandled = handler.handle(e);
-                if (isExceptionHandled)
-                    return true;
-            }
         }
-        logger.debug("Forwarding responsibility to Main ExceptionHandler");
-        close();
         return true;
     }
+
+    @Override
+    public void handle(SteppingException e) {
+        synchronized (closingLock) {
+            if (isClosed)
+                return;
+            String error = "Exception Detected in Step - " + e.getStepId();
+            logger.error(error, e);
+            close();
+        }
+    }
+
+    @Override
+    public void handle(SteppingSystemException e) {
+        synchronized (closingLock) {
+            if (isClosed)
+                return;
+            String error = "Exception Detected";
+            if (e instanceof SteppingDistributionException)
+                error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
+            logger.error(error, e);
+            close();
+        }
+    }
+
+    public void close() {
+        synchronized (closingLock) {
+            try {
+                if (isClosed)
+                    return;
+                List<Closeable> closeables = getContainer().getSonOf(IStepDecorator.class);
+                for (Closeable closable : closeables) {
+                    try {
+                        closable.close();
+                    } catch (IOException e) {
+                        logger.error("Failed to close a closeable object, continuing with the next one");
+                    }
+                }
+            } finally {
+                isClosed = true;
+                IRunning.kill();
+            }
+        }
+    }
+
+
+    /*@Override
+    public void close() {
+        try {
+            logger.info("Try close entire Algo players");
+            //if (isClosed) {
+            //    logger.debug("Algo already closed");
+             //   return;
+            //}
+
+            List<Closeable> closeables = new ArrayList<>();
+            closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
+            closeables.addAll(getContainer().getSonOf(IRunning.class));
+            logger.debug(closeables.size() + " closeables found");
+            for (Closeable closable : closeables) {
+                try {
+                    closable.close();
+                } catch (IOException e) {
+                    logger.error("Failed to close a closeable object, continuing with the next one");
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to close Algo", e);
+        } finally {
+            //isClosed = true;
+            try {
+                IRunning.kill();
+                this.running.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }*/
 }
