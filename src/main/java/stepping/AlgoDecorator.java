@@ -247,12 +247,11 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public boolean handle(Exception e) {
         synchronized (closingLock) {
-            if (isClosed)
+            if (isClosed || delegateExceptionHandling(e))
                 return true;
             String error = "Exception Detected";
             logger.error(error, e);
             close();
-
         }
         return true;
     }
@@ -260,7 +259,7 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public void handle(SteppingException e) {
         synchronized (closingLock) {
-            if (isClosed)
+            if (isClosed && delegateExceptionHandling(e))
                 return;
             String error = "Exception Detected in Step - " + e.getStepId();
             logger.error(error, e);
@@ -271,7 +270,7 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public void handle(SteppingSystemException e) {
         synchronized (closingLock) {
-            if (isClosed)
+            if (isClosed && delegateExceptionHandling(e))
                 return;
             String error = "Exception Detected";
             if (e instanceof SteppingDistributionException)
@@ -290,50 +289,40 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 for (Closeable closable : closeables) {
                     try {
                         closable.close();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         logger.error("Failed to close a closeable object, continuing with the next one");
                     }
+                }
+
+                List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
+                for (IStepDecorator step : stepDecorators) {
+                    step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
                 }
             } finally {
                 isClosed = true;
                 IRunning.kill();
+                Thread.currentThread().interrupt();
             }
         }
     }
 
 
-    /*@Override
-    public void close() {
-        try {
-            logger.info("Try close entire Algo players");
-            //if (isClosed) {
-            //    logger.debug("Algo already closed");
-             //   return;
-            //}
-
-            List<Closeable> closeables = new ArrayList<>();
-            closeables.addAll(getContainer().getSonOf(IStepDecorator.class));
-            closeables.addAll(getContainer().getSonOf(IRunning.class));
-            logger.debug(closeables.size() + " closeables found");
-            for (Closeable closable : closeables) {
-                try {
-                    closable.close();
-                } catch (IOException e) {
-                    logger.error("Failed to close a closeable object, continuing with the next one");
-                }
-            }
-
-        } catch (Exception e) {
-            logger.error("Failed to close Algo", e);
-        } finally {
-            //isClosed = true;
-            try {
-                IRunning.kill();
-                this.running.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+    private boolean delegateExceptionHandling(Exception e) {
+        logger.info("Try delegate Exception to custom Exception Handler");
+        List<IExceptionHandler> ehs = cntr.getSonOf(IExceptionHandler.class);
+        if (ehs == null || ehs.isEmpty()) {
+            logger.info("Custom Exception Handler MISSING");
+            return false;
         }
-    }*/
+        IExceptionHandler eh = ehs.get(0);
+        try {
+            boolean handle = eh.handle(e);
+            if (!handle)
+                logger.debug("Custom Exception Handler was not able to fully handle the Exception");
+            return handle;
+        } catch (Exception ex) {
+            logger.error("Custom Exception Handler FAILED", ex);
+            return false;
+        }
+    }
 }

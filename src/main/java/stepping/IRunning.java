@@ -12,7 +12,7 @@ abstract class IRunning implements Closeable {
     String id;
     Runnable runnable;
     protected static ExecutorService executorService = Executors.newCachedThreadPool();
-    protected static List<ScheduledExecutorService> scheduledExecutorServices = new ArrayList<>();
+    protected static List<ScheduledExecutorService> scheduledExecutorServices = new CopyOnWriteArrayList<>();
     private static Object lock = new Object();
 
     protected abstract Future<?> awake();
@@ -22,17 +22,22 @@ abstract class IRunning implements Closeable {
             try {
                 if (!executorService.isShutdown()) {
                     logger.info("Closing ExecutorService gracefully");
+                    executorService.shutdown();
                     executorService.shutdownNow();
                 }
 
                 for (ExecutorService scheduledExecutorService : scheduledExecutorServices) {
                     if (!scheduledExecutorService.isShutdown()) {
                         logger.info("Closing ScheduledExecutorService gracefully");
+                        scheduledExecutorService.shutdown();
                         scheduledExecutorService.shutdownNow();
                     }
                 }
+                logger.info("Tasks are dead");
             } catch (Exception e) {
-
+                logger.error("Failed closing ScheduledExecutorService");
+            } finally {
+                Thread.currentThread().interrupt();
             }
         }
     }

@@ -14,7 +14,7 @@ public class StepDecorator implements IStepDecorator {
     private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private IExceptionHandler rootExceptionHabdler;
+    private volatile boolean  dead = false;
 
 
     StepDecorator(Step step) {
@@ -31,7 +31,6 @@ public class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getClass().getName());
         container = cntr;
         step.init(container, shouter);
-        //rootExceptionHabdler = container.getById(BuiltinTypes.STEPPING_EXCEPTION_HANDLER.name());
     }
 
     @Override
@@ -68,8 +67,19 @@ public class StepDecorator implements IStepDecorator {
     public void openDataSink() {
         try {
             logger.info("Opening DataSink for Step - " + getStep().getClass().getName());
-            while (true) {
+            while (!dead) {
+                if (Thread.currentThread().isInterrupted())
+                    throw new InterruptedException();
                 Message message = q.take();
+
+                if (message.getSubjectType().equals("POISON-PILL")) {
+                    logger.info("Taking a Poison Pill. " + getStep().getClass().getName() + " is going to die");
+                    Thread.currentThread().interrupt();
+                    dead = true;
+                    logger.info("I am dead - " + getStep().getClass().getName());
+                    throw new InterruptedException();
+                }
+
                 if (message != null && message.getData() != null) {
                     if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
                         onSubjectUpdate(message.getData(), message.getSubjectType());
