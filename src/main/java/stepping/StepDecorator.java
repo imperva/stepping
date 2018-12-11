@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class StepDecorator implements IStepDecorator {
+class StepDecorator implements IStepDecorator {
     static final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
     protected Container container;
     private Q<Message> q = new Q<>();

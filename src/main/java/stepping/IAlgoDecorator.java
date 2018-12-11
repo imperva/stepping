@@ -1,5 +1,5 @@
 package stepping;
 
-public interface IAlgoDecorator extends Algo {
+interface IAlgoDecorator extends Algo {
 
 }

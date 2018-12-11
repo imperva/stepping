@@ -4,7 +4,7 @@ package stepping;
 
 import java.io.Closeable;
 
-public interface IStepDecorator extends Step, Closeable {
+interface IStepDecorator extends Step, Closeable {
 
     void init(Container cntr);
 

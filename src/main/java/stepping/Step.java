@@ -6,7 +6,7 @@ public interface Step {
 
       boolean followsSubject(String subjectType);
 
-      default StepConfig getConfig(){
+      default StepConfig getConfig() {
             return new StepConfig();
       }
 

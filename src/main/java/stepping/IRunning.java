@@ -17,7 +17,7 @@ abstract class IRunning implements Closeable {
 
     protected abstract Future<?> awake();
 
-    public static void kill() {
+     static void kill() {
         synchronized (lock) {
             try {
                 if (!executorService.isShutdown()) {

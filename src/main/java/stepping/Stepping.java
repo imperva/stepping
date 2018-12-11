@@ -1,10 +1,10 @@
 package stepping;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Stepping {
-    private List<Algo> algos = new ArrayList<Algo>();
+    private List<Algo> algos = new CopyOnWriteArrayList<>();
 
     public Stepping register(Algo iAlgo) {
         IAlgoDecorator algo = new AlgoDecorator(iAlgo);

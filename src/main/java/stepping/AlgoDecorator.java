@@ -4,12 +4,11 @@ package stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
-public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
+class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     static final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
 
     private volatile Container cntr = new Container();
@@ -223,11 +222,11 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-    protected SubjectContainer getSubjectContainer() {
+    private SubjectContainer getSubjectContainer() {
         return getContainer().getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
     }
 
-    protected Container getContainer() {
+    private Container getContainer() {
         return cntr;
     }
 
@@ -280,6 +279,7 @@ public class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
+    @Override
     public void close() {
         synchronized (closingLock) {
             try {
