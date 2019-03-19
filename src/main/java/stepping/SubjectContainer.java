@@ -1,31 +1,34 @@
 package stepping;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 class SubjectContainer {
     //todo improve performance (O)N + merge with global Container
-    private List<ISubject> subjectsList = new CopyOnWriteArrayList<>();
+    private ConcurrentHashMap<String, ISubject> subjectsList = new ConcurrentHashMap<>();
 
 
     List<ISubject> getSubjectsList() {
-        return subjectsList;
+        List<ISubject> subjects = new ArrayList<>(subjectsList.values());
+        return subjects;
     }
 
-    void setSubjectsList(List<ISubject> subjectsList) {
-        this.subjectsList = subjectsList;
-    }
+    //void setSubjectsList(List<ISubject> subjectsList) {
+    //    this.subjectsList = subjectsList;
+    //}
 
     ISubject getByName(String name) {
-        for (ISubject subject : subjectsList) {
-            if (subject.getType().equals(name))
-                return subject;
-
-        }
-        return null;
+        return subjectsList.get(name);
+//        for (ISubject subject : subjectsList) {
+//            if (subject.getType().equals(name))
+//                return subject;
+//
+//        }
+        //       return null;
     }
 
     void add(ISubject subject) {
-        subjectsList.add(subject);
+        subjectsList.putIfAbsent(subject.getType(), subject);
     }
 }
