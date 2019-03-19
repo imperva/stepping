@@ -294,6 +294,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                     }
                 }
 
+                //todo use shouter?
                 List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
                 for (IStepDecorator step : stepDecorators) {
                     step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
