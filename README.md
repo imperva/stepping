@@ -3,15 +3,16 @@ Stepping is a framework designed to eases the implementation of data processing 
 In use cases where we need to implement data or data-streaming algorithms or any other processing on data, we need to 
 first handle many different infrastructure issues.
 
-For example, we need to decide how to split the data processing logic into different steps, how this division fits with 
-our threading policy, how to handle communication between the different steps, error handling etc.
+For example, we need to decide how to split the data processing logic into different steps, think about our threading policy, 
+how to handle communication between the different steps, error handling etc.
 One of the most important subjects is the Threading Policy of our solution. For example, we need to think how many threads 
 to open, have the option to distribute the processing of data to multiple 'executors' in parallel, have a thread-safe 
 communication layer between the threads etc.
 On top of that we also care a lot about the performance of our solution, we want to make sure that the latency added by 
 these infrastructures is minimal as possible. 
 
-Stepping aims to handle many of these aspects so developers can spend their time on the business logic instead of infrastructure and data flow issues. 
+Stepping aims to handle many of these aspects so developers can spend their time on the business logic instead of 
+solving these infrastructure and data flow issues issues over and over again. 
 
 # Benefits
 The goal of this framework is to solve infrastructure issues encountered when developing data or data-streaming processing solution.
@@ -155,7 +156,7 @@ public class DBFetcher implements Step {
     @Override
     public void onTickCallBack() {
        //Will be called periodically based on Step configuration. 
-       //In this case the Step is configured to request CPU time every 10 seconds
+       //In this case the Step is configured to request CPU time every 10 seconds see getConfig()
        
        /*
        * PSEUDO_CODE
@@ -226,7 +227,7 @@ public class KafkaFetcher implements Step {
     @Override
     public void onTickCallBack() {
        //Will be called periodically based on Step configuration. 
-       //In this case the Step is configured to request CPU time every 1 millisecond
+       //In this case the Step is configured to request CPU time every 1 millisecond see getConfig()
        
        /*
        * PSEUDO_CODE
@@ -271,7 +272,6 @@ public class KafkaFetcher implements Step {
 
 ```
 Just as with "DBFetcher", once "KafkaDataArrived" event is triggered, the "KafkaFetcher" Step is ready to receive more streams of data, while other Steps take further care of the current stream.
-
 
 The last Step to implement is the "Merger" which is in charge to merge these these two source of data and write them back into a Kafka topic.
 ```java
