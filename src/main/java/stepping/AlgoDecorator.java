@@ -142,7 +142,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                     Exception ex = (Exception) e;
                     logger.error("OnRestate phase FAILED", ex);
                     handle(ex);
-                    System.exit(1);
+                    System.exit(1);// TODO - why?
                 }
             });
             thread.start();
