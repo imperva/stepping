@@ -44,7 +44,10 @@ When data processing stage is done, Steps can notify subscribers (other steps su
 the result of the processing stage so they can execute further logic on the data.
 Stepping usually runs in the background as service/daemon and executes internally at least two Steps, one acts as the 
 entry-point which reads data from a data source and another Step that acts as an ending-point usually writes back the 
-result to a streaming platform, a file or into a DB 
+result to a streaming platform, a file or into a DB.
+
+Steps can't communicate directly  with other Steps just by calling their function. The communication is event-driven and 
+Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible.
   
 ### Subjects
 Subjects are entities that represents events that Steps can subscribe to based on their business logic needs.
@@ -350,6 +353,8 @@ Stepping makes use of non-daemon threads so the application is kept alive till c
 
 
 # Concurrency Model
+
+### Steps and Threads
 Stepping is multithreaded in sense that each Step runs in its own thread to maximize efficiency of the Steps. 
 While Step B is busy executing its logic on the data Step A can start executing its logic on a different chunk of data.
 Usually there are always threads that performs I/O so the number of Steps can be grater than the number of cores of the machine.
@@ -358,19 +363,23 @@ Splitting the logic into different Steps is important not only to gain threads e
 so creating more Steps then the number of cores in the machine is still acceptable unless you create dozens of steps on a 4 core machine. 
 In this case you might discover that your efficiency actually decreases. 
 
+### Concurrency Policy
 Although each Step works in a dedicated thread, inside the Steps Stepping makes sure that only one thread executes a Step's function.  
 For example while onSubjectUpdate() is executed to to an event change, onTickCallBack() will not be executed, onTickCallBack() 
 will wait till current execution is done before start executing.
 
-Steps can't communicate directly  with other Steps just by calling their function. The communication is event-driven and 
-Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible.
-
 This Thread Policy allows consumers of Stepping  (Steps implementors) to use local variables inside their Steps as the 
 variables are always accessed by the *same* single thread thus avoiding visibility issues between threads.
+
+Stepping is lockless, meaning that threads' flow is not controlled by locks which might hurt the concurrency of the program.
+
+NOTE: When triggering events via the Shouter objects the consumers must make sure to not read or write data into an object 
+already published. Doing that might create visibility and condition race issues.   
 
 # Configuration
 Stepping contains a single configuration file at this location:
 /stepping/src/main/resources/stepping.properties
+
 
 # Getting Help
 If you have questions about the library, please be sure to check out the API documentation. 
