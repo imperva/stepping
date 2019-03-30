@@ -26,7 +26,7 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 - Enable customers to implement custom error handling policies
 
 # Dependencies
-- log4j
+- slf4j-simple & slf4j-api
 
 # Basics
 Stepping has three main players: Algos, Steps and Subjects.
