@@ -7,6 +7,11 @@
     <groupId>com.imperva</groupId>
     <artifactId>stepping</artifactId>
     <version>3.1-SNAPSHOT</version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <bintray.repo>imperva.opensource.maven.repository</bintray.repo>
+        <bintray.package>domain-directory-controller</bintray.package>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -23,27 +28,32 @@
 
     <distributionManagement>
         <repository>
-            <id>libs-release-local</id>
-            <url>https://il-mavenrep-lp1/libs-release-local</url>
+            <id>bintray-imperva-admin-imperva.opensource.maven.repository</id>
+            <name>imperva-admin-imperva.opensource.maven.repository</name>
+            <url>https://api.bintray.com/maven/imperva-admin/${bintray.repo}/${bintray.package}/;override=1;publish=1</url>
         </repository>
-        <snapshotRepository>
-            <id>libs-snapshot-local</id>
-            <url>https://il-mavenrep-lp1/libs-snapshot-local</url>
-        </snapshotRepository>
+        <!--<repository>-->
+        <!--<id>libs-release-local</id>-->
+        <!--<url>https://il-mavenrep-lp1/libs-release-local</url>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+        <!--<id>libs-snapshot-local</id>-->
+        <!--<url>https://il-mavenrep-lp1/libs-snapshot-local</url>-->
+        <!--</snapshotRepository>-->
     </distributionManagement>
 
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.0</version>
-            <configuration>
-                <source>1.8</source>
-                <target>1.8</target>
-            </configuration>
-        </plugin>
-    </plugins>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
 
-</build>
+    </build>
 </project>
