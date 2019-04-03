@@ -6,7 +6,7 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.repo>imperva.opensource.maven.repository</bintray.repo>
