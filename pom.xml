@@ -32,14 +32,6 @@
             <name>imperva-admin-imperva.opensource.maven.repository</name>
             <url>https://api.bintray.com/maven/imperva-admin/${bintray.repo}/${bintray.package}/;override=1;publish=1</url>
         </repository>
-        <!--<repository>-->
-        <!--<id>libs-release-local</id>-->
-        <!--<url>https://il-mavenrep-lp1/libs-release-local</url>-->
-        <!--</repository>-->
-        <!--<snapshotRepository>-->
-        <!--<id>libs-snapshot-local</id>-->
-        <!--<url>https://il-mavenrep-lp1/libs-snapshot-local</url>-->
-        <!--</snapshotRepository>-->
     </distributionManagement>
 
     <build>
