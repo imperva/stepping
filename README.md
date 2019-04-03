@@ -1,5 +1,5 @@
 # Stepping 
-Stepping is a framework designed to eases the implementation of data processing solutions.
+Stepping is a framework designed to ease the implementation of data processing solutions.
 In use cases where we need to implement data or data-streaming algorithms or any other processing on data, we need to 
 first handle many different infrastructure issues.
 
