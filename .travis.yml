@@ -11,11 +11,11 @@ stages:
 jobs:
   include:
   - stage: build
-    script: mvn -f source/pom.xml install
+    script: mvn -f pom.xml install
   - stage: publish-snapshot
-    script: mvn --settings .travis.settings.xml -f source/pom.xml deploy
+    script: mvn --settings .travis.settings.xml -f pom.xml deploy
   - stage: publish-release
-    script: mvn --settings .travis.settings.xml -f source/pom.xml deploy
+    script: mvn --settings .travis.settings.xml -f pom.xml deploy
 cache:
   directories:
   - "$HOME/.m2"
