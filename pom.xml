@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.repo>imperva.opensource.maven.repository</bintray.repo>
-        <bintray.package>domain-directory-controller</bintray.package>
+        <bintray.package>stepping</bintray.package>
     </properties>
 
     <dependencies>
