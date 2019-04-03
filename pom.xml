@@ -104,4 +104,18 @@
         </plugins>
 
     </build>
+
+    <developers>
+        <developer>
+            <name>Gabriel Beyo</name>
+            <email>gabi.beyo@imperva.com</email>
+            <organization>Imperva</organization>
+            <organizationUrl>http://www.imperva.com</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/imperva/stepping.git</connection>
+        <developerConnection>scm:git:ssh://github.com:imperva/stepping.git</developerConnection>
+        <url>https://github.com/imperva/stepping.git</url>
+    </scm>
 </project>
