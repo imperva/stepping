@@ -25,6 +25,12 @@
         solving these infrastructure and data flow issues issues over and over again.
     </description>
     <url>https://github.com/imperva/stepping.git</url>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.repo>imperva.opensource.maven.repository</bintray.repo>
