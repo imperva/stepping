@@ -6,7 +6,25 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>3.3.0</version>
+    <version>3.4.0</version>
+    <name>Stepping</name>
+    <description>
+        Stepping is a framework designed to ease the implementation of data processing solutions.
+        In use cases where we need to implement data or data-streaming algorithms or any other processing on data, we need to
+        first handle many different infrastructure issues.
+
+        For example, we need to decide how to split the data processing logic into different steps, think about our threading policy,
+        how to handle communication between the different steps, error handling etc.
+        One of the most important subjects is the Threading Policy of our solution. For example, we need to think how many threads
+        to open, have the option to distribute the processing of data to multiple 'executors' in parallel, have a thread-safe
+        communication layer between the threads etc.
+        On top of that we also care a lot about the performance of our solution, we want to make sure that the latency added by
+        these infrastructures is minimal as possible.
+
+        Stepping aims to handle many of these aspects so developers can spend their time on the business logic instead of
+        solving these infrastructure and data flow issues issues over and over again.
+    </description>
+    <url>https://github.com/imperva/stepping.git</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.repo>imperva.opensource.maven.repository</bintray.repo>
