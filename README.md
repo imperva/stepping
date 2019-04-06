@@ -1,3 +1,8 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.imperva.ddc/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.ddc%22%20AND%20a:%22stepping%22)
+
+[![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=travis)](https://www.travis-ci.org/imperva/stepping?branch=travis)
+
+
 # Stepping 
 Stepping is a framework designed to ease the implementation of data processing solutions.
 In use cases where we need to implement data or data-streaming algorithms or any other processing on data, we need to 
