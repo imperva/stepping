@@ -34,6 +34,17 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 - slf4j-simple
 - slf4j-api
 
+# How To Use It - First Steps
+Stepping is a Maven project (binaries are deployed in Maven Central) so you can import the projects manually or via Maven by adding the following Dependencies to your project's POM file:
+
+~~~
+<dependency>
+  <groupId>com.imperva.stepping</groupId>
+  <artifactId>stepping</artifactId>
+  <version>3.5.0</version>
+</dependency>
+~~~
+
 # Basics
 Stepping has three main players: Algos, Steps and Subjects.
 
