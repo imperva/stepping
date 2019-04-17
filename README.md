@@ -398,6 +398,14 @@ Stepping contains a single configuration file at this location:
 /stepping/src/main/resources/stepping.properties
 
 
+# Advanced Topics
+
+### Custom Error Handling
+TBD
+
+### Distribiution Policy for Parallel Nodes
+TBD
+
 # Getting Help
 If you have questions about the library, please be sure to check out the API documentation. 
 If you still have questions, reach out me via mail gabi.beyo@imperva.com.
