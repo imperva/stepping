@@ -16,6 +16,8 @@ interface IStepDecorator extends Step, Closeable {
 
     void followSubject(ISubject iSubject);
 
+    Follower getSubjectsToFollow();
+
     Step getStep();
 
     void setAlgoConfig(AlgoConfig algoConfig);

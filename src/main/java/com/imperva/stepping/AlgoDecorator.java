@@ -217,7 +217,19 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             for (ISubject subject : subjectContainer.getSubjectsList()) {
-                iStepDecorator.followSubject(subject);
+                Follower follower = iStepDecorator.getSubjectsToFollow();
+                if (follower != null && follower.size() != 0) {
+                    for (String subjectType : follower.get()) {
+                        ISubject s = subjectContainer.getByName(subjectType);
+                        if (s == null) {
+                            s = new Subject(subjectType);
+                            subjectContainer.add(s);
+                        }
+                        s.attach(iStepDecorator);
+                    }
+                } else {
+                    iStepDecorator.followSubject(subject);
+                }
             }
         }
     }

@@ -15,6 +15,7 @@ class StepDecorator implements IStepDecorator {
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
     private volatile boolean  dead = false;
+    private Follower follower = null;
 
 
     StepDecorator(Step step) {
@@ -104,6 +105,11 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void getSubjectsToFollow(Follower follower) {
+        step.getSubjectsToFollow(follower);
+    }
+
+    @Override
     public void followSubject(ISubject iSubject) {
         try {
             boolean isAttached = followsSubject(iSubject.getType());
@@ -112,6 +118,16 @@ class StepDecorator implements IStepDecorator {
         } catch (Exception e) {
             throw new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e);
         }
+    }
+
+    @Override
+    public Follower getSubjectsToFollow() {
+        if(follower != null)
+            return follower;
+        Follower follower = new Follower();
+        getSubjectsToFollow(follower);
+        this.follower = follower;
+        return follower;
     }
 
     @Override

@@ -4,7 +4,9 @@ public interface Step {
 
       void init(Container cntr, Shouter shouter);
 
-      boolean followsSubject(String subjectType);
+      default boolean followsSubject(String subjectType){ return true;}
+
+      default void getSubjectsToFollow(Follower follower){}
 
       default StepConfig getConfig() {
             return new StepConfig();
