@@ -99,9 +99,9 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void attachSubject() {
+    public void attachSubjects() {
         SubjectContainer subjectContainer = container.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
-        Follower follower = getSubjectsToFollow();
+        Follower follower = cacheSubjectsToFollow();
         if (follower != null && follower.size() != 0) {
             for (String subjectType : follower.get()) {
                 ISubject s = subjectContainer.getByName(subjectType);
@@ -125,8 +125,8 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
-    public void getSubjectsToFollow(Follower follower) {
-        step.getSubjectsToFollow(follower);
+    public void listSubjectsToFollow(Follower follower) {
+        step.listSubjectsToFollow(follower);
     }
 
     private void followSubject(ISubject iSubject) {
@@ -139,11 +139,11 @@ class StepDecorator implements IStepDecorator {
         }
     }
 
-    private Follower getSubjectsToFollow() {
+    private Follower cacheSubjectsToFollow() {
         if(follower != null)
             return follower;
         Follower follower = new Follower();
-        getSubjectsToFollow(follower);
+        listSubjectsToFollow(follower);
         this.follower = new Follower(follower);
         return follower;
     }

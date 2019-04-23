@@ -213,7 +213,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void attachSubjects() {
         List<IStepDecorator> iStepDecoratorList =  cntr.<IStepDecorator>getSonOf(IStepDecorator.class);
         for (IStepDecorator iStepDecorator : iStepDecoratorList) {
-            iStepDecorator.attachSubject();
+            iStepDecorator.attachSubjects();
         }
     }
 

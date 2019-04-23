@@ -24,6 +24,6 @@ interface IStepDecorator extends Step, Closeable {
 
     void openDataSink();
 
-    void attachSubject();
+    void attachSubjects();
 
 }
