@@ -35,7 +35,11 @@ public class Container {
     }
 
     public Container add(List<Identifiable> identifiables) {
-        objects.addAll(identifiables);
+        if(identifiables == null)
+            throw new RuntimeException("Can't add null object to Container");
+        for (Identifiable identifiable :  identifiables) {
+            add(identifiable);
+        }
         return this;
     }
 
