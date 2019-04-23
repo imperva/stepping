@@ -125,7 +125,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private void initSubjectContainer() {
         SubjectContainer subjectContainer = getSubjectContainer();
-        for (Subject subject : getContainer().<Subject>getTypeOf(Subject.class)) {
+        for (Subject subject : cntr.<Subject>getTypeOf(Subject.class)) {
             subjectContainer.add(subject);
         }
     }
@@ -162,8 +162,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void initRunners() {
         AlgoConfig globConf = getConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-
-
             if (iStepDecorator.getConfig().isEnableTickCallback()) {
                 long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
                 long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
@@ -213,33 +211,14 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private void attachSubjects() {
-        SubjectContainer subjectContainer = getContainer().getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
-
-        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            for (ISubject subject : subjectContainer.getSubjectsList()) {
-                Follower follower = iStepDecorator.getSubjectsToFollow();
-                if (follower != null && follower.size() != 0) {
-                    for (String subjectType : follower.get()) {
-                        ISubject s = subjectContainer.getByName(subjectType);
-                        if (s == null) {
-                            s = new Subject(subjectType);
-                            subjectContainer.add(s);
-                        }
-                        s.attach(iStepDecorator);
-                    }
-                } else {
-                    iStepDecorator.followSubject(subject);
-                }
-            }
+        List<IStepDecorator> iStepDecoratorList =  cntr.<IStepDecorator>getSonOf(IStepDecorator.class);
+        for (IStepDecorator iStepDecorator : iStepDecoratorList) {
+            iStepDecorator.attachSubject();
         }
     }
 
     private SubjectContainer getSubjectContainer() {
-        return getContainer().getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
-    }
-
-    private Container getContainer() {
-        return cntr;
+        return cntr.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
     }
 
     private <T> void DI(T obj, String id) {
@@ -297,7 +276,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             try {
                 if (isClosed)
                     return;
-                List<Closeable> closeables = getContainer().getSonOf(IStepDecorator.class);
+                List<Closeable> closeables = cntr.getSonOf(IStepDecorator.class);
                 for (Closeable closable : closeables) {
                     try {
                         closable.close();

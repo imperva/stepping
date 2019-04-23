@@ -6,6 +6,12 @@ import java.util.List;
 public class Follower {
     private List<String> toFollow = new ArrayList<>();
 
+    public Follower(){}
+
+    public Follower(Follower follower){
+       toFollow = follower.get();
+    }
+
     public Follower follow(String subjectType) {
         toFollow.add(subjectType);
         return this;
@@ -16,6 +22,6 @@ public class Follower {
     }
 
     public List<String> get(){
-        return toFollow;
+        return new ArrayList<>(toFollow);
     }
 }
