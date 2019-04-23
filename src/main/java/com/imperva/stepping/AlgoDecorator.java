@@ -35,8 +35,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             initSteps();
             logger.info("Initializing Runners...");
             initRunners();
-            logger.info("Initializing Subjects...");
-            initSubjectContainer();
             logger.info("Register ShutdownHook...");
             registerShutdownHook();
             logger.info("Attach Subjects to Followers...");
@@ -98,9 +96,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private ContainerRegistrar builtinContainerRegistration() {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-        SubjectContainer subjectContainer = new SubjectContainer();
-        containerRegistrar.add(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name(), subjectContainer);
-        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(subjectContainer, this));
+        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(cntr, this));
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
@@ -121,13 +117,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public ContainerRegistrar containerRegistration() {
         return algo.containerRegistration();
-    }
-
-    private void initSubjectContainer() {
-        SubjectContainer subjectContainer = getSubjectContainer();
-        for (Subject subject : cntr.<Subject>getTypeOf(Subject.class)) {
-            subjectContainer.add(subject);
-        }
     }
 
     private void restate() {
@@ -215,10 +204,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         for (IStepDecorator iStepDecorator : iStepDecoratorList) {
             iStepDecorator.attachSubjects();
         }
-    }
-
-    private SubjectContainer getSubjectContainer() {
-        return cntr.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
     }
 
     private <T> void DI(T obj, String id) {

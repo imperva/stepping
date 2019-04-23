@@ -3,6 +3,7 @@ package com.imperva.stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
@@ -100,19 +101,19 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void attachSubjects() {
-        SubjectContainer subjectContainer = container.getById(BuiltinTypes.STEPPING_SUBJECT_CONTAINER.name());
         Follower follower = cacheSubjectsToFollow();
         if (follower != null && follower.size() != 0) {
             for (String subjectType : follower.get()) {
-                ISubject s = subjectContainer.getByName(subjectType);
+                ISubject s = container.getById(subjectType);
                 if (s == null) {
                     s = new Subject(subjectType);
-                    subjectContainer.add(s);
+                    container.add(s, subjectType);
                 }
                 s.attach(this);
             }
         } else {
-            for (ISubject subject : subjectContainer.getSubjectsList()) {
+            List<ISubject> subjects = container.getSonOf(ISubject.class);
+            for (ISubject subject : subjects) {
                 followSubject(subject);
             }
         }
