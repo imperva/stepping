@@ -29,6 +29,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             fillContainer();
             logger.info("Decorating Steps...");
             decorateSteps();
+            logger.info("Fill Subjects in Container...");
+            fillAutoCreatedSubjectsInContainer();
             logger.info("Duplicating Parallel Nodes Steps...");
             duplicateNodes();
             logger.info("Initializing Steps...");
@@ -53,13 +55,35 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
+    private void fillAutoCreatedSubjectsInContainer() {
+        ContainerRegistrar autoSubjectsRegistration = autoSubjectsRegistration();
+        DI(autoSubjectsRegistration.getRegistered());
+    }
+
     private void fillContainer() {
         ContainerRegistrar builtinRegistration = builtinContainerRegistration();
-
         ContainerRegistrar objectsRegistration = containerRegistration();
 
         DI(builtinRegistration.getRegistered());
         DI(objectsRegistration.getRegistered());
+    }
+
+    private ContainerRegistrar autoSubjectsRegistration() {
+        ContainerRegistrar containerRegistrar = new ContainerRegistrar();
+        for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+            Follower follower = step.listSubjectsToFollow();
+            if (follower != null && follower.size() != 0) {
+                for (String subjectType : follower.get()) {
+                    ISubject s = cntr.getById(subjectType);
+                    if (s == null) { //* If exist do nothing
+                        s = new Subject(subjectType);
+                        containerRegistrar.add(subjectType, s);
+                    }
+
+                }
+            }
+        }
+        return containerRegistrar;
     }
 
     private void decorateSteps() {

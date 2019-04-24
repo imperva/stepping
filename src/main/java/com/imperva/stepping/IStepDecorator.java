@@ -26,4 +26,6 @@ interface IStepDecorator extends Step, Closeable {
 
     void attachSubjects();
 
+    Follower listSubjectsToFollow();
+
 }

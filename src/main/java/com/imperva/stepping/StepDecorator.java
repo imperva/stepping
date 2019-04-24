@@ -101,13 +101,12 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void attachSubjects() {
-        Follower follower = cacheSubjectsToFollow();
+        Follower follower = listSubjectsToFollow();
         if (follower != null && follower.size() != 0) {
             for (String subjectType : follower.get()) {
                 ISubject s = container.getById(subjectType);
                 if (s == null) {
-                    s = new Subject(subjectType);
-                    container.add(s, subjectType);
+                   throw new RuntimeException("Can't attach null Subject to be followed");
                 }
                 s.attach(this);
             }
@@ -140,7 +139,8 @@ class StepDecorator implements IStepDecorator {
         }
     }
 
-    private Follower cacheSubjectsToFollow() {
+    @Override
+    public Follower listSubjectsToFollow() {
         if(follower != null)
             return follower;
         Follower follower = new Follower();
