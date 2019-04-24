@@ -1,13 +1,13 @@
 package com.imperva.stepping;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Container {
-    //todo improve performance (O)N
-    private volatile List<Identifiable> objects = new CopyOnWriteArrayList<>();
+    private volatile ConcurrentHashMap<String,Identifiable> objects = new ConcurrentHashMap<>();
 
     public Container() {
     }
@@ -23,14 +23,14 @@ public class Container {
     }
 
     public <T> Container add(Identifiable<T> identifiable) {
-        if (objects.contains(identifiable))
+        if (objects.containsKey(identifiable.getId()))
             throw new RuntimeException("Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
-        objects.add(identifiable);
+        objects.putIfAbsent(identifiable.getId(),identifiable);
         return this;
     }
 
     public Container remove(String id) {
-        objects.removeIf((i) -> i.getId().toLowerCase().equals(id.toLowerCase()));
+        objects.remove(id);
         return this;
     }
 
@@ -44,11 +44,11 @@ public class Container {
     }
 
     public <T> T getById(String id) {
-        for (Identifiable identifiable :  objects) {
-            if (identifiable.getId().toLowerCase().equals(id.toLowerCase()))
-                return (T) identifiable.get();
-        }
-        return null;
+        Identifiable obj = objects.get(id);
+        if(obj == null)
+            return null;
+
+        return (T)obj.get();
     }
 
     private boolean getSonOf(Class<?> interf, Class clss, List<Class> context) {
@@ -76,7 +76,7 @@ public class Container {
 
     public <T> List<T> getSonOf(Class<?> interf) {
         List<T> ts = new ArrayList<>();
-        List<Object> objects2 = objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
+        List<Object> objects2 = objects.entrySet().stream().map((obj) -> (obj.getValue()).get()).collect(Collectors.toList());
         for (Object o : objects2) {
             Boolean found = getSonOf(interf, o.getClass(), new ArrayList<>());
             if (found)
@@ -87,7 +87,7 @@ public class Container {
 
     public <T> List<T> getTypeOf(Class<?> interf) {
         List<T> ts = new ArrayList<>();
-        List<Object> objects2 = objects.stream().map((obj) -> ((Identifiable) obj).get()).collect(Collectors.toList());
+        List<Object> objects2 = objects.entrySet().stream().map((obj) -> (obj.getValue()).get()).collect(Collectors.toList());
         for (Object o : objects2) {
             if (o.getClass().equals(interf))
                 ts.add((T) o);
@@ -105,12 +105,6 @@ public class Container {
     }
 
     public boolean exist(String name) {
-        for (Identifiable identifiable : objects) {
-            if (identifiable.getId().equals(name)) {
-                return true;
-            }
-            return false;
-        }
-        return false;
+       return objects.containsKey(name);
     }
 }
