@@ -99,7 +99,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
                     StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
-                    stepDecorator.setDistributionNodeID(stepDecorator.getClass().getName());
+                    stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
                     cntr.add(stepDecorator);
                 }
             }
