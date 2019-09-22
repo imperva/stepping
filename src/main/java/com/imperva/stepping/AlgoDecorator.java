@@ -1,6 +1,7 @@
 package com.imperva.stepping;
 
 
+import com.sun.deploy.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
@@ -227,6 +228,17 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         List<IStepDecorator> iStepDecoratorList =  cntr.<IStepDecorator>getSonOf(IStepDecorator.class);
         for (IStepDecorator iStepDecorator : iStepDecoratorList) {
             iStepDecorator.attachSubjects();
+        }
+    }
+
+    private void attachReducersToMappers() {
+        List<Step> steps =  cntr.<Step>getSonOf(Step.class);
+        for (Step stp : steps) {
+            int numOfNodes = stp.getConfig().getNumOfNodes();
+            String reducerId = stp.getConfig().getReducerID();
+            if( numOfNodes > 0 && reducerId != null && !reducerId.trim().equals("")){
+              stp.getConfig().setReducerStep(cntr.getById(reducerId));
+            }
         }
     }
 

@@ -7,8 +7,10 @@ public class StepConfig {
     private long runningPeriodicDelay;
     private TimeUnit runningPeriodicDelayUnit;
     private int numOfNodes = 0;
+    private String reducerID;
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
+    private Step reducerStep;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -64,5 +66,24 @@ public class StepConfig {
 
     public void setRunningPeriodicDelayUnit(TimeUnit runningPeriodicDelayUnit) {
         this.runningPeriodicDelayUnit = runningPeriodicDelayUnit;
+    }
+
+    public String getReducerID() {
+        return reducerID;
+    }
+
+    public void setReducerID(String reducerID) {
+        this.reducerID = reducerID;
+    }
+
+
+
+     Step getReducerStep() {
+        return reducerStep;
+    }
+
+
+    void setReducerStep(Step reducerStep) {
+        this.reducerStep = reducerStep;
     }
 }

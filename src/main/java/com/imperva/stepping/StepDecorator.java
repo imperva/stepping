@@ -3,9 +3,12 @@ package com.imperva.stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
+import java.util.stream.Collectors;
 
 class StepDecorator implements IStepDecorator {
     static final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
@@ -17,6 +20,7 @@ class StepDecorator implements IStepDecorator {
     private String subjectDistributionID = "default";
     private volatile boolean  dead = false;
     private Follower follower = null;
+    private CopyOnWriteArrayList<Data> reducerCache = new CopyOnWriteArrayList<>();
 
 
     StepDecorator(Step step) {
@@ -53,6 +57,25 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void queueSubjectUpdate(Data data, String subjectType) {
+        if(subjectType.contains(BuiltinSubjectType.STEPPING_REDUCE_EVENT.name())){
+            reducerCache.add(data);
+            try {
+                ((CyclicBarrier)data.getMetadata("synchronyzer")).wait();
+                synchronized (this) {
+                    int nomOfNodes = new Integer(data.getMetadata("numOfNodes").toString());
+                    if (reducerCache.size() == nomOfNodes) {
+                        Data dt = new Data(new ArrayList<>(reducerCache));
+                        q.queue(new Message(dt, subjectType));
+                        reducerCache.clear();
+                    }else {
+                        return;
+                    }
+                }
+            }catch (Exception e){
+
+            }
+        }
+
         q.queue(new Message(data, subjectType));
     }
 
@@ -106,7 +129,7 @@ class StepDecorator implements IStepDecorator {
             for (String subjectType : follower.get()) {
                 ISubject s = container.getById(subjectType);
                 if (s == null) {
-                   throw new RuntimeException("Can't attach null Subject to be followed");
+                    throw new RuntimeException("Can't attach null Subject to be followed");
                 }
                 s.attach(this);
             }
@@ -115,6 +138,11 @@ class StepDecorator implements IStepDecorator {
             for (ISubject subject : subjects) {
                 followSubject(subject);
             }
+        }
+
+
+        if (getConfig().getReducerID() != null) {
+            IStepDecorator s = container.getById(getConfig().getReducerID());
         }
     }
 

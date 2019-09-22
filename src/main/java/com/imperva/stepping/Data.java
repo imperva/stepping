@@ -1,7 +1,9 @@
 package com.imperva.stepping;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
 
 /**
  * Created by gabi.beyo on 12/13/2017.
@@ -9,6 +11,7 @@ import java.util.List;
 public class Data {
     private final Object value;
     private final int size;
+    private HashMap<String, Object> metaData = new HashMap<String,Object>();
 
     public Data(Object value) {
         this.value = value;
@@ -30,5 +33,21 @@ public class Data {
 
     public int getSize() {
         return size;
+    }
+
+//    public CyclicBarrier getSyncronyzer() {
+//        return syncronyzer;
+//    }
+//
+//    public void setSyncronyzer(CyclicBarrier syncronyzer) {
+//        this.syncronyzer = syncronyzer;
+//    }
+
+    public void addMetadata(String key, Object val) {
+        metaData.put(key,val);
+    }
+
+    public Object getMetadata(String key) {
+        return metaData.get(key);
     }
 }
