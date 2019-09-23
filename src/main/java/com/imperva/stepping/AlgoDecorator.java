@@ -3,6 +3,7 @@ package com.imperva.stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Future;
@@ -17,6 +18,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private volatile boolean isClosed = false;
     private final Object closingLock = new Object();
     private Future runningAlgoTickCallbackFuture;
+    private SteppingConfig steppingConfig;
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -170,7 +172,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             } catch (InterruptedException e) {
                 logger.error("Exception while waiting for restate phase to complete");
             }
-
         });
     }
 
@@ -307,10 +308,24 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 runnersController.kill();
                 if (runningAlgoTickCallbackFuture != null)
                     runningAlgoTickCallbackFuture.cancel(true);
+
+                if (steppingConfig.isKillProcessOnException())
+                    killProcess();
             }
         }
     }
 
+    private void killProcess() {
+        try {
+            //* todo: I know it is ugly... need to implement a better way to control Stepping from outside
+            String vmName = ManagementFactory.getRuntimeMXBean().getName();
+            int p = vmName.indexOf("@");
+            String pid = vmName.substring(0, p);
+            Runtime.getRuntime().exec("kill " + pid);
+        } catch (Exception e) {
+            logger.error("killProcess failed" + e.toString());
+        }
+    }
 
     private boolean delegateExceptionHandling(Exception e) {
         logger.info("Try delegate Exception to custom Exception Handler");
@@ -329,5 +344,10 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             logger.error("Custom Exception Handler FAILED", ex);
             return false;
         }
+    }
+
+    @Override
+    public void setSteppingConfig(SteppingConfig steppingConfig) {
+        this.steppingConfig = steppingConfig;
     }
 }
