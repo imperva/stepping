@@ -1,21 +1,22 @@
 package com.imperva.stepping;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
-    static final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
-
-    private volatile Container cntr = new Container();
+    private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
+    private Container cntr = new Container();
     private Algo algo;
-    private IRunning running;
-    private boolean isClosed = false;
+    private IRunning runningAlgoTickCallback;
+    private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
+    private volatile boolean isClosed = false;
     private final Object closingLock = new Object();
+    private Future runningAlgoTickCallbackFuture;
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -107,15 +108,17 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private void registerShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+        Thread shutDownThread = new Thread(this::close);
+        shutDownThread.setName("ShutdownHookThread");
+        Runtime.getRuntime().addShutdownHook(shutDownThread);
     }
 
     private void wakenRunners() {
         for (IRunning running : cntr.<IRunning>getSonOf(IRunning.class)) {
             running.awake();
         }
-        if (running != null)
-            running.awake();
+        if (runningAlgoTickCallback != null)
+            runningAlgoTickCallbackFuture = runningAlgoTickCallback.awake();
     }
 
     private ContainerRegistrar builtinContainerRegistration() {
@@ -155,7 +158,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                     Exception ex = (Exception) e;
                     logger.error("OnRestate phase FAILED", ex);
                     handle(ex);
-                    System.exit(1);// TODO - why?
                 }
             });
             thread.start();
@@ -180,7 +182,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
                 TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
-                cntr.add(new RunningScheduled("Step TickCallBack - " + iStepDecorator.getStep().getClass().getName(), delay, initialDelay, timeUnit,
+                RunningScheduled runningScheduled =  new RunningScheduled(delay, initialDelay, timeUnit,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -188,21 +190,22 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                             } catch (Exception e) {
                                 handle(e);
                             }
-                        }));
+                        });
+                cntr.add(runningScheduled);
+                runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
             }
 
-            String runnerID = "Step DataSink - " + iStepDecorator.getStep().getClass().getName();
-            cntr.add(new Running(runnerID, () -> {
+            cntr.add(new Running(() -> {
                 try {
                     iStepDecorator.openDataSink();
                 } catch (Exception e) {
                     handle(e);
                 }
-            }));
+            }, runnersController.getExecutorService()));
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.running = new RunningScheduled("Algo TickCallback - " + algo.getClass().getName(),
+            this.runningAlgoTickCallback = new RunningScheduled(
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
@@ -301,8 +304,9 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 }
             } finally {
                 isClosed = true;
-                IRunning.kill();
-                Thread.currentThread().interrupt();
+                runnersController.kill();
+                if (runningAlgoTickCallbackFuture != null)
+                    runningAlgoTickCallbackFuture.cancel(true);
             }
         }
     }

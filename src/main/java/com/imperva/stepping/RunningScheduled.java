@@ -6,21 +6,23 @@ import java.util.concurrent.*;
      private long delay;
      private long initialdelay;
      private ScheduledFuture scheduledFuture;
-     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+     private ScheduledExecutorService scheduledExecutorService;
      private TimeUnit timeUnit;
-
-     protected RunningScheduled(String id, long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
-         this.id = id;
+     protected RunningScheduled(long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
          this.delay = delay;
          this.initialdelay = initialdelay;
          this.runnable = runnable;
          this.timeUnit = timeUnit;
+         this.scheduledExecutorService =  Executors.newSingleThreadScheduledExecutor();
      }
 
      protected Future<?> awake() {
          this.scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
-         scheduledExecutorServices.add(scheduledExecutorService);
          return scheduledFuture;
+     }
+
+     ScheduledExecutorService getScheduledExecutorService(){
+         return scheduledExecutorService;
      }
 
      @Override

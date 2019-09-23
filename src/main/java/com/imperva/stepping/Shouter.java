@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
  public class Shouter {
-     static final Logger logger = LoggerFactory.getLogger(IRunning.class);
+     private final Logger logger = LoggerFactory.getLogger(IRunning.class);
      private Container container;
      private IExceptionHandler rootExceptionHandler;
 

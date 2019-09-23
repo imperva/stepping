@@ -8,15 +8,16 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 class StepDecorator implements IStepDecorator {
-    static final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
+    private final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
     protected Container container;
     private Q<Message> q = new Q<>();
     private Step step;
     private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private volatile boolean  dead = false;
+    private volatile boolean dead = false;
     private Follower follower = null;
+    private CyclicBarrier cb;
 
 
     StepDecorator(Step step) {
@@ -76,7 +77,6 @@ class StepDecorator implements IStepDecorator {
 
                 if (message.getSubjectType().equals("POISON-PILL")) {
                     logger.info("Taking a Poison Pill. " + getStep().getClass().getName() + " is going to die");
-                    Thread.currentThread().interrupt();
                     dead = true;
                     logger.info("I am dead - " + getStep().getClass().getName());
                     throw new InterruptedException();
@@ -87,7 +87,7 @@ class StepDecorator implements IStepDecorator {
                         onSubjectUpdate(message.getData(), message.getSubjectType());
                     } else {
                         onTickCallBack();
-                        CyclicBarrier cb = (CyclicBarrier) message.getData().getValue();
+                        cb = (CyclicBarrier) message.getData().getValue();
                         cb.await();
                     }
                 }
@@ -95,7 +95,7 @@ class StepDecorator implements IStepDecorator {
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);
         } catch (Exception e) {
-            throw new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e);
+           throw new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e);
         }
     }
 
@@ -106,7 +106,7 @@ class StepDecorator implements IStepDecorator {
             for (String subjectType : follower.get()) {
                 ISubject s = container.getById(subjectType);
                 if (s == null) {
-                   throw new RuntimeException("Can't attach null Subject to be followed");
+                    throw new RuntimeException("Can't attach null Subject to be followed");
                 }
                 s.attach(this);
             }
@@ -141,7 +141,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public Follower listSubjectsToFollow() {
-        if(follower != null)
+        if (follower != null)
             return follower;
         Follower follower = new Follower();
         listSubjectsToFollow(follower);
@@ -183,6 +183,8 @@ class StepDecorator implements IStepDecorator {
     public void close() {
         logger.info("Forwarding Kill handling to Step impl- " + getStep().getClass().getName());
         onKill();
+        if (cb != null)
+            cb.reset();
     }
 }
 

@@ -10,9 +10,9 @@ import java.util.Properties;
  * Created by Gabi Beyo on 16/09/2015.
  */
 class SteppingProperties extends Properties {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SteppingProperties.class.getName());
+    private final Logger LOGGER = LoggerFactory.getLogger(SteppingProperties.class.getName());
     private String propertiesRelativeFileLocation = "stepping.properties";
-    private static SteppingProperties SteppingProperties;
+    private static SteppingProperties SteppingProperties; //* todo: should be ok as it dose not keep state. To check!
 
     static synchronized SteppingProperties getInstance() {
         if (SteppingProperties == null) {
