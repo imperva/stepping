@@ -10,7 +10,7 @@ import java.util.concurrent.CyclicBarrier;
 class StepDecorator implements IStepDecorator {
     private final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
     protected Container container;
-    private Q<Message> q = new Q<>();
+    private Q<Message> q;
     private Step step;
     private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
@@ -34,6 +34,7 @@ class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getClass().getName());
         container = cntr;
         step.init(container, shouter);
+        q = new Q<>(getConfig().getBoundQueueCapacity());
     }
 
     @Override

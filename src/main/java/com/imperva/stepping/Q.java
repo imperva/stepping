@@ -9,19 +9,33 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 class Q<T> {
 
-    private BlockingQueue<T> blockingQueue = new LinkedBlockingDeque<>();
+    private BlockingQueue<T> blockingQueue;
+    private int capacity;
+
+    Q() {
+        this(0);
+    }
+
+    Q(int capacity) {
+        this.capacity = capacity;
+        if (capacity > 0)
+            blockingQueue = new LinkedBlockingDeque<>(capacity);
+        else if (capacity < 0)
+            throw new RuntimeException("Q capacity must be a postive number");
+        else
+            blockingQueue = new LinkedBlockingDeque<>();
+    }
 
     T peek() {
         return blockingQueue.peek();
     }
 
     void queue(T item) {
-        blockingQueue.add(item);
-
-    }
-
-    void queue(List<T> items) {
-        blockingQueue.addAll(items);
+        try {
+            blockingQueue.put(item);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     boolean contains() {
@@ -40,6 +54,10 @@ class Q<T> {
 
     void clear() {
         blockingQueue.clear();
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 }
 

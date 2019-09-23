@@ -9,6 +9,7 @@ public class StepConfig {
     private int numOfNodes = 0;
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
+    private int boundQueueCapacity;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -16,6 +17,7 @@ public class StepConfig {
         runningPeriodicDelay = new Long(stepProp.getProperty("stepping.default.step.delay"));
         runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit").toUpperCase());
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
+        boundQueueCapacity = new Integer(stepProp.getProperty("stepping.default.step.bound.queue"));
     }
 
     public long getRunningInitialDelay() {
@@ -64,5 +66,13 @@ public class StepConfig {
 
     public void setRunningPeriodicDelayUnit(TimeUnit runningPeriodicDelayUnit) {
         this.runningPeriodicDelayUnit = runningPeriodicDelayUnit;
+    }
+
+    public int getBoundQueueCapacity() {
+        return boundQueueCapacity;
+    }
+
+    public void setBoundQueueCapacity(int boundQueueCapacity) {
+        this.boundQueueCapacity = boundQueueCapacity;
     }
 }
