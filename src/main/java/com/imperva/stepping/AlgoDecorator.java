@@ -1,6 +1,5 @@
 package com.imperva.stepping;
 
-import com.imperva.sampler.ThreadsSampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
@@ -47,8 +46,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             attachSubjects();
             logger.info("Starting Restate stage...");
             restate();
-            logger.info("Init PerfSampler...");
-            initPerfSamplerStep();
 
             logger.debug("Run Steps...");
             wakenRunners();
@@ -59,10 +56,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             logger.error("Algo initialization FAILED", e);
             handle(e);
         }
-    }
-
-    private void initPerfSamplerStep() {
-
     }
 
     private void fillAutoCreatedSubjectsInContainer() {
@@ -137,7 +130,12 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
 
-        containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep());
+        if (getConfig().getPerfSamplerStepConfig().isEnable()) {
+            int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
+            String packages = getConfig().getPerfSamplerStepConfig().getPackages();
+            containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval,packages));
+        }
+
         return containerRegistrar;
     }
 
@@ -215,7 +213,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.runningAlgoTickCallback = new RunningScheduled("",
+            this.runningAlgoTickCallback = new RunningScheduled(this.getClass().getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
@@ -226,6 +224,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                             handle(e);
                         }
                     });
+            runnersController.addScheduledRunner(((RunningScheduled) this.runningAlgoTickCallback).getScheduledExecutorService());
         }
     }
 

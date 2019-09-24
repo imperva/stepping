@@ -6,13 +6,20 @@ import com.imperva.sampler.outputer.LoggerSamplingOutputer;
 import java.io.IOException;
 
 public class PerfSamplerStep implements Step {
+    private final int reportInterval;
+    private final String packges;
     private ThreadsSampler ts;
 
+    PerfSamplerStep(int reportInterval,String packges){
+        this.reportInterval = reportInterval;
+        this.packges = packges;
+    }
     @Override
     public void init(Container cntr, Shouter shouter) {
         ts = new ThreadsSampler();
-        ts.setMonitoredPackages("com.imperva.algos");
-        ts.setReportFrequencySeconds(300);
+        ts.setReportFrequencySeconds(reportInterval);
+        if (packges != null && !packges.trim().equals(""))
+            ts.setMonitoredPackages(packges);
         ts.setSamplingFrequencyMillis(50L);
         ts.setSamplingOutputer(new LoggerSamplingOutputer());
         ts.setActive(true);
@@ -20,29 +27,16 @@ public class PerfSamplerStep implements Step {
     }
 
     @Override
-    public void listSubjectsToFollow(Follower follower) {
-        //follower.follow(BuiltinSubjectType.STEPPING_PERFSAMPLE.name());
-    }
+    public boolean followsSubject(String subjectType){ return false;}
 
     @Override
-    public void onSubjectUpdate(Data data, String subjectType) {
-        sampleNow();
-    }
-
-    private void sampleNow() {
-       // System.out.println("SAMPLINGGgGGG");
-      //  ts.printReport();
-    }
+    public void onSubjectUpdate(Data data, String subjectType) { }
 
     @Override
-    public void onTickCallBack() {
-        sampleNow();
-    }
+    public void onTickCallBack() { }
 
     @Override
-    public void onRestate() {
-
-    }
+    public void onRestate() { }
 
     @Override
     public void onKill() {
