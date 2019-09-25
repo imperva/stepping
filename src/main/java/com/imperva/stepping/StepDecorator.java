@@ -18,6 +18,7 @@ class StepDecorator implements IStepDecorator {
     private volatile boolean dead = false;
     private Follower follower = null;
     private CyclicBarrier cb;
+    private String id;
 
 
     StepDecorator(Step step) {
@@ -186,6 +187,16 @@ class StepDecorator implements IStepDecorator {
         onKill();
         if (cb != null)
             cb.reset();
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
     }
 }
 

@@ -92,6 +92,9 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             StepDecorator stepDecorator = new StepDecorator(step);
+            String decoratorId = step.getId() == null ? null : step.getId() + "_" + "decorator";
+            stepDecorator.setId(step.getId());
+            stepDecorator.setId(decoratorId);
             cntr.add(stepDecorator);
         }
     }
@@ -235,11 +238,22 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private <T> void DI(T obj, String id) {
-        cntr.add(obj, id);
+        if (obj instanceof Step && ((Step) obj).getId() != null) {
+            cntr.add(obj, ((Step) obj).getId());
+        } else {
+            cntr.add(obj, id);
+        }
     }
 
     private <T> void DI(T obj) {
-        cntr.add(obj);
+        if (obj instanceof Step && ((Step) obj).getId() != null) {
+            if ((((Step) obj).getId() == null)) {
+                cntr.add(obj, ((Step) obj).getId());
+            } else {
+                cntr.add(obj);
+            }
+        }
+
     }
 
     private void DI(HashMap<String, Object> objs) {
