@@ -1,6 +1,6 @@
 package com.imperva.stepping;
 
-public interface Step {
+public interface Step extends IIdentity {
 
       void init(Container cntr, Shouter shouter);
 

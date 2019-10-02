@@ -2,7 +2,7 @@ package com.imperva.stepping;
 
 public interface IIdentity {
     default String getId() {
-        return null;
+        return getClass().getName();
     }
 
     default void setId(String id){}
