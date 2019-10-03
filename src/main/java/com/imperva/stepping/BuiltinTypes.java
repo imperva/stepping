@@ -1,5 +1,7 @@
 package com.imperva.stepping;
 
 enum BuiltinTypes {
-    STEPPING_SHOUTER
+    STEPPING_SHOUTER,
+    PERFSAMPLER;
+
 }

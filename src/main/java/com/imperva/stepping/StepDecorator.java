@@ -72,6 +72,7 @@ class StepDecorator implements IStepDecorator {
     public void openDataSink() {
         try {
             logger.info("Opening DataSink for Step - " + getStep().getId());
+            setThreadName();
             while (!dead) {
                 if (Thread.currentThread().isInterrupted())
                     throw new InterruptedException();
@@ -99,6 +100,10 @@ class StepDecorator implements IStepDecorator {
         } catch (Exception e) {
            throw new SteppingException(getStep().getId(), "DataSink FAILED", e);
         }
+    }
+
+    private void setThreadName() {
+        Thread.currentThread().setName(getStep().getClass().getName());
     }
 
     @Override

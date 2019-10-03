@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
      public void shout(String subjectType, Object value) {
          try {
-             logger.trace("Shouting update on " + subjectType);
              container.<Subject>getById(subjectType).publish(value);
          } catch (Exception e) {
              rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
      public void shout(String subjectType, Data value) {
          try {
-             logger.trace("Shouting update on " + subjectType);
              container.<Subject>getById(subjectType).publish(value);
          } catch (Exception e) {
              rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
