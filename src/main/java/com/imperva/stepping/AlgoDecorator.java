@@ -92,10 +92,9 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             StepDecorator stepDecorator = new StepDecorator(step);
-            String decoratorId = step.getId() == null ? null : step.getId() + "_" + "decorator";
-            stepDecorator.setId(step.getId());
+            String decoratorId = step.getId() + "_" + "decorator";
             stepDecorator.setId(decoratorId);
-            cntr.add(stepDecorator);
+            cntr.add(stepDecorator, decoratorId);
         }
     }
 
@@ -105,9 +104,10 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
                     StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
-                    stepDecorator.setId(iStepDecorator.getId() == null? null : iStepDecorator.getId() + "_" + i);
+                    String stepDecoratorId = iStepDecorator.getId() + "_" + i;
+                    stepDecorator.setId(stepDecoratorId);
                     stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
-                    cntr.add(stepDecorator);
+                    cntr.add(stepDecorator, stepDecoratorId);
                 }
             }
         }

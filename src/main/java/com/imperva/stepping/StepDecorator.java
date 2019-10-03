@@ -32,7 +32,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void init(Container cntr, Shouter shouter) {
-        logger.debug("Initializing Step - " + getStep().getClass().getName());
+        logger.debug("Initializing Step - " + getStep().getId());
         container = cntr;
         step.init(container, shouter);
         q = new Q<>(getConfig().getBoundQueueCapacity());
@@ -40,7 +40,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void onRestate() {
-        logger.info("Start Restate phase for Step - " + getStep().getClass().getName());
+        logger.info("Start Restate phase for Step - " + getStep().getId());
         step.onRestate();
     }
 
@@ -64,23 +64,23 @@ class StepDecorator implements IStepDecorator {
         try {
             step.onTickCallBack();
         } catch (Exception e) {
-            throw new SteppingException(getStep().getClass().getName(), "onTickCallback FAILED", e);
+            throw new SteppingException(getStep().getId(), "onTickCallback FAILED", e);
         }
     }
 
     @Override
     public void openDataSink() {
         try {
-            logger.info("Opening DataSink for Step - " + getStep().getClass().getName());
+            logger.info("Opening DataSink for Step - " + getStep().getId());
             while (!dead) {
                 if (Thread.currentThread().isInterrupted())
                     throw new InterruptedException();
                 Message message = q.take();
 
                 if (message.getSubjectType().equals("POISON-PILL")) {
-                    logger.info("Taking a Poison Pill. " + getStep().getClass().getName() + " is going to die");
+                    logger.info("Taking a Poison Pill. " + getStep().getId() + " is going to die");
                     dead = true;
-                    logger.info("I am dead - " + getStep().getClass().getName());
+                    logger.info("I am dead - " + getStep().getId());
                     throw new InterruptedException();
                 }
 
@@ -97,7 +97,7 @@ class StepDecorator implements IStepDecorator {
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);
         } catch (Exception e) {
-           throw new SteppingException(getStep().getClass().getName(), "DataSink FAILED", e);
+           throw new SteppingException(getStep().getId(), "DataSink FAILED", e);
         }
     }
 
@@ -137,7 +137,7 @@ class StepDecorator implements IStepDecorator {
             if (isAttached)
                 iSubject.attach(this);
         } catch (Exception e) {
-            throw new SteppingException(getStep().getClass().getName(), "followSubject registration FAILED", e);
+            throw new SteppingException(getStep().getId(), "followSubject registration FAILED", e);
         }
     }
 
@@ -183,7 +183,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void close() {
-        logger.info("Forwarding Kill handling to Step impl- " + getStep().getClass().getName());
+        logger.info("Forwarding Kill handling to Step impl- " + getStep().getId());
         onKill();
         if (cb != null)
             cb.reset();
