@@ -92,7 +92,9 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             StepDecorator stepDecorator = new StepDecorator(step);
-            cntr.add(stepDecorator);
+            String decoratorId = step.getId() + "_" + "decorator";
+            stepDecorator.setId(decoratorId);
+            cntr.add(stepDecorator, decoratorId);
         }
     }
 
@@ -102,8 +104,10 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
                     StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
+                    String stepDecoratorId = iStepDecorator.getId() + "_" + i;
+                    stepDecorator.setId(stepDecoratorId);
                     stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
-                    cntr.add(stepDecorator);
+                    cntr.add(stepDecorator, stepDecoratorId);
                 }
             }
         }
@@ -243,11 +247,22 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private <T> void DI(T obj, String id) {
-        cntr.add(obj, id);
+        if (obj instanceof Step && ((Step) obj).getId() != null) {
+            cntr.add(obj, ((Step) obj).getId());
+        } else {
+            cntr.add(obj, id);
+        }
     }
 
     private <T> void DI(T obj) {
-        cntr.add(obj);
+        if (obj instanceof Step && ((Step) obj).getId() != null) {
+            if ((((Step) obj).getId() == null)) {
+                cntr.add(obj, ((Step) obj).getId());
+            } else {
+                cntr.add(obj);
+            }
+        }
+
     }
 
     private void DI(HashMap<String, Object> objs) {
