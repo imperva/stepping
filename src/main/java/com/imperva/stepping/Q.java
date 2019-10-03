@@ -1,6 +1,5 @@
 package com.imperva.stepping;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 

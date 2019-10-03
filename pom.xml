@@ -48,6 +48,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.6.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.imperva.sampler</groupId>
+            <artifactId>perf-sampler</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <distributionManagement>
