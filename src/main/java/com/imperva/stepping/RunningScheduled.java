@@ -2,7 +2,7 @@ package com.imperva.stepping;
 
 import java.util.concurrent.*;
 
- class RunningScheduled extends IRunning {
+ public class RunningScheduled extends IRunning {
      private String id;
      private long delay;
      private long initialdelay;
@@ -32,6 +32,16 @@ import java.util.concurrent.*;
 
      ScheduledExecutorService getScheduledExecutorService(){
          return scheduledExecutorService;
+     }
+
+     public void changeDelay(long delay, long initialdelay, TimeUnit timeUnit){
+         scheduledFuture.cancel(false);
+         scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
+     }
+
+     public void changeDelayNow(long delay, long initialdelay, TimeUnit timeUnit){
+         scheduledFuture.cancel(true);
+         scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
      }
 
      @Override
