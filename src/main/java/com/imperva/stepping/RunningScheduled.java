@@ -39,9 +39,9 @@ import java.util.concurrent.*;
          scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
      }
 
-     public void changeDelayNow(long delay, long initialdelay, TimeUnit timeUnit){
-         scheduledFuture.cancel(true);
-         scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
+     public void changeDelay(long delay, TimeUnit timeUnit){
+         scheduledFuture.cancel(false);
+         scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, timeUnit);
      }
 
      @Override
