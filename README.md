@@ -124,7 +124,7 @@ public class KafkaDBMergerAlgo implements Algo {
     public ContainerRegistrar containerRegistration() {
         //This function is called by Stepping to enable Algos register Steps and Subjects.
         //ContainerRegistrar can be used to register any arbitrary/cutom object. By doing so Stepping will keep it in-memory 
-        // and enable the retrieval of these objects via the Container object visible to all the Steps
+        ContainerDefaultImpl
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
 
         //* init subjects
