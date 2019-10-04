@@ -103,7 +103,7 @@ class StepDecorator implements IStepDecorator {
     }
 
     private void setThreadName() {
-        Thread.currentThread().setName(getStep().getClass().getName());
+        Thread.currentThread().setName(getId() + ".running");
     }
 
     @Override
@@ -170,6 +170,8 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public StepConfig getConfig() {
+        if(localStepConfig != null)
+            return localStepConfig;
         localStepConfig = step.getConfig();
         if (localStepConfig == null)
             throw new RuntimeException("LocalStepConfig is required");
