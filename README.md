@@ -231,13 +231,15 @@ public class KafkaDBMergerAlgo implements Algo {
         //and enable the retrieval of these objects via the Container object visible to all the Steps
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
 
-        //* init subjects
+        /**** init subjects - NOTE: AS we now can use (3.6.0) the new Follower.follow() API to register
+        * Steps to Subjects, there is no need explicitly create and register Subjects.
+        * 
         ISubject dbDataArrivedSubject = new Subject("DBDataArrived");
         containerRegistrar.add(subject.getType(), dbDataArrivedSubject);
         
         ISubject kafkaDataArrivedSubject = new Subject("KafkaDataArrived");
         containerRegistrar.add(subject.getType(), kafkaDataArrivedSubject);
-        
+        */
         
         //* init Steps
         containerRegistrar.add("DBFetcher", new DBFetcher());
@@ -411,6 +413,16 @@ public class Merger implements Step {
     }
 
     @Override
+    public void listSubjectsToFollow(Follower follower){
+        //This function is called on Stepping initialization for each registered Subject.
+        //This is the way to notify Stepping which events (Subjects) we are interested in.
+        //In this case we need to subscribe to a subset of Subjects so it makes sense to use the new API:
+        follower.follow("DBDataArrived").follow("KafkaDataArrived");
+    }
+    
+    
+    /***** OLD API
+    @Override
     public boolean followsSubject(String subjectType) {
         //This function is called on Stepping initialization for each registered Subject.
         //This is the way to notify Stepping which events (Subjects) we are interested in.
@@ -420,7 +432,7 @@ public class Merger implements Step {
             return true;
         }
         return false;
-    }
+    }*/
 
     @Override
     public void onSubjectUpdate(Data data, String subjectType) {
@@ -509,7 +521,7 @@ Steeping provides its internal error handling for un-handled exception. The buil
 exception handling to client's custom ExceptionHandler if provided (more about this in the next paragraph), otherwise it
 will try to gracefully shutdown all the steps, give a change to all Steps to cleanup and die gracefully.
 
-# Custom ExceptionHandling
+### Custom ExceptionHandling
 Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
 exception, in this case the builtin Exception handling is suppressed, otherwise Stepping will trigger the default behaviour.
 To set your customeException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
@@ -526,19 +538,22 @@ To set your customeException Handler you just need to supply an IExceptionHandle
     }
 ```
 
-# Kill Process
+### Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
 working Steps that are not the cause of the failure. This way you can rest assure that if needed the entire process will
 shutdown and not hang-up. 
+
 To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
 By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
 to kill the entire process.
 
 ### Distribution Strategy 
 When "Shout" is triggered, internally Stepping detects the DistributionPolicy attached to the 'callee' Step (the destination Step),
-and deleagtes the handling to it the distribution logic. Stepping implements two basic Distribution Policies: 
+and delegates the handling to its the distribution logic. Stepping delivers two basic builtin Distribution Strategy: 
+
 - All2AllDistributionStrategy: This policy is the default and the simplest one. It is designed to send the same data to each 
 Step that is registered to the specific 'Subject'
+
 - EvenDistributionStrategy - This policy is the default behaviour used for Duplicated Nodes (more about this in the next paragraph).
 In this case each duplicated node will get an even chunk of data.
 
@@ -550,7 +565,7 @@ The Distribution Policy must implements the IDistributionStrategy interface, and
 public class MyStep implements Step {
 
     public StepConfig getConfig() {
-        stepConfig.setDistributionStrategy(new MyCustomDistributionPolicy());;//MyCustomDistributionPolicy implements IDistributionStrategy
+        stepConfig.setDistributionStrategy(new MyCustomDistributionPolicy());;//MyCustomDistributionPolicy must implement IDistributionStrategy
         return stepConfig;
     }
 }
