@@ -544,6 +544,7 @@ working Steps that are not the cause of the failure. This way you can rest assur
 shutdown and not hang-up. 
 
 To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
+
 By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
 to kill the entire process.
 
