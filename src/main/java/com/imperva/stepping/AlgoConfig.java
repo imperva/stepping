@@ -5,6 +5,7 @@ public class AlgoConfig {
     private long runningPeriodicDelay;
     private boolean enableTickCallback;
     private PerfSamplerStepConfig perfSamplerStepConfig;
+    private IExceptionHandler customExceptionHandler;
 
     public AlgoConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -40,5 +41,13 @@ public class AlgoConfig {
 
     public PerfSamplerStepConfig getPerfSamplerStepConfig() {
         return perfSamplerStepConfig;
+    }
+
+    public IExceptionHandler getCustomExceptionHandler() {
+        return customExceptionHandler;
+    }
+
+    public void setCustomExceptionHandler(IExceptionHandler customExceptionHandler) {
+        this.customExceptionHandler = customExceptionHandler;
     }
 }

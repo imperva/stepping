@@ -502,15 +502,29 @@ Steeping provides its internal error handling for un-handled exception. The buil
 exception handling to client's custom ExceptionHandler if provided (more about this in the next paragraph), otherwise it
 will try to gracefully shutdown all the steps, give a change to all Steps to cleanup and die gracefully.
 
-# Custom  ExceptionHandling
+# Custom ExceptionHandling
 Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
-exception, in this case the builtin Exception handling is suppressed, otherwise Steping will trigger the default behaviour.
-
+exception, in this case the builtin Exception handling is suppressed, otherwise Stepping will trigger the default behaviour.
+To set your customeException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
+```java
+    public AlgoConfig getConfig() {
+        AlgoConfig algoConfig = new AlgoConfig();
+        algoConfig.setCustomExceptionHandler(new IExceptionHandler() {
+            @Override
+            public boolean handle(Exception e) {
+                return false;
+            }
+        });
+        return algoConfig;
+    }
+```
 
 # Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
 working Steps that are not the cause of the failure. This way you can rest assure that if needed the entire process will
-shutdown and not hang-up: XXXXXXX
+shutdown and not hang-up. To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
+By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
+to kill the entire process.
 
 ### Distribution Strategy 
 When "Shout" is triggered, internally Stepping detects the DistributionPolicy attached to the 'callee' Step (the destination Step),
@@ -522,6 +536,8 @@ In this case each duplicated node will get an even chunk of data.
 
 Stepping enables consumers to specify their own behaviour be supply a custom Distribution Policy. 
 The Distribution Policy must implements the IDistributionStrategy interface, and configure the Step's configuration:
+
+
 ```java
 public class MyStep implements Step {
 

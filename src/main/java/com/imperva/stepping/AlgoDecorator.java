@@ -18,7 +18,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private volatile boolean isClosed = false;
     private final Object closingLock = new Object();
     private Future runningAlgoTickCallbackFuture;
-    private SteppingConfig steppingConfig;
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -137,7 +136,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
             int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
-            containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval,packages));
+            containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval, packages));
         }
 
         return containerRegistrar;
@@ -240,7 +239,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private void attachSubjects() {
-        List<IStepDecorator> iStepDecoratorList =  cntr.<IStepDecorator>getSonOf(IStepDecorator.class);
+        List<IStepDecorator> iStepDecoratorList = cntr.<IStepDecorator>getSonOf(IStepDecorator.class);
         for (IStepDecorator iStepDecorator : iStepDecoratorList) {
             iStepDecorator.attachSubjects();
         }
@@ -277,7 +276,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 return true;
             String error = "Exception Detected";
             logger.error(error, e);
-            close();
+            closeAndTryKill(e);
         }
         return true;
     }
@@ -289,7 +288,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 return;
             String error = "Exception Detected in Step - " + e.getStepId();
             logger.error(error, e);
-            close();
+            closeAndTryKill(e);
         }
     }
 
@@ -300,7 +299,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 return;
             String error = "Exception Detected in stepping";
             logger.error(error, e);
-            close();
+            closeAndTryKill(e);
         }
     }
 
@@ -313,7 +312,17 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (e instanceof SteppingDistributionException)
                 error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
             logger.error(error, e);
+            closeAndTryKill(e);
+        }
+    }
+
+    private void closeAndTryKill(Exception e) {
+        try {
             close();
+        } finally {
+            if (e instanceof SteppingSystemCriticalException) {
+                killProcess();
+            }
         }
     }
 
@@ -342,9 +351,6 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 runnersController.kill();
                 if (runningAlgoTickCallbackFuture != null)
                     runningAlgoTickCallbackFuture.cancel(true);
-
-                if (steppingConfig.isKillProcessOnException())
-                    killProcess();
             }
         }
     }
@@ -363,14 +369,13 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private boolean delegateExceptionHandling(Exception e) {
         logger.info("Try delegate Exception to custom Exception Handler");
-        List<IExceptionHandler> ehs = cntr.getSonOf(IExceptionHandler.class);
-        if (ehs == null || ehs.isEmpty()) {
+        IExceptionHandler customExceptionHandler = getConfig().getCustomExceptionHandler();
+        if (customExceptionHandler == null) {
             logger.info("Custom Exception Handler MISSING");
             return false;
         }
-        IExceptionHandler eh = ehs.get(0);
         try {
-            boolean handle = eh.handle(e);
+            boolean handle = customExceptionHandler.handle(e);
             if (!handle)
                 logger.debug("Custom Exception Handler was not able to fully handle the Exception");
             return handle;
@@ -378,10 +383,5 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             logger.error("Custom Exception Handler FAILED", ex);
             return false;
         }
-    }
-
-    @Override
-    public void setSteppingConfig(SteppingConfig steppingConfig) {
-        this.steppingConfig = steppingConfig;
     }
 }
