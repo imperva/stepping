@@ -7,7 +7,7 @@ public class Identifiable<T> {
 
     public Identifiable(T object, String id) {
         if (id == null || "".equals(id.trim()))
-            throw new RuntimeException("Identifiable Object must contain an ID name");
+            throw new SteppingException("Identifiable Object must contain an ID name");
 
         this.id = id;
         this.object = object;

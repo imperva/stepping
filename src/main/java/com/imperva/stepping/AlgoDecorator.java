@@ -283,11 +283,22 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     @Override
-    public void handle(SteppingException e) {
+    public void handle(IdentifiableSteppingException e) {
         synchronized (closingLock) {
             if (isClosed && delegateExceptionHandling(e))
                 return;
             String error = "Exception Detected in Step - " + e.getStepId();
+            logger.error(error, e);
+            close();
+        }
+    }
+
+    @Override
+    public void handle(SteppingException e) {
+        synchronized (closingLock) {
+            if (isClosed && delegateExceptionHandling(e))
+                return;
+            String error = "Exception Detected in stepping";
             logger.error(error, e);
             close();
         }

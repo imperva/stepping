@@ -20,7 +20,7 @@ class Q<T> {
         if (capacity > 0)
             blockingQueue = new LinkedBlockingDeque<>(capacity);
         else if (capacity < 0)
-            throw new RuntimeException("Q capacity must be a postive number");
+            throw new SteppingException("Q capacity must be a positive number");
         else
             blockingQueue = new LinkedBlockingDeque<>();
     }
@@ -33,7 +33,7 @@ class Q<T> {
         try {
             blockingQueue.put(item);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SteppingSystemException("Queue was not able to insert a new item", e);
         }
     }
 
