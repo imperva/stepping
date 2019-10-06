@@ -231,7 +231,7 @@ public class KafkaDBMergerAlgo implements Algo {
         //and enable the retrieval of these objects via the Container object visible to all the Steps
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
 
-        /**** init subjects - NOTE: AS we now can use (3.6.0) the new Follower.follow() API to register
+        /**** init subjects - NOTE: As we now can use (3.6.0) the new Follower.follow() API to register
         * Steps to Subjects, there is no need explicitly create and register Subjects.
         * 
         ISubject dbDataArrivedSubject = new Subject("DBDataArrived");
