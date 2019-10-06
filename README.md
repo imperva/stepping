@@ -10,9 +10,11 @@ first handle many different infrastructure issues.
 
 For example, we need to decide how to split the data processing logic into different steps, think about our threading policy, 
 how to handle communication between the different steps, error handling etc.
+
 One of the most important subjects is the Threading Policy of our solution. For example, we need to think how many threads 
 to open, have the option to distribute the processing of data to multiple 'executors' in parallel, have a thread-safe 
 communication layer between the threads etc.
+
 On top of that we also care a lot about the performance of our solution, we want to make sure that the latency added by 
 these infrastructures is minimal as possible. 
 
@@ -73,7 +75,9 @@ behind the scenes, Stepping makes us of in-memory queues to handle the incoming 
 
 #### Multiple Steps on a Single Process
 In order to allow maximum flexibility and physical resource utilization, Stepping supports initialization of multiple Algos
-within a single process. This feature is useful in cases where you have enough resources to handle multiple Algos in the same process.
+within a single process. 
+
+This feature is useful in cases where you have enough resources to handle multiple Algos in the same process.
 Because Algos can't communicate with each other directly, you can always rest assure that when the Algos will be deployed separately,
 it can be done smoothly without fearing of un-expected behaviour:
 
@@ -90,8 +94,9 @@ Since version 3.6.0, Stepping enables clients to bound each Step's internal queu
 a Step hits this predefined size, the event (Subject) 'caller' will hang till the 'Callee' (destination Step) deque some messages.
 
 This can be ry helpful to prevent memory to crash the application. For example imagine your application suffers of random 
-peaks of traffic and your Step struggles to process all the amount of data arrived. In this case you can protect your Step
-by setting a bound capacity limit for its queue. By doing so the application might move a bit slower as the 'Caller' will hang
+peaks of traffic and your Step struggles to process all the amount of data arrived. 
+
+In this case you can protect your Step by setting a bound capacity limit for its queue. By doing so the application might move a bit slower as the 'Caller' will hang
 till the 'Callee' process some messages, but it will prevent the application from undesired crashes.
 
 To set the BoundQueue capacity you just need specify the maximum number of messages in the desired Steps Config:
@@ -123,7 +128,9 @@ This API is good when we want to subscribe to all or ignore all the Subjects, bu
 and an explicitly registration of the Subject in Algo's containerRegistration().
 
 In many cases you just want to subscribe to just a subset of the events, in this case you can use the new API: 
-void listSubjectsToFollow(Follower follower). With this function you can append the names of the subjects you are interested in 
+void listSubjectsToFollow(Follower follower). 
+
+With this function you can append the names of the subjects you are interested in 
 and Stepping will make sure to both, register your Step and even create the Subject for you, so you don't need anymore to 
 explicitly register it in Algo's containerRegistration():
 
@@ -174,7 +181,9 @@ Since version 3.6.0 it is possible to adjust or cancel TickCallBack timeout at r
   running.stop();//Completely stop TickCallBack
 ```   
 The Container object injected into the Step at the init() phase can be casted to a ContainerService object which expends
-Container's capabilities. One of this new capabilities is the easy way og get the Step's TickCallBack representation (RunningScheduled)  
+Container's capabilities. 
+
+One of this new capabilities is the easy way og get the Step's TickCallBack representation (RunningScheduled)  
 just be providing the Step's ID. Once the RunningScheduled is available you can adjust the RunningScheduled or even stop 
 it completely.
 
@@ -194,8 +203,10 @@ First thing to do is to create an Algo which acts as a container and initializer
 ### Hands-On
 Create 3 new Classes that implements the Step Interface and leave the functions empty. Let's call the classes them as 
 follows: "DBFetcher", "KafkaFetcher", "Merger". 
+
 Now create your first Algo, by creating a new Class "KafkaDBMergerAlgo" that implements the Algo Interface, and register 
 the Steps that you just created.
+
 We already know which event each Step will trigger, so we can also register the Subjects into our "KafkaDBMergerAlgo":
 
 ```java
@@ -467,9 +478,12 @@ public class Merger implements Step {
 }
 
 ```
-As we can see the "Merger" Step is the first Step in this exercise that implements the followsSubject() and onSubjectUpdate() functions.
+As we can see the "Merger" Step is the first Step in this exercise that implements the followsSubject() and onSubjectUpdate() 
+functions.
+
 "DBFetcher" and "KafkaFetcher" are two entry-point Steps, they use "TickCallBack" function to get CPU time to fetch their 
 data but their work does not depend on external events of other Steps therefore they do not register to any event.
+
 In this example "Merger" is the first Step that depends on events triggered be other Steps, "DBFetcher" and "KafkaFetcher".
 
 Now you are probably curios to see how we run it. Actually it is very simple:
@@ -517,13 +531,16 @@ Stepping contains a single configuration file at this location:
 # Advanced Topics
 
 ### Exception Handling
-Steeping provides its internal error handling for un-handled exception. The builtin implementation will try to delegate the
-exception handling to client's custom ExceptionHandler if provided (more about this in the next paragraph), otherwise it
-will try to gracefully shutdown all the steps, give a change to all Steps to cleanup and die gracefully.
+Steeping provides its internal error handling for un-handled exception. 
+
+The builtin implementation will try to delegate the exception handling to client's custom ExceptionHandler if provided 
+(more about this in the next paragraph), otherwise it will try to gracefully shutdown all the steps, give a change to 
+all Steps to cleanup and die gracefully.
 
 ### Custom ExceptionHandling
 Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
 exception, in this case the builtin Exception handling is suppressed, otherwise Stepping will trigger the default behaviour.
+
 To set your customeException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
 ```java
     public AlgoConfig getConfig() {
@@ -574,9 +591,10 @@ public class MyStep implements Step {
 
 
 ### Duplicated Nodes
-In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. Consumers just need 
-to specify the amount of duplication of a Step and internally Stepping will create the corresponding number of threads 
-that will work in-parallel on the data inorder to increase throughput: xxxxxxx
+In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. 
+
+Consumers just need to specify the amount of duplication of a Step and internally Stepping will create the corresponding number of threads 
+that will work in-parallel on the data inorder to increase throughput:
 
 ```java
 public class MyStep implements Step {
@@ -593,9 +611,11 @@ their own policy.
 
 
 ### Performance Sampler
-Debugging can be not so trivial in an event driven system as Stepping. To facilitate the debugging process, Steeping supplies
-a special builtin Step (by default not enabled) called PerfSamplerStep designed to help developers understand where their 
-application spends its time. By enabling this Step, Stepping will emit once awhile (configurable) a report that specify the
+Debugging can be not so trivial in an event driven system as Stepping. 
+To facilitate the debugging process, Steeping supplies a special builtin Step (by default not enabled) called PerfSamplerStep designed to help developers understand where their 
+application spends its time. 
+
+By enabling this Step, Stepping will emit once awhile (configurable) a report that specify the
 time spent on each method, this way, in case of slowness it will be easier to detect the bad behaviour.
 
 Internally Stepping makes use of [https://github.com/imperva/perf-sampler](perf-sampler) an Open Source project and
