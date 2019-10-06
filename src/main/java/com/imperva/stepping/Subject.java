@@ -49,7 +49,7 @@ public class Subject implements ISubject {
     public void attach(IStepDecorator step) {
         IDistributionStrategy distributionStrategy = step.getConfig().getDistributionStrategy();
         if (distributionStrategy == null)
-            throw new RuntimeException("IDistributionStrategy missing");
+            throw new SteppingException("IDistributionStrategy missing distribution id: " + step.getDistributionNodeID());
         SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), distributionStrategy);
         List<IStepDecorator> distributionList = iSteps.get(subjectKey);
         if (distributionList != null) {
