@@ -9,13 +9,14 @@ import java.util.concurrent.*;
      private ScheduledFuture scheduledFuture;
      private ScheduledExecutorService scheduledExecutorService;
      private TimeUnit timeUnit;
+
      protected RunningScheduled(String id, long delay, long initialdelay, TimeUnit timeUnit, Runnable runnable) {
          this.id = id;
          this.delay = delay;
          this.initialdelay = initialdelay;
          this.runnable = runnable;
          this.timeUnit = timeUnit;
-         this.scheduledExecutorService =  Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
              @Override
              public Thread newThread(Runnable r) {
                  Thread t = new Thread(r);
@@ -30,22 +31,26 @@ import java.util.concurrent.*;
          return scheduledFuture;
      }
 
-     ScheduledExecutorService getScheduledExecutorService(){
+     ScheduledExecutorService getScheduledExecutorService() {
          return scheduledExecutorService;
      }
 
-     public void changeDelay(long delay, long initialdelay, TimeUnit timeUnit){
+     public void changeDelay(long delay, long initialdelay, TimeUnit timeUnit) {
          scheduledFuture.cancel(false);
          scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
      }
 
-     public void changeDelay(long delay, TimeUnit timeUnit){
+     public void changeDelay(long delay, TimeUnit timeUnit) {
          scheduledFuture.cancel(false);
          scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, timeUnit);
      }
 
+     public void stop() {
+         close(scheduledFuture, false);
+     }
+
      @Override
      public void close() {
-         close(scheduledFuture);
+         close(scheduledFuture, true);
      }
  }

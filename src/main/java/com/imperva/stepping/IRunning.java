@@ -10,12 +10,12 @@ abstract class IRunning implements Closeable {
     Runnable runnable;
     protected abstract Future<?> awake();
 
-    void close(Future future) {
+    void close(Future future, boolean force) {
         try {
 
             if (future != null && !future.isDone() && !future.isCancelled()) {
                 logger.info("@@@@@ Start Closing Stepping Future");
-                boolean isCanceled = future.cancel(true);
+                boolean isCanceled = future.cancel(force);
                 logger.trace("Stepping orchestrator Future canceled successfully?: " + isCanceled);
                 logger.info("Finish closing Stepping orchestrator");
             }

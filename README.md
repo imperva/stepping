@@ -33,6 +33,7 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 # Dependencies
 - slf4j-simple
 - slf4j-api
+- perf-sampler
 
 # How To Use It - First Steps
 Stepping is a Maven project (binaries are deployed in Maven Central) so you can import the projects manually or via Maven by adding the following Dependencies to your project's POM file:
@@ -41,7 +42,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.5.0</version>
+  <version>3.6.0</version>
 </dependency>
 ~~~
 
@@ -52,6 +53,20 @@ Stepping has three main players: Algos, Steps and Subjects.
 Algos are containers of Steps, each Algo contains a Step or more (there are no limits on the number of steps an Algo can 
 contain apart machine's limits like RAM, CPU etc).
 An Algo is responsible of initiating the steps, handling errors and exposing Stepping's external API to consumers.
+
+# Multiple Steps on a Single Process
+In order to allow maximum flexibility and physical resource utilization, Stepping supports initialization of multiple Algos
+within a single process. This feature is useful in cases where you have enough resources to handle multiple Algos in the same process.
+Because Algos can't communicate with each other directly, you can always rest assure that when the Algos will be deployed separately,
+it can be done smoothly without fearing of un-expected behaviour:
+
+```java
+
+ new Stepping()
+    .register(algo1)
+    .register(algo2)
+    .register(algo3).go();
+```
 
 ### Steps
 Steps are contained and initialized by their Algo and contains & execute the data-streaming logic (consumers' business logic).
@@ -65,11 +80,63 @@ entry-point which reads data from a data source and another Step that acts as an
 result to a streaming platform, a file or into a DB.
 
 Steps can't communicate directly  with other Steps just by calling their function. The communication is event-driven and 
-Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible.
-  
+Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible,  
+behind the scenes, Stepping makes us of in-memory queues to handle the incoming messages.
+
+# Set Bound Queue Capacity
+Since version 3.6.0, Stepping enables clients to bound each Step's internal queue to a specific amount of messages, in case
+a Step hits this predefined size, the event (Subject) 'caller' will hang till the 'Callee' (destination Step) deque some messages.
+
+This can be ry helpful to prevent memory to crash the application. For example imagine your application suffers of random 
+peaks of traffic and your Step struggles to process all the amount of data arrived. In this case you can protect your Step
+by setting a bound capacity limit for its queue. By doing so the application might move a bit slower as the 'Caller' will hang
+till the 'Callee' process some messages, but it will prevent the application from undesired crashes.
+
+To set the BoundQueue capacity you just need specify the maximum number of messages in the desired Steps Config:
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setBoundQueueCapacity(10000);//Maximum 10K messages
+        return stepConfig;
+    }
+}
+```
+
+ 
+
 ### Subjects
 Subjects are entities that represents events that Steps can subscribe to based on their business logic needs.
 Once a Step register himself to a Subject, Stepping will make sure to notify it on each update. 
+
+# Follower
+Since version 3.6.0 there are two ways to subscribe to a subject. The good old boolean followsSubject(String subjectType) 
+and the new void listSubjectsToFollow(Follower follower).
+
+followsSubject() gets a subject as input and expects to get a true/false for each Subject registered in Algo's containerRegistration() 
+(See more about that in the sample below). True means that the Steps wants to register to the subject and false the opposite.
+
+This API is good when we want to subscribe to all or ignore all the Subjects, but it requires tedious if/else statements 
+and an explicitly registration of the Subject in Algo's containerRegistration().
+
+In many cases you just want to subscribe to just a subset of the events, in this case you can use the new API: 
+void listSubjectsToFollow(Follower follower). With this function you can append the names of the subjects you are interested in 
+and Stepping will make sure to both, register your Step and even create the Subject for you, so you don't need anymore to 
+explicitly register it in Algo's containerRegistration():
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower){
+        follower.follow("subjectA").follow("subjectB").follow("subjectC");
+    }
+    
+```
+
+listSubjectsToFollow(), if implemented will be called and used by default while followsSubject() will be called only in
+cases where listSubjectsToFollow() was left empty.
+
 
 ### onTickCallBack
 TickCallBack is not a player in Stepping but is a fundamental functionality.
@@ -80,6 +147,36 @@ By configuring your Step to enable TickCallBack Stepping will take care of the r
 CPU time based on the timeout specified in the configuration. 
 
 Sometimes we need to perform some periodic, cross Steps processing, in this case we can enable  TickCallBack on the Algo itself.
+
+TickCallback can be enabled via Step or Algo configuration:
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setRunningPeriodicDelay(1000);//The TickCallBack function will be called each 1 sec
+        return stepConfig;
+    }
+}
+```
+# Adjust onTickCallBack at runtime
+Since version 3.6.0 it is possible to adjust or cancel TickCallBack timeout at runtime:
+
+```java
+  RunningScheduled running = ((ContainerService)cntr).getTickCallbackRunning(getId());
+  running.changeDelay(20, TimeUnit.SECONDS);//Adjust the delay
+  //...OR...
+  running.stop();//Completely stop TickCallBack
+```   
+The Container object injected into the Step at the init() phase can be casted to a ContainerService object which expends
+Container's capabilities. One of this new capabilities is the easy way og get the Step's TickCallBack representation (RunningScheduled)  
+just be providing the Step's ID. Once the RunningScheduled is available you can adjust the RunningScheduled or even stop 
+it completely.
+
+This feature can be very usefull in cases you don't have a specific timeout delay for your TickCallBack, instead you want
+to change the timeout period based on some internal logic.
+
 
 # How it Works
 First thing to do is to create an Algo which acts as a container and initializer of Steps. Than we will Create three Steps:
@@ -400,11 +497,84 @@ Stepping contains a single configuration file at this location:
 
 # Advanced Topics
 
-### Custom Error Handling
-TBD
+### Exception Handling
+Steeping provides its internal error handling for un-handled exception. The builtin implementation will try to delegate the
+exception handling to client's custom ExceptionHandler if provided (more about this in the next paragraph), otherwise it
+will try to gracefully shutdown all the steps, give a change to all Steps to cleanup and die gracefully.
 
-### Distribiution Policy for Parallel Nodes
-TBD
+# Custom  ExceptionHandling
+Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
+exception, in this case the builtin Exception handling is suppressed, otherwise Steping will trigger the default behaviour.
+
+
+# Kill Process
+In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
+working Steps that are not the cause of the failure. This way you can rest assure that if needed the entire process will
+shutdown and not hang-up: XXXXXXX
+
+### Distribution Strategy 
+When "Shout" is triggered, internally Stepping detects the DistributionPolicy attached to the 'callee' Step (the destination Step),
+and deleagtes the handling to it the distribution logic. Stepping implements two basic Distribution Policies: 
+- All2AllDistributionStrategy: This policy is the default and the simplest one. It is designed to send the same data to each 
+Step that is registered to the specific 'Subject'
+- EvenDistributionStrategy - This policy is the default behaviour used for Duplicated Nodes (more about this in the next paragraph).
+In this case each duplicated node will get an even chunk of data.
+
+Stepping enables consumers to specify their own behaviour be supply a custom Distribution Policy. 
+The Distribution Policy must implements the IDistributionStrategy interface, and configure the Step's configuration:
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        stepConfig.setDistributionStrategy(new MyCustomDistributionPolicy());;//MyCustomDistributionPolicy implements IDistributionStrategy
+        return stepConfig;
+    }
+}
+```
+
+
+### Duplicated Nodes
+In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. Consumers just need 
+to specify the amount of duplication of a Step and internally Stepping will create the corresponding number of threads 
+that will work in-parallel on the data inorder to increase throughput: xxxxxxx
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        stepConfig.setNumOfNodes(3);;//Internally Stepping will create 3 Threads to handle load
+        return stepConfig;
+    }
+}
+```
+
+As mentioned above, the default Distribution Policy in this case is EvenDistributionStrategy, but consumers can specify 
+their own policy.
+
+
+### Performance Sampler
+Debugging can be not so trivial in an event driven system as Stepping. To facilitate the debugging process, Steeping supplies
+a special builtin Step (by default not enabled) called PerfSamplerStep designed to help developers understand where their 
+application spends its time. By enabling this Step, Stepping will emit once awhile (configurable) a report that specify the
+time spent on each method, this way, in case of slowness it will be easier to detect the bad behaviour.
+
+Internally Stepping makes use of [https://github.com/imperva/perf-sampler](perf-sampler) an Open Source project and
+integrate it within its infrastructure.
+
+PerformanceSamplerStep can be enabled and configured via AlgoConfig in your Algo class:
+
+```java
+public AlgoConfig getConfig() {
+        AlgoConfig algoConfig = new AlgoConfig();
+        algoConfig.getPerfSamplerStepConfig().setEnable(true);
+        algoConfig.getPerfSamplerStepConfig().setReportInterval(60);//Sets the periodic interval to emit the report in seconds
+        algoConfig.getPerfSamplerStepConfig().setPackages("mycompany.myproj.myclass,mycompany.myproj2.myclass");
+        //Optional: A comma delimited string that specifies the packages to sample. By default will sample all the packages
+        return algoConfig;
+    }
+```
+
+Currently the report will be output its findings in the default Logger.
 
 # Getting Help
 If you have questions about the library, please be sure to check out the API documentation. 

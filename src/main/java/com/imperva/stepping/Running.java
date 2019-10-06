@@ -23,6 +23,6 @@ class Running extends IRunning {
 
     @Override
     public void close() {
-        close(future);
+        close(future, true);
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
-    private Container cntr = new ContainerDefaultImpl();
+    private Container cntr = new ContainerService();
     private Algo algo;
     private IRunning runningAlgoTickCallback;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
@@ -234,7 +234,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init(new ContainerService(cntr, step));
+            step.init(cntr);
             step.setAlgoConfig(getConfig());
         }
     }
