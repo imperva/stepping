@@ -581,7 +581,7 @@ that will work in-parallel on the data inorder to increase throughput: xxxxxxx
 public class MyStep implements Step {
 
     public StepConfig getConfig() {
-        stepConfig.setNumOfNodes(3);;//Internally Stepping will create 3 Threads to handle load
+        stepConfig.setNumOfNodes(3);//Internally Stepping will create 3 Threads to handle load
         return stepConfig;
     }
 }
