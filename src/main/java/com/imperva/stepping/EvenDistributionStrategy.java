@@ -8,7 +8,8 @@ public class EvenDistributionStrategy implements IDistributionStrategy {
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
         if (!(data.getValue() instanceof List))
-            throw new RuntimeException("EvenDistributionStrategy not supported");
+            // todo- consider maybe we need an IdentifiableSteppingException in the future
+            throw new SteppingException("EvenDistributionStrategy not supported");
 
         List dataToDistribute = ((List) data.getValue());
         int chunks = Math.floorDiv(dataToDistribute.size(), iStepDecorators.size());

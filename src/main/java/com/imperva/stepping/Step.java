@@ -15,7 +15,7 @@ public interface Step extends IIdentity {
       void onSubjectUpdate(Data data, String subjectType);
 
       default void onTickCallBack() {
-            throw new RuntimeException("onTickCallBack not implemented");
+            throw new SteppingSystemException("onTickCallBack not implemented");
       }
 
       void onRestate();
