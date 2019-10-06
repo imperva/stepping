@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
-    private Container cntr = new Container();
+    private Container cntr = new ContainerDefaultImpl();
     private Algo algo;
     private IRunning runningAlgoTickCallback;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
@@ -92,7 +92,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             StepDecorator stepDecorator = new StepDecorator(step);
-            String decoratorId = step.getId() + "_" + "decorator";
+            String decoratorId = step.getId() + "." + "decorator";
             stepDecorator.setId(decoratorId);
             cntr.add(stepDecorator, decoratorId);
         }
@@ -104,7 +104,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
                     StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
-                    String stepDecoratorId = iStepDecorator.getId() + "_" + i;
+                    String stepDecoratorId = iStepDecorator.getId() + "." + i;
                     stepDecorator.setId(stepDecoratorId);
                     stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
                     cntr.add(stepDecorator, stepDecoratorId);
@@ -194,8 +194,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
                 TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
-                String idcallbnack = iStepDecorator.getStep().getClass().getName() + "_tickCallBack";
-                RunningScheduled runningScheduled =  new RunningScheduled(idcallbnack,delay, initialDelay, timeUnit,
+                String runnerScheduledID = iStepDecorator.getStep().getId() + ".runningScheduled";
+                RunningScheduled runningScheduled = new RunningScheduled(runnerScheduledID, delay, initialDelay, timeUnit,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -204,7 +204,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                                 handle(e);
                             }
                         });
-                cntr.add(runningScheduled);
+                cntr.add(runningScheduled, runnerScheduledID);
                 runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
             }
             cntr.add(new Running(() -> {
@@ -234,7 +234,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init(cntr);
+            step.init(new ContainerService(cntr, step));
             step.setAlgoConfig(getConfig());
         }
     }
