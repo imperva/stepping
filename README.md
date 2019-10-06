@@ -54,7 +54,24 @@ Algos are containers of Steps, each Algo contains a Step or more (there are no l
 contain apart machine's limits like RAM, CPU etc).
 An Algo is responsible of initiating the steps, handling errors and exposing Stepping's external API to consumers.
 
-# Multiple Steps on a Single Process
+### Steps
+Steps are contained and initialized by their Algo and contains & execute the data-streaming logic (consumers' business logic).
+Each Step register itself to Subjects (events) it is interested and the framework makes sure that whenever a Subject is 
+triggered the registered Steps will get notified.
+Once a Subjects is triggered the relevant Steps get a chance to perform their data processing. 
+
+When data processing stage is done, Steps can notify subscribers (other steps subscribed to their event) and send them 
+the result of the processing stage so they can execute further logic on the data.
+
+Stepping usually runs in the background as service/daemon and executes internally at least two Steps, one acts as the 
+entry-point which reads data from a data source and another Step that acts as an ending-point usually writes back the 
+result to a streaming platform, a file or into a DB.
+
+Steps can't communicate directly  with other Steps just by calling their function. The communication is event-driven and 
+Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible,  
+behind the scenes, Stepping makes us of in-memory queues to handle the incoming messages.
+
+#### Multiple Steps on a Single Process
 In order to allow maximum flexibility and physical resource utilization, Stepping supports initialization of multiple Algos
 within a single process. This feature is useful in cases where you have enough resources to handle multiple Algos in the same process.
 Because Algos can't communicate with each other directly, you can always rest assure that when the Algos will be deployed separately,
@@ -68,22 +85,7 @@ it can be done smoothly without fearing of un-expected behaviour:
     .register(algo3).go();
 ```
 
-### Steps
-Steps are contained and initialized by their Algo and contains & execute the data-streaming logic (consumers' business logic).
-Each Step register itself to Subjects (events) it is interested and the framework makes sure that whenever a Subject is 
-triggered the registered Steps will get notified.
-Once a Subjects is triggered the relevant Steps get a chance to perform their data processing. 
-When data processing stage is done, Steps can notify subscribers (other steps subscribed to their event) and send them 
-the result of the processing stage so they can execute further logic on the data.
-Stepping usually runs in the background as service/daemon and executes internally at least two Steps, one acts as the 
-entry-point which reads data from a data source and another Step that acts as an ending-point usually writes back the 
-result to a streaming platform, a file or into a DB.
-
-Steps can't communicate directly  with other Steps just by calling their function. The communication is event-driven and 
-Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible,  
-behind the scenes, Stepping makes us of in-memory queues to handle the incoming messages.
-
-# Set Bound Queue Capacity
+### Set Bound Queue Capacity
 Since version 3.6.0, Stepping enables clients to bound each Step's internal queue to a specific amount of messages, in case
 a Step hits this predefined size, the event (Subject) 'caller' will hang till the 'Callee' (destination Step) deque some messages.
 
@@ -110,7 +112,7 @@ public class MyStep implements Step {
 Subjects are entities that represents events that Steps can subscribe to based on their business logic needs.
 Once a Step register himself to a Subject, Stepping will make sure to notify it on each update. 
 
-# Follower
+#### followsSubject vs Follower
 Since version 3.6.0 there are two ways to subscribe to a subject. The good old boolean followsSubject(String subjectType) 
 and the new void listSubjectsToFollow(Follower follower).
 
@@ -140,9 +142,11 @@ cases where listSubjectsToFollow() was left empty.
 
 ### onTickCallBack
 TickCallBack is not a player in Stepping but is a fundamental functionality.
+
 Often, when working on data we need to perform some work (computation, I/O tasks) periodically, based on a specific timeout.   
 In these cases we can't relay only on the CPU time we get when an event we are interested in was triggered, we need a way 
 to get some CPU time periodically.
+
 By configuring your Step to enable TickCallBack Stepping will take care of the rest and periodically assign to your Step 
 CPU time based on the timeout specified in the configuration. 
 
@@ -160,7 +164,7 @@ public class MyStep implements Step {
     }
 }
 ```
-# Adjust onTickCallBack at runtime
+#### Adjust onTickCallBack at runtime
 Since version 3.6.0 it is possible to adjust or cancel TickCallBack timeout at runtime:
 
 ```java
@@ -179,6 +183,9 @@ to change the timeout period based on some internal logic.
 
 
 # How it Works
+Let's say we need to implement a simple application that fetches data from two different sources, merged the data based on
+a business logic and writes the data to 3rd kafka destination.
+
 First thing to do is to create an Algo which acts as a container and initializer of Steps. Than we will Create three Steps:
 - Step1: Fetches periodically data form a DataBase and publish a "DBDataArrived" Subject
 - Step2: Fetches streams of data from a kafka cluster and publish a "KafkaDataArrived" Subject
@@ -522,7 +529,8 @@ To set your customeException Handler you just need to supply an IExceptionHandle
 # Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
 working Steps that are not the cause of the failure. This way you can rest assure that if needed the entire process will
-shutdown and not hang-up. To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
+shutdown and not hang-up. 
+To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
 By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
 to kill the entire process.
 
