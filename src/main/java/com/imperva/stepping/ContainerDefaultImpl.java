@@ -24,7 +24,7 @@ public class ContainerDefaultImpl implements Container{
 
     public <T> ContainerDefaultImpl add(Identifiable<T> identifiable) {
         if (objects.containsKey(identifiable.getId()))
-            throw new RuntimeException("Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
+            throw new IdentifiableSteppingException(identifiable.getId(), "Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
         objects.putIfAbsent(identifiable.getId(),identifiable);
         return this;
     }
@@ -36,7 +36,7 @@ public class ContainerDefaultImpl implements Container{
 
     public ContainerDefaultImpl add(List<Identifiable> identifiables) {
         if(identifiables == null)
-            throw new RuntimeException("Can't add null object to Container");
+            throw new SteppingException("Can't add null object to Container");
         for (Identifiable identifiable :  identifiables) {
             add(identifiable);
         }

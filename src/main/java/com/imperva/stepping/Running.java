@@ -18,7 +18,7 @@ class Running extends IRunning {
             this.future = executorService.submit(runnable);
             return future;
         }
-        throw new RuntimeException("Can't awake empty Runnable");
+        throw new SteppingException("Can't awake empty Runnable");
     }
 
     @Override

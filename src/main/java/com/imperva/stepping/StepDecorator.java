@@ -64,7 +64,7 @@ class StepDecorator implements IStepDecorator {
         try {
             step.onTickCallBack();
         } catch (Exception e) {
-            throw new SteppingException(getStep().getId(), "onTickCallback FAILED", e);
+            throw new IdentifiableSteppingException(getStep().getId(), "onTickCallback FAILED", e);
         }
     }
 
@@ -98,7 +98,7 @@ class StepDecorator implements IStepDecorator {
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);
         } catch (Exception e) {
-           throw new SteppingException(getStep().getId(), "DataSink FAILED", e);
+           throw new IdentifiableSteppingException(getStep().getId(), "DataSink FAILED", e);
         }
     }
 
@@ -113,7 +113,7 @@ class StepDecorator implements IStepDecorator {
             for (String subjectType : follower.get()) {
                 ISubject s = container.getById(subjectType);
                 if (s == null) {
-                    throw new RuntimeException("Can't attach null Subject to be followed");
+                    throw new SteppingSystemException("Can't attach null Subject to be followed. Step id: " + this.step.getId());
                 }
                 s.attach(this);
             }
@@ -142,7 +142,7 @@ class StepDecorator implements IStepDecorator {
             if (isAttached)
                 iSubject.attach(this);
         } catch (Exception e) {
-            throw new SteppingException(getStep().getId(), "followSubject registration FAILED", e);
+            throw new IdentifiableSteppingException(getStep().getId(), "followSubject registration FAILED", e);
         }
     }
 
@@ -164,7 +164,7 @@ class StepDecorator implements IStepDecorator {
     @Override
     public void setAlgoConfig(AlgoConfig algoConfig) {
         if (algoConfig == null)
-            throw new RuntimeException("AlgoConfig is required");
+            throw new IdentifiableSteppingException(this.step.getId(), "AlgoConfig is required");
         this.algoConfig = algoConfig;
     }
 
@@ -174,7 +174,7 @@ class StepDecorator implements IStepDecorator {
             return localStepConfig;
         localStepConfig = step.getConfig();
         if (localStepConfig == null)
-            throw new RuntimeException("LocalStepConfig is required");
+            throw new IdentifiableSteppingException(this.step.getId(), "StepConfig is required");
         return localStepConfig;
     }
 
