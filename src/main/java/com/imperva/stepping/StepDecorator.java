@@ -157,6 +157,16 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
+    public int getQSize() {
+        return q.size();
+    }
+
+    @Override
+    public int getQCapacity() {
+        return q.getCapacity();
+    }
+
+    @Override
     public Step getStep() {
         return step;
     }

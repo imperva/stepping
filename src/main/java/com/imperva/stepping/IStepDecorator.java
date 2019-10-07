@@ -28,4 +28,8 @@ interface IStepDecorator extends Step, Closeable {
 
     Follower listSubjectsToFollow();
 
+    int getQSize();
+
+    int getQCapacity();
+
 }
