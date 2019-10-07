@@ -6,7 +6,7 @@ public class ContainerService extends ContainerDefaultImpl {
         try {
             return getById(stepID + ".runningScheduled");
         } catch (Exception e) {
-            throw new RuntimeException("Running object not found. Please make sure that you enabled TickCallback for this step");
+            throw new SteppingException("Running object not found. Please make sure that you enabled TickCallback for this step");
         }
     }
 }

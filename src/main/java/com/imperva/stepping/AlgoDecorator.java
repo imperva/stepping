@@ -133,6 +133,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
             int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
+            if(packages == null || packages.trim().equals(""))
+                throw new SteppingException("'packages' list field is required to initialize PerfSamplerStep");
             containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval, packages));
         }
 

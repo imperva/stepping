@@ -629,7 +629,7 @@ public AlgoConfig getConfig() {
         algoConfig.getPerfSamplerStepConfig().setEnable(true);
         algoConfig.getPerfSamplerStepConfig().setReportInterval(60);//Sets the periodic interval to emit the report in seconds
         algoConfig.getPerfSamplerStepConfig().setPackages("mycompany.myproj.myclass,mycompany.myproj2.myclass");
-        //Optional: A comma delimited string that specifies the packages to sample. By default will sample all the packages
+        //Required: A comma delimited string that specifies the packages to sample. If not supplied an Exception will be throw
         return algoConfig;
     }
 ```
