@@ -45,11 +45,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             attachSubjects();
             logger.info("Starting Restate stage...");
             restate();
-
             logger.debug("Run Steps...");
             wakenRunners();
-
-
             algo.init();
         } catch (Exception e) {
             logger.error("Algo initialization FAILED", e);
@@ -318,6 +315,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private void closeAndTryKill(Exception e) {
         try {
+            logger.error("Try to close and kill", e);
             close();
         } finally {
             if (e instanceof SteppingSystemCriticalException) {
@@ -368,7 +366,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private boolean delegateExceptionHandling(Exception e) {
-        logger.info("Try delegate Exception to custom Exception Handler");
+        logger.info("Try delegate Exception to custom Exception Handler", e);
         IExceptionHandler customExceptionHandler = getConfig().getCustomExceptionHandler();
         if (customExceptionHandler == null) {
             logger.info("Custom Exception Handler MISSING");
@@ -379,6 +377,10 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             if (!handle)
                 logger.debug("Custom Exception Handler was not able to fully handle the Exception");
             return handle;
+        } catch (SteppingSystemCriticalException ex) {
+            logger.error("Custom Exception Handler throw SteppingSystemCriticalException", ex);
+            closeAndTryKill(e);
+            return true;
         } catch (Exception ex) {
             logger.error("Custom Exception Handler FAILED", ex);
             return false;
