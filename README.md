@@ -637,7 +637,7 @@ application spends its time.
 By enabling this Step, Stepping will emit once awhile (configurable) a report that specify the
 time spent on each method, this way, in case of slowness it will be easier to detect the bad behaviour.
 
-Internally Stepping makes use of [https://github.com/imperva/perf-sampler](perf-sampler) an Open Source project and
+Internally Stepping makes use of [perf-sampler](https://github.com/imperva/perf-sampler) an Open Source project and
 integrate it within its infrastructure.
 
 PerformanceSamplerStep can be enabled and configured via AlgoConfig in your Algo class:
