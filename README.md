@@ -589,6 +589,15 @@ public class MyStep implements Step {
 }
 ```
 
+### Steps Identity
+Since version 3.6.0 each Step implements interface Identity meant to give each Step a unique friendly name. This interface 
+has a default implementation which concatenates the Step class name and the object hashcode.
+
+The default behaviour may fit simple use-cases but in order to get clear logs and improve your debugging experience we 
+encourage you to Override the getId() and setId() methods and give a meaningful name to your Steps.
+
+NOTE: In case of Duplicated Nodes (see next paragraph), implementation of this two methods and supplying a meaningful name 
+to your Step is required. Duplicating Steps that don't implement the Identity interface will lead to a runtime exception.
 
 ### Duplicated Nodes
 In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. 
@@ -608,6 +617,16 @@ public class MyStep implements Step {
 
 As mentioned above, the default Distribution Policy in this case is EvenDistributionStrategy, but consumers can specify 
 their own policy.
+
+As mentioned in the "Step Identity" section, when duplicating Steps it is mandatory to implement the getId() and setId() 
+methods and supply a meaningful name to your Step.
+
+Stepping will make sure to create new instances of the duplicated Step and give each one the name supplied by you via the getId()
+method with an additional suffix: _<INCREMENTAL-STEP_NUMBER>. i.e. 'myCustomStep_2'
+
+In use-cases where you need to create an in-memory state at initialization phase of the Step, you should do it as part of the init()
+method and not in the constructor because When duplicating Steps Stepping creates new instances of your Class by duplicating 
+the object but it does so without serializing its in-memory state.
 
 
 ### Performance Sampler

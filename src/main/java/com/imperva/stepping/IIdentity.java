@@ -5,5 +5,5 @@ public interface IIdentity {
         return getClass().getName() + hashCode();
     }
 
-    default void setId(String id){}
+    default void setId(String id){throw new SteppingException("Step must implement setId() method before changing its value");}
 }

@@ -200,7 +200,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void close() {
-        logger.info("Forwarding Kill handling to Step impl- " + getStep().getId());
+        logger.info("Forwarding Kill handling to Step - " + getStep().getId());
         onKill();
         if (cb != null)
             cb.reset();

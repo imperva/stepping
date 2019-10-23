@@ -94,16 +94,32 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void duplicateNodes() {
+    private void duplicateNodes() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             int numOfNodes = iStepDecorator.getConfig().getNumOfNodes();
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
-                    StepDecorator stepDecorator = new StepDecorator(iStepDecorator.getStep());
+                    Step currentStep = iStepDecorator.getStep();
+                    String currentStepId = currentStep.getId();
+                    Step duplicatedStp = (Step) Class.forName(currentStep.getClass().getName(), true, currentStep.getClass().getClassLoader()).newInstance();
+                    String stepID = currentStepId + "." + i;
+                    try {
+                        duplicatedStp.setId(stepID);
+                        if (!duplicatedStp.getId().equals(stepID)) {
+                            throw new SteppingException("Can't set Step id. Tried to set id: " + stepID + " but found: " + duplicatedStp.getId());
+                        }
+                    } catch (SteppingException ex) {
+                        logger.error(ex.getMessage());
+                        logger.error("Make sure setId() and getId() are implemented in Step: " + currentStep.getClass());
+                        throw ex;
+                    }
+
+                    StepDecorator stepDecorator = new StepDecorator(duplicatedStp);
                     String stepDecoratorId = iStepDecorator.getId() + "." + i;
                     stepDecorator.setId(stepDecoratorId);
                     stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
                     cntr.add(stepDecorator, stepDecoratorId);
+                    cntr.add(duplicatedStp, duplicatedStp.getId());
                 }
             }
         }
