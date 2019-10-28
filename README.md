@@ -44,7 +44,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.6.0</version>
+  <version>3.6.1</version>
 </dependency>
 ~~~
 
@@ -90,7 +90,7 @@ it can be done smoothly without fearing of un-expected behaviour:
 ```
 
 ### Set Bound Queue Capacity
-Since version 3.6.0, Stepping enables clients to bound each Step's internal queue to a specific amount of messages, in case
+Since version 3.6.x, Stepping enables clients to bound each Step's internal queue to a specific amount of messages, in case
 a Step hits this predefined size, the event (Subject) 'caller' will hang till the 'Callee' (destination Step) deque some messages.
 
 This can be ry helpful to prevent memory to crash the application. For example imagine your application suffers of random 
@@ -118,7 +118,7 @@ Subjects are entities that represents events that Steps can subscribe to based o
 Once a Step register himself to a Subject, Stepping will make sure to notify it on each update. 
 
 #### followsSubject vs Follower
-Since version 3.6.0 there are two ways to subscribe to a subject. The good old boolean followsSubject(String subjectType) 
+Since version 3.6.x there are two ways to subscribe to a subject. The good old boolean followsSubject(String subjectType) 
 and the new void listSubjectsToFollow(Follower follower).
 
 followsSubject() gets a subject as input and expects to get a true/false for each Subject registered in Algo's containerRegistration() 
@@ -172,7 +172,7 @@ public class MyStep implements Step {
 }
 ```
 #### Adjust onTickCallBack at runtime
-Since version 3.6.0 it is possible to adjust or cancel TickCallBack timeout at runtime:
+Since version 3.6.x it is possible to adjust or cancel TickCallBack timeout at runtime:
 
 ```java
   RunningScheduled running = ((ContainerService)cntr).getTickCallbackRunning(getId());
@@ -242,7 +242,7 @@ public class KafkaDBMergerAlgo implements Algo {
         //and enable the retrieval of these objects via the Container object visible to all the Steps
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
 
-        /**** init subjects - NOTE: As we now can use (3.6.0) the new Follower.follow() API to register
+        /**** init subjects - NOTE: As we now can use (3.6.x) the new Follower.follow() API to register
         * Steps to Subjects, there is no need explicitly create and register Subjects.
         * 
         ISubject dbDataArrivedSubject = new Subject("DBDataArrived");
@@ -567,7 +567,7 @@ In case a single process hosts multiple Algos, Stepping expose a way to kill the
 working Steps that are not the cause of the failure. This way you can rest assure that if needed the entire process will
 shutdown and not hang-up. 
 
-To support that a new SteppingSystemCriticalException has been introduced in version 3.6.0.
+To support that a new SteppingSystemCriticalException has been introduced in version 3.6.x.
 
 By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
 to kill the entire process.
@@ -597,7 +597,7 @@ public class MyStep implements Step {
 ```
 
 ### Steps Identity
-Since version 3.6.0 each Step implements interface Identity meant to give each Step a unique friendly name. This interface 
+Since version 3.6.x each Step implements interface Identity meant to give each Step a unique friendly name. This interface 
 has a default implementation which concatenates the Step class name and the object hashcode.
 
 The default behaviour may fit simple use-cases but in order to get clear logs and improve your debugging experience we 
