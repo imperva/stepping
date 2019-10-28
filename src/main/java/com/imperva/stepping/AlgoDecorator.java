@@ -88,6 +88,9 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private void decorateSteps() {
         for (Step step : cntr.<Step>getSonOf(Step.class)) {
             StepDecorator stepDecorator = new StepDecorator(step);
+            if (step.getId() == null || "".equals(step.getId().trim())) {
+                throw new SteppingException("Step Object must contain an ID name");
+            }
             String decoratorId = step.getId() + "." + "decorator";
             stepDecorator.setId(decoratorId);
             cntr.add(stepDecorator, decoratorId);
