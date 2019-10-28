@@ -73,7 +73,7 @@ Steps can't communicate directly  with other Steps just by calling their functio
 Stepping makes sure that communicating Steps don't interfere with each other and release the Steps fast as possible,  
 behind the scenes, Stepping makes us of in-memory queues to handle the incoming messages.
 
-#### Multiple Steps on a Single Process
+#### Multiple Algos on a Single Process
 In order to allow maximum flexibility and physical resource utilization, Stepping supports initialization of multiple Algos
 within a single process. 
 
@@ -270,6 +270,13 @@ public class KafkaDBMergerAlgo implements Algo {
 This is it! now we are ready to deal with our business logic of each of our registered Steps.
 Let's start with the "DBFetcher" Step. This Step polls data from a DB every second, makes some data manipulation and 
 notifies subscribers of "DBDataArrived" that DB data is ready.
+
+NOTE: since version 3.6.x, ContainerRegistrar supports two methods for registration: one for registering an IIDentity object. This item must have an ID by overriding the IIdentity interface, otherwise, 
+the registration will fail. The other method allows to register an object, which is not an IIdentity, and specify its ID. If you try to call this method with an
+IIdentity object or with an invalid ID, the registration will fail.
+
+Steps are by default IIDentity and have a default getId() implementation.
+
 ```java
 public class DBFetcher implements Step {
 

@@ -264,22 +264,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     private <T> void DI(T obj, String id) {
-        if (obj instanceof Step && ((Step) obj).getId() != null) {
-            cntr.add(obj, ((Step) obj).getId());
-        } else {
-            cntr.add(obj, id);
-        }
-    }
-
-    private <T> void DI(T obj) {
-        if (obj instanceof Step && ((Step) obj).getId() != null) {
-            if ((((Step) obj).getId() == null)) {
-                cntr.add(obj, ((Step) obj).getId());
-            } else {
-                cntr.add(obj);
-            }
-        }
-
+        cntr.add(obj, id);
     }
 
     private void DI(HashMap<String, Object> objs) {
