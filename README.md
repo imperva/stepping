@@ -54,7 +54,7 @@ Algos are containers of Steps, each Algo contains a Step or more (there are no l
 contain apart machine's limits like RAM, CPU etc).
 An Algo is responsible of initiating the steps, handling errors and exposing Stepping's external API to consumers.
 
-# Multiple Steps on a Single Process
+# Multiple Algos on a Single Process
 In order to allow maximum flexibility and physical resource utilization, Stepping supports initialization of multiple Algos
 within a single process. This feature is useful in cases where you have enough resources to handle multiple Algos in the same process.
 Because Algos can't communicate with each other directly, you can always rest assure that when the Algos will be deployed separately,
@@ -250,6 +250,13 @@ public class KafkaDBMergerAlgo implements Algo {
 This is it! now we are ready to deal with our business logic of each of our registered Steps.
 Let's start with the "DBFetcher" Step. This Step polls data from a DB every second, makes some data manipulation and 
 notifies subscribers of "DBDataArrived" that DB data is ready.
+
+NOTE: since version 3.6.x, ContainerRegistrar supports two methods for registration: one for registering an IIDentity object. This item must have an ID by overriding the IIdentity interface, otherwise, 
+the registration will fail. The other method allows to register an object, which is not an IIdentity, and specify its ID. If you try to call this method with an
+IIdentity object or with an invalid ID, the registration will fail.
+
+Steps are by default IIDentity and have a default getId() implementation.
+
 ```java
 public class DBFetcher implements Step {
 
