@@ -271,11 +271,11 @@ This is it! now we are ready to deal with our business logic of each of our regi
 Let's start with the "DBFetcher" Step. This Step polls data from a DB every second, makes some data manipulation and 
 notifies subscribers of "DBDataArrived" that DB data is ready.
 
-NOTE: since version 3.6.x, ContainerRegistrar supports two methods for registration: one for registering an IIDentity object. This item must have an ID by overriding the IIdentity interface, otherwise, 
-the registration will fail. The other method allows to register an object, which is not an IIdentity, and specify its ID. If you try to call this method with an
+NOTE: Since version 3.6.x, ContainerRegistrar supports two methods for registration: one for registering an IIdentity object and one for all other objects types. IIdentity objects must have an ID by overriding the IIdentity interface, otherwise, 
+the registration will fail. The other method allows to register any other type object, in this case you need to use the method that receives the object and a unique identifier. If you try to call this method with an
 IIdentity object or with an invalid ID, the registration will fail.
 
-Steps are by default IIDentity and have a default getId() implementation.
+Steps are by default IIdentity and have a default getId() implementation.
 
 ```java
 public class DBFetcher implements Step {
