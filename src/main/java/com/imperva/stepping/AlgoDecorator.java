@@ -400,7 +400,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             return handle;
         } catch (SteppingSystemCriticalException ex) {
             logger.error("Custom Exception Handler throw SteppingSystemCriticalException", ex);
-            closeAndTryKill(e);
+            closeAndTryKill(ex);
             return true;
         } catch (Exception ex) {
             logger.error("Custom Exception Handler FAILED", ex);
