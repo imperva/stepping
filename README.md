@@ -613,7 +613,7 @@ to your Step is required. Duplicating Steps that don't implement the Identity in
 ### Duplicated Nodes
 In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. 
 
-Consumers just need to specify the amount of duplication of a Step and internally Stepping will create the corresponding number of threads 
+Consumers just need to specify the number of Steps nodes and internally Stepping will create the corresponding number of threads 
 that will work in-parallel on the data inorder to increase throughput:
 
 ```java
@@ -626,14 +626,13 @@ public class MyStep implements Step {
 }
 ```
 
-As mentioned above, the default Distribution Policy in this case is EvenDistributionStrategy, but consumers can specify 
-their own policy.
+As mentioned above consumers can specify their own policy.
 
 As mentioned in the "Step Identity" section, when duplicating Steps it is mandatory to implement the getId() and setId() 
 methods and supply a meaningful name to your Step.
 
 Stepping will make sure to create new instances of the duplicated Step and give each one the name supplied by you via the getId()
-method with an additional suffix: _<INCREMENTAL-STEP_NUMBER>. i.e. 'myCustomStep_2'
+method with an additional suffix: .<INCREMENTAL-STEP_NUMBER>. i.e. 'myCustomStep.2'
 
 In use-cases where you need to create an in-memory state at initialization phase of the Step, you should do it as part of the init()
 method and not in the constructor because When duplicating Steps Stepping creates new instances of your Class by duplicating 
