@@ -19,7 +19,7 @@ On top of that we also care a lot about the performance of our solution, we want
 these infrastructures is minimal as possible. 
 
 Stepping aims to handle many of these aspects so developers can spend their time on the business logic instead of 
-solving these infrastructure and data flow issues issues over and over again. 
+solving these infrastructure and data flow issues, over and over again. 
 
 # Benefits
 The goal of this framework is to solve infrastructure issues encountered when developing data or data-streaming processing solution.
@@ -44,7 +44,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.6.1</version>
+  <version>3.6.2</version>
 </dependency>
 ~~~
 
