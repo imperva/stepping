@@ -130,7 +130,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
 
     private void registerShutdownHook() {
         Thread shutDownThread = new Thread(this::close);
-        shutDownThread.setName("ShutdownHookThread");
+        shutDownThread.setName("ShutdownHookThread." + getClass().getName());
         Runtime.getRuntime().addShutdownHook(shutDownThread);
     }
 
@@ -324,10 +324,25 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             logger.error("Try to close and kill", e);
             close();
         } finally {
-            if (e instanceof SteppingSystemCriticalException) {
+            if (containsInChain(e, SteppingSystemCriticalException.class)) {
                 killProcess();
             }
         }
+    }
+
+   private boolean containsInChain(Throwable e, Class c) {
+        if(c.isInstance(e))
+            return true;
+
+        Throwable cause = null;
+        Throwable result = e;
+
+        while(null != (cause = result.getCause())  ) {
+            result = cause;
+            if(c.isInstance(cause))
+                return true;
+        }
+        return false;
     }
 
     @Override
