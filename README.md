@@ -572,6 +572,10 @@ To support that a new SteppingSystemCriticalException has been introduced in ver
 By throwing this exception Stepping you instruct Stepping to consider the exception as Critical and thus enable Stepping 
 to kill the entire process.
 
+NOTE: Currently this feature works for by sending a 'kill <pid>' command to the process and thus triggers internal ShutdownHook 
+methods to gracefully close the process. In this version SteppingSystemCriticalException feature is not available for Stepping 
+running on Windows.
+
 ### Distribution Strategy 
 When "Shout" is triggered, internally Stepping detects the DistributionPolicy attached to the 'callee' Step (the destination Step),
 and delegates the handling to its the distribution logic. Stepping delivers two basic builtin Distribution Strategy: 
