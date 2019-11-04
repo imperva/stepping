@@ -6,7 +6,7 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>3.6.3</version>
+    <version>3.6.4-SNAPSHOT</version>
     <name>Stepping</name>
     <description>
         Stepping is a framework designed to ease the implementation of data processing solutions.
