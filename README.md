@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/com.imperva.stepping/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.ddc%22%20AND%20a:%22stepping%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.imperva.stepping/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.stepping%22%20AND%20a:%22stepping%22)
 
 [![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=master)](https://www.travis-ci.org/imperva/stepping?branch=master)
 
