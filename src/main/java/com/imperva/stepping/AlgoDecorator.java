@@ -3,11 +3,13 @@ package com.imperva.stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
-import java.lang.management.ManagementFactory;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
@@ -16,7 +18,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private IRunning runningAlgoTickCallback;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
     private volatile boolean isClosed = false;
-    private final Object closingLock = new Object();
+    private final Lock closingLock = new ReentrantLock();//todo id final also volatile?
+    private int closingLockWaitDuration = 5;//* in seconds
     private Future runningAlgoTickCallbackFuture;
 
     AlgoDecorator(Algo algo) {
@@ -271,44 +274,59 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         objs.forEach((s, o) -> DI(o, s));
     }
 
-
     @Override
     public boolean handle(Exception e) {
-        synchronized (closingLock) {
+        try {
+            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
             if (isClosed || delegateExceptionHandling(e))
                 return true;
             String error = "Exception Detected";
             logger.error(error, e);
             closeAndTryKill(e);
+        } catch (InterruptedException e1) {
+            logger.error("tryLock was interrupted", e);
+        } finally {
+            closingLock.unlock();
         }
         return true;
     }
 
     @Override
-    public void handle(IdentifiableSteppingException e) {
-        synchronized (closingLock) {
-            if (isClosed && delegateExceptionHandling(e))
-                return;
-            String error = "Exception Detected in Step - " + e.getStepId();
-            logger.error(error, e);
-            closeAndTryKill(e);
-        }
-    }
-
-    @Override
     public void handle(SteppingException e) {
-        synchronized (closingLock) {
+        try {
+            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
             if (isClosed && delegateExceptionHandling(e))
                 return;
             String error = "Exception Detected in stepping";
             logger.error(error, e);
             closeAndTryKill(e);
+        } catch (InterruptedException e1) {
+            logger.error("tryLock was interrupted", e);
+        } finally {
+            closingLock.unlock();
+        }
+    }
+
+    @Override
+    public void handle(IdentifiableSteppingException e) {
+        try {
+            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
+            if (isClosed && delegateExceptionHandling(e))
+                return;
+            String error = "Exception Detected in Step - " + e.getStepId();
+            logger.error(error, e);
+            closeAndTryKill(e);
+        } catch (InterruptedException e1) {
+            logger.error("tryLock was interrupted", e);
+        } finally {
+            closingLock.unlock();
         }
     }
 
     @Override
     public void handle(SteppingSystemException e) {
-        synchronized (closingLock) {
+        try {
+            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
             if (isClosed && delegateExceptionHandling(e))
                 return;
             String error = "Exception Detected";
@@ -316,6 +334,35 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                 error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
             logger.error(error, e);
             closeAndTryKill(e);
+        } catch (InterruptedException e1) {
+            logger.error("tryLock was interrupted", e);
+        } finally {
+            closingLock.unlock();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
+
+            if (isClosed)
+                return;
+
+            closeCloseables();
+
+            sendPoisonPill();
+
+            closeAlgo();
+
+            closeRunners();
+
+            isClosed = true;
+
+        } catch (InterruptedException e) {
+            logger.error("tryLock interrupted", e);
+        } finally {
+            closingLock.unlock();
         }
     }
 
@@ -345,45 +392,59 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         return false;
     }
 
-    @Override
-    public void close() {
-        synchronized (closingLock) {
-            try {
-                if (isClosed)
-                    return;
-                List<Closeable> closeables = cntr.getSonOf(IStepDecorator.class);
-                for (Closeable closable : closeables) {
-                    try {
-                        closable.close();
-                    } catch (Exception e) {
-                        logger.error("Failed to close a closeable object, continuing with the next one");
-                    }
-                }
-
-                //todo use shouter?
-                List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
-                for (IStepDecorator step : stepDecorators) {
-                    step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
-                }
-            } finally {
-                isClosed = true;
-                runnersController.kill();
-                if (runningAlgoTickCallbackFuture != null)
-                    runningAlgoTickCallbackFuture.cancel(true);
+    private void closeRunners() {
+        logger.info("Closing Runners");
+        try {
+            runnersController.kill();
+            if (runningAlgoTickCallbackFuture != null) {
+                runningAlgoTickCallbackFuture.cancel(true);
             }
+        } catch (Exception e) {
+            logger.error("Failed to close Runners in Algo " + this.algo.getClass(), e);
+        }
+    }
+
+    private void closeAlgo(){
+        logger.debug("Closing Algo");
+        try {
+            this.algo.close();
+        } catch (IOException e) {
+            logger.error("Failed to close Algo " + this.algo.getClass(), e);
+        }
+    }
+
+    private void closeCloseables(){
+        logger.debug("Closing Closeables");
+        try {
+            List<Closeable> closeables = cntr.getSonOf(IStepDecorator.class);
+            for (Closeable closable : closeables) {
+                try {
+                    closable.close();
+                } catch (Exception e) {
+                    logger.error("Failed to close a closeable object, continuing with the next one");
+                }
+            }
+        }catch (Exception e){
+            logger.error("Failed to close Closeables in Algo " + this.algo.getClass(), e);
+        }
+    }
+
+    private void sendPoisonPill(){
+        logger.debug("Sending Poison Pill");
+        try {
+            //todo use shouter?
+            List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
+            for (IStepDecorator step : stepDecorators) {
+                step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
+            }
+        }catch (Exception e){
+            logger.error("Failed to send poison pill in Algo " + this.algo.getClass(), e);
         }
     }
 
     private void killProcess() {
-        try {
-            //* todo: I know it is ugly... need to implement a better way to control Stepping from outside
-            String vmName = ManagementFactory.getRuntimeMXBean().getName();
-            int p = vmName.indexOf("@");
-            String pid = vmName.substring(0, p);
-            Runtime.getRuntime().exec("kill " + pid);
-        } catch (Exception e) {
-            logger.error("killProcess failed" + e.toString());
-        }
+        logger.warn("Gracefully killing process. It should take " + closingLockWaitDuration + " seconds");
+        System.exit(1);
     }
 
     private boolean delegateExceptionHandling(Exception e) {
