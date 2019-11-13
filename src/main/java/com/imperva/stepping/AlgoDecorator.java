@@ -18,9 +18,11 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private IRunning runningAlgoTickCallback;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
     private volatile boolean isClosed = false;
-    private final Lock closingLock = new ReentrantLock();//todo id final also volatile?
-    private int closingLockWaitDuration = 5;//* in seconds
+    private final Lock closingLock = new ReentrantLock();
     private Future runningAlgoTickCallbackFuture;
+
+    private int closingLockWaitDuration = 1;//* in seconds
+    private int poisonPillWaitDuration = 3000;
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -344,6 +346,10 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public void close() {
         try {
+
+            if (isClosed)
+                return;
+
             closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
 
             if (isClosed)
@@ -352,10 +358,11 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             closeCloseables();
 
             sendPoisonPill();
-
-            closeAlgo();
+            Thread.sleep(poisonPillWaitDuration);
 
             closeRunners();
+
+            closeAlgo();
 
             isClosed = true;
 
