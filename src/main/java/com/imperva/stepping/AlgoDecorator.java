@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
+class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
     private Container cntr = new ContainerService();
     private Algo algo;
@@ -21,8 +21,8 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     private final Lock closingLock = new ReentrantLock();
     private Future runningAlgoTickCallbackFuture;
 
-    private int closingLockWaitDuration = 1;//* in seconds
-    private int poisonPillWaitDuration = 3000;
+    private final int closingLockWaitDuration = 1;//* in seconds
+    private final int poisonPillWaitDuration = 3000;
 
     AlgoDecorator(Algo algo) {
         this.algo = algo;
@@ -44,7 +44,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             initSteps();
             logger.info("Initializing Runners...");
             initRunners();
-            logger.info("Register ShutdownHook...");
+            logger.info("Register ƒtdownHook...");
             registerShutdownHook();
             logger.info("Attach Subjects to Followers...");
             attachSubjects();
@@ -157,7 +157,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
             int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
-            if(packages == null || packages.trim().equals(""))
+            if (packages == null || packages.trim().equals(""))
                 throw new SteppingException("'packages' list field is required to initialize PerfSamplerStep");
             containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval, packages));
         }
@@ -279,12 +279,20 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     @Override
     public boolean handle(Exception e) {
         try {
-            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
+            if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
+                return true;
+
             if (isClosed || delegateExceptionHandling(e))
                 return true;
+
             String error = "Exception Detected";
+            if (e instanceof IdentifiableSteppingException)
+                error += " in Step Id: " + ((IdentifiableSteppingException) e).getStepId();
+            else if (e instanceof SteppingDistributionException)
+                error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
             logger.error(error, e);
-            closeAndTryKill(e);
+
+            closeAndKillIfNeeded(e);
         } catch (InterruptedException e1) {
             logger.error("tryLock was interrupted", e);
         } finally {
@@ -294,68 +302,19 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
     }
 
     @Override
-    public void handle(SteppingException e) {
-        try {
-            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
-            if (isClosed && delegateExceptionHandling(e))
-                return;
-            String error = "Exception Detected in stepping";
-            logger.error(error, e);
-            closeAndTryKill(e);
-        } catch (InterruptedException e1) {
-            logger.error("tryLock was interrupted", e);
-        } finally {
-            closingLock.unlock();
-        }
-    }
-
-    @Override
-    public void handle(IdentifiableSteppingException e) {
-        try {
-            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
-            if (isClosed && delegateExceptionHandling(e))
-                return;
-            String error = "Exception Detected in Step - " + e.getStepId();
-            logger.error(error, e);
-            closeAndTryKill(e);
-        } catch (InterruptedException e1) {
-            logger.error("tryLock was interrupted", e);
-        } finally {
-            closingLock.unlock();
-        }
-    }
-
-    @Override
-    public void handle(SteppingSystemException e) {
-        try {
-            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
-            if (isClosed && delegateExceptionHandling(e))
-                return;
-            String error = "Exception Detected";
-            if (e instanceof SteppingDistributionException)
-                error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
-            logger.error(error, e);
-            closeAndTryKill(e);
-        } catch (InterruptedException e1) {
-            logger.error("tryLock was interrupted", e);
-        } finally {
-            closingLock.unlock();
-        }
-    }
-
-    @Override
     public void close() {
         try {
 
             if (isClosed)
                 return;
 
-            closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS);
+            if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
+                return;
 
             if (isClosed)
                 return;
 
-            closeCloseables();
+            closeStepDecorators();
 
             sendPoisonPill();
             Thread.sleep(poisonPillWaitDuration);
@@ -365,7 +324,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             closeAlgo();
 
             isClosed = true;
-
+            /* this is located here and not inside finally because we want to make sure all the prev steps were taken */
         } catch (InterruptedException e) {
             logger.error("tryLock interrupted", e);
         } finally {
@@ -373,7 +332,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void closeAndTryKill(Exception e) {
+    private void closeAndKillIfNeeded(Exception e) {
         try {
             logger.error("Try to close and kill", e);
             close();
@@ -384,16 +343,16 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-   private boolean containsInChain(Throwable e, Class c) {
-        if(c.isInstance(e))
+    private boolean containsInChain(Throwable e, Class c) {
+        if (c.isInstance(e))
             return true;
 
         Throwable cause = null;
         Throwable result = e;
 
-        while(null != (cause = result.getCause())  ) {
+        while (null != (cause = result.getCause())) {
             result = cause;
-            if(c.isInstance(cause))
+            if (c.isInstance(cause))
                 return true;
         }
         return false;
@@ -411,7 +370,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void closeAlgo(){
+    private void closeAlgo() {
         logger.debug("Closing Algo");
         try {
             this.algo.close();
@@ -420,7 +379,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void closeCloseables(){
+    private void closeStepDecorators() {
         logger.debug("Closing Closeables");
         try {
             List<Closeable> closeables = cntr.getSonOf(IStepDecorator.class);
@@ -431,20 +390,19 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
                     logger.error("Failed to close a closeable object, continuing with the next one");
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to close Closeables in Algo " + this.algo.getClass(), e);
         }
     }
 
-    private void sendPoisonPill(){
+    private void sendPoisonPill() {
         logger.debug("Sending Poison Pill");
         try {
-            //todo use shouter?
             List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
             for (IStepDecorator step : stepDecorators) {
                 step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Failed to send poison pill in Algo " + this.algo.getClass(), e);
         }
     }
@@ -468,7 +426,7 @@ class AlgoDecorator implements IBuiltinExceptionHandler, IAlgoDecorator {
             return handle;
         } catch (SteppingSystemCriticalException ex) {
             logger.error("Custom Exception Handler throw SteppingSystemCriticalException", ex);
-            closeAndTryKill(ex);
+            closeAndKillIfNeeded(ex);
             return true;
         } catch (Exception ex) {
             logger.error("Custom Exception Handler FAILED", ex);
