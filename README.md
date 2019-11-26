@@ -252,9 +252,14 @@ public class KafkaDBMergerAlgo implements Algo {
         containerRegistrar.add(subject.getType(), kafkaDataArrivedSubject);
         */
         
+        /* NOTE: Since version 3.6.x, ContainerRegistrar supports two methods for registration: one for registering an IIdentity object and one for all other objects types. IIdentity objects must have an ID by overriding the IIdentity interface, otherwise, 
+        the registration will fail. The other method allows to register any other type object, in this case you need to use the method that receives the object and a unique identifier. If you try to call this method with an
+        IIdentity object or with an invalid ID, the registration will fail.
+        */
+        
         //* init Steps
-        containerRegistrar.add("DBFetcher", new DBFetcher());
-        containerRegistrar.add("KafkaFetcher", new KafkaFetcher());
+        containerRegistrar.add(new DBFetcher());
+        containerRegistrar.add(new KafkaFetcher());
         return containerRegistrar;
     }
 
@@ -638,6 +643,31 @@ In use-cases where you need to create an in-memory state at initialization phase
 method and not in the constructor because When duplicating Steps Stepping creates new instances of your Class by duplicating 
 the object but it does so without serializing its in-memory state.
 
+### Remote Controller and Remote Controllers
+Since version 3.7 we added a new RemoteController entity that enables Stepping consumers to control their Algos also 
+and Steps “remotely” from outside the Algo. Consumers can now use the Shouter and access the Container from outside Stepping.
+In addition the same API allows consumers to close Stepping externally.
+
+```java
+ public static void main(String[] args) {
+    ...
+ 
+    RemoteControllers remoteControllers = stepping
+            .registerAndControl("algo1", algo1)
+            .registerAndControl("algo2", algo2)
+            .go();
+
+    remoteControllers.get("algo1").getShouter().shout(data, "event1");
+    
+    ...
+    
+    remoteControllers.get("algo1").getContainer();
+    
+    ...
+    
+    remoteControllers.get("algo1").close();
+}
+```
 
 ### Performance Sampler
 Debugging can be not so trivial in an event driven system as Stepping. 
