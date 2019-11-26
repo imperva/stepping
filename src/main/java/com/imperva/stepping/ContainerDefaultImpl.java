@@ -2,6 +2,7 @@ package com.imperva.stepping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -27,6 +28,11 @@ public class ContainerDefaultImpl implements Container{
             throw new IdentifiableSteppingException(identifiable.getId(), "Identifiable Object must contain unique ID. " + identifiable.getId() + " already exists!");
         objects.putIfAbsent(identifiable.getId(),identifiable);
         return this;
+    }
+
+    @Override
+    public <T> void add(HashMap<String, T> objs) {
+        objs.forEach((s, o) -> add(o, s));
     }
 
     public ContainerDefaultImpl remove(String id) {
@@ -93,6 +99,11 @@ public class ContainerDefaultImpl implements Container{
                 ts.add((T) o);
         }
         return ts;
+    }
+
+    public List<Identifiable> getAll() {
+        List<Identifiable> clonedObject = objects.entrySet().stream().map((obj) -> (obj.getValue())).collect(Collectors.toList());
+        return clonedObject;
     }
 
     public void clear() {

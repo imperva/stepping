@@ -43,7 +43,6 @@ class RunnersController {
                 logger.error("Failed closing ScheduledExecutorService");
             } finally {
                 scheduledExecutorServices.clear();
-                Thread.currentThread().interrupt();
             }
         }
     }

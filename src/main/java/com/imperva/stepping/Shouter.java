@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
          try {
              container.<Subject>getById(subjectType).publish(value);
          } catch (Exception e) {
+             logger.error("Shouter Failed", e);
              rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
          }
      }
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
          try {
              container.<Subject>getById(subjectType).publish(value);
          } catch (Exception e) {
+             logger.error("Shouter Failed", e);
              rootExceptionHandler.handle(new SteppingDistributionException(subjectType, "Distribution FAILED", e));
          }
      }

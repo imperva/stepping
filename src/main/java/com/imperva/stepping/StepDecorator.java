@@ -56,6 +56,8 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public void queueSubjectUpdate(Data data, String subjectType) {
+        if (StringUtils.isEmpty(subjectType) || data == null)
+            throw new SteppingException("Can't queue an empty Subject or empty Data");
         q.queue(new Message(data, subjectType));
     }
 
@@ -89,16 +91,19 @@ class StepDecorator implements IStepDecorator {
                     if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
                         onSubjectUpdate(message.getData(), message.getSubjectType());
                     } else {
-                        onTickCallBack();
-                        cb = (CyclicBarrier) message.getData().getValue();
-                        cb.await();
+                        try {
+                            onTickCallBack();
+                        } finally {
+                            cb = (CyclicBarrier) message.getData().getValue();
+                            cb.await();
+                        }
                     }
                 }
             }
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);
         } catch (Exception e) {
-           throw new IdentifiableSteppingException(getStep().getId(), "DataSink FAILED", e);
+            throw new IdentifiableSteppingException(getStep().getId(), "DataSink FAILED", e);
         }
     }
 

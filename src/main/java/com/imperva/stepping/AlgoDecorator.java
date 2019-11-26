@@ -6,21 +6,18 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
-    private Container cntr = new ContainerService();
+    private Container cntr = new ContainerDefaultImpl();
+    private Container cntrPublic = new ContainerService();
     private Algo algo;
-    private IRunning runningAlgoTickCallback;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
     private volatile boolean isClosed = false;
     private final Lock closingLock = new ReentrantLock();
-    private Future runningAlgoTickCallbackFuture;
-
     private final int closingLockWaitDuration = 1;//* in seconds
     private final int poisonPillWaitDuration = 3000;
 
@@ -32,26 +29,41 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     public void init() {
         try {
             logger.info("Initializing Algo...");
+
             logger.info("Populating container...");
             fillContainer();
+
             logger.info("Decorating Steps...");
             decorateSteps();
-            logger.info("Fill Subjects in Container...");
+
+            logger.info("Fill Auto Created Subjects in Container...");
             fillAutoCreatedSubjectsInContainer();
+
             logger.info("Duplicating Parallel Nodes Steps...");
             duplicateNodes();
-            logger.info("Initializing Steps...");
+
+            logger.info("Populating public container...");
+            fillPublicContainer();
+
+            logger.info("Initializing Steps");
             initSteps();
+
             logger.info("Initializing Runners...");
             initRunners();
-            logger.info("Register ƒtdownHook...");
+
+            logger.info("Register ShutdownHook...");
             registerShutdownHook();
+
             logger.info("Attach Subjects to Followers...");
             attachSubjects();
+
             logger.info("Starting Restate stage...");
             restate();
+
             logger.debug("Run Steps...");
             wakenRunners();
+
+            logger.debug("Init Algo...");
             algo.init();
         } catch (Exception e) {
             logger.error("Algo initialization FAILED", e);
@@ -61,15 +73,28 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void fillAutoCreatedSubjectsInContainer() {
         ContainerRegistrar autoSubjectsRegistration = autoSubjectsRegistration();
-        DI(autoSubjectsRegistration.getRegistered());
+        cntr.add(autoSubjectsRegistration.getRegistered());
     }
 
     private void fillContainer() {
         ContainerRegistrar builtinRegistration = builtinContainerRegistration();
         ContainerRegistrar objectsRegistration = containerRegistration();
 
-        DI(builtinRegistration.getRegistered());
-        DI(objectsRegistration.getRegistered());
+        cntr.add(builtinRegistration.getRegistered());
+        cntr.add(objectsRegistration.getRegistered());
+    }
+
+    private void fillPublicContainer() {
+        List<Identifiable> identifiables = cntr.getAll();
+        for (Identifiable iden : identifiables) {
+            Object obj = iden.get();
+            if (obj instanceof Step ||
+                    obj instanceof Algo ||
+                    obj instanceof IRunning) {//* TODO obj instanceof Subject. Can't remove them as we need them for the follower flow. Can be fixed
+                continue;
+            }
+            cntrPublic.add(iden);
+        }
     }
 
     private ContainerRegistrar autoSubjectsRegistration() {
@@ -103,11 +128,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     private void duplicateNodes() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            int numOfNodes = iStepDecorator.getConfig().getNumOfNodes();
+        for (IStepDecorator iStepDecoratorToDuplicate : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+            int numOfNodes = iStepDecoratorToDuplicate.getConfig().getNumOfNodes();
             if (numOfNodes > 0) {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
-                    Step currentStep = iStepDecorator.getStep();
+                    Step currentStep = iStepDecoratorToDuplicate.getStep();
                     String currentStepId = currentStep.getId();
                     Step duplicatedStp = (Step) Class.forName(currentStep.getClass().getName(), true, currentStep.getClass().getClassLoader()).newInstance();
                     String stepID = currentStepId + "." + i;
@@ -123,9 +148,13 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     }
 
                     StepDecorator stepDecorator = new StepDecorator(duplicatedStp);
-                    String stepDecoratorId = iStepDecorator.getId() + "." + i;
+                    String stepDecoratorId = iStepDecoratorToDuplicate.getId() + "." + i;
                     stepDecorator.setId(stepDecoratorId);
-                    stepDecorator.setDistributionNodeID(stepDecorator.getStep().getClass().getName());
+
+                    String distId = stepDecorator.getStep().getClass().getName();
+                    stepDecorator.setDistributionNodeID(distId);
+                    iStepDecoratorToDuplicate.setDistributionNodeID(distId);
+
                     cntr.add(stepDecorator, stepDecoratorId);
                     cntr.add(duplicatedStp, duplicatedStp.getId());
                 }
@@ -143,8 +172,6 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (IRunning running : cntr.<IRunning>getSonOf(IRunning.class)) {
             running.awake();
         }
-        if (runningAlgoTickCallback != null)
-            runningAlgoTickCallbackFuture = runningAlgoTickCallback.awake();
     }
 
     private ContainerRegistrar builtinContainerRegistration() {
@@ -173,6 +200,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public AlgoConfig getConfig() {
         return algo.getConfig();
+    }
+
+    @Override
+    public Container getContainer() {
+        return cntrPublic;
     }
 
 
@@ -230,16 +262,23 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
             }
             cntr.add(new Running(() -> {
-                try {
-                    iStepDecorator.openDataSink();
-                } catch (Exception e) {
-                    handle(e);
+                while (true) {
+                    try {
+                        iStepDecorator.openDataSink();
+                    } catch (Exception e) {
+                        if (!handle(e)) {
+                            logger.debug("Exception was NOT handled successfully, re-opening DataSink");
+                            break;
+                        }else{
+                            logger.debug("Exception was handled, re-opening DataSink ");
+                        }
+                    }
                 }
             }, runnersController.getExecutorService()));
         }
 
         if (this.getConfig().isEnableTickCallback()) {
-            this.runningAlgoTickCallback = new RunningScheduled(this.getClass().getName(),
+            RunningScheduled runningScheduledAlgo = new RunningScheduled(this.getClass().getName(),
                     globConf.getRunningPeriodicDelay(),
                     globConf.getRunningInitialDelay(),
                     TimeUnit.MILLISECONDS,
@@ -250,13 +289,14 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                             handle(e);
                         }
                     });
-            runnersController.addScheduledRunner(((RunningScheduled) this.runningAlgoTickCallback).getScheduledExecutorService());
+            cntr.add(runningScheduledAlgo, this.getClass().getName());
+            runnersController.addScheduledRunner(runningScheduledAlgo.getScheduledExecutorService());
         }
     }
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init(cntr);
+            step.init(cntrPublic);
             step.setAlgoConfig(getConfig());
         }
     }
@@ -268,22 +308,18 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private <T> void DI(T obj, String id) {
-        cntr.add(obj, id);
-    }
-
-    private void DI(HashMap<String, Object> objs) {
-        objs.forEach((s, o) -> DI(o, s));
-    }
-
     @Override
     public boolean handle(Exception e) {
         try {
             if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
                 return true;
 
-            if (isClosed || delegateExceptionHandling(e))
+            if (isClosed)
+                return false;
+
+            if (delegateExceptionHandling(e))
                 return true;
+
 
             String error = "Exception Detected";
             if (e instanceof IdentifiableSteppingException)
@@ -295,10 +331,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             closeAndKillIfNeeded(e);
         } catch (InterruptedException e1) {
             logger.error("tryLock was interrupted", e);
+            return false;
         } finally {
             closingLock.unlock();
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -359,14 +396,20 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     private void closeRunners() {
-        logger.info("Closing Runners");
+        logger.debug("Closing Runners");
+
+        for (IRunning running : cntr.<IRunning>getSonOf(IRunning.class)) {
+            try {
+                running.close();
+            } catch (Exception e) {
+                logger.error("Failed to close a Runner in Algo " + this.algo.getClass(), e);
+            }
+        }
+
         try {
             runnersController.kill();
-            if (runningAlgoTickCallbackFuture != null) {
-                runningAlgoTickCallbackFuture.cancel(true);
-            }
         } catch (Exception e) {
-            logger.error("Failed to close Runners in Algo " + this.algo.getClass(), e);
+            logger.error("Failed to Kill Runners in Algo " + this.algo.getClass(), e);
         }
     }
 
@@ -423,11 +466,13 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             boolean handle = customExceptionHandler.handle(e);
             if (!handle)
                 logger.debug("Custom Exception Handler was not able to fully handle the Exception");
+            else
+                logger.debug("Custom Exception Handler fully handled the Exception");
             return handle;
         } catch (SteppingSystemCriticalException ex) {
             logger.error("Custom Exception Handler throw SteppingSystemCriticalException", ex);
             closeAndKillIfNeeded(ex);
-            return true;
+            return false;
         } catch (Exception ex) {
             logger.error("Custom Exception Handler FAILED", ex);
             return false;

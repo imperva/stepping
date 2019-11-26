@@ -1,21 +1,25 @@
 package com.imperva.stepping;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface Container {
 
-    <T> ContainerDefaultImpl add(T obj);
+    <T> Container add(T obj);
 
-    <T> ContainerDefaultImpl add(T obj, String id);
+    <T> Container add(T obj, String id);
 
-    <T> ContainerDefaultImpl add(Identifiable<T> identifiable);
+    <T> Container add(Identifiable<T> identifiable);
 
-    ContainerDefaultImpl remove(String id);
+    <T> void add(HashMap<String, T> objs);
 
-    ContainerDefaultImpl add(List<Identifiable> identifiables);
+    Container remove(String id);
+
+    Container add(List<Identifiable> identifiables);
 
     <T> T getById(String id);
 
+    List<Identifiable> getAll();
 
     <T> List<T> getSonOf(Class<?> interf);
 
