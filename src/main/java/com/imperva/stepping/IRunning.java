@@ -14,10 +14,9 @@ abstract class IRunning implements Closeable {
         try {
 
             if (future != null && !future.isDone() && !future.isCancelled()) {
-                logger.info("@@@@@ Start Closing Stepping Future");
+                logger.info("Start Closing IRunning Future");
                 boolean isCanceled = future.cancel(force);
-                logger.trace("Stepping orchestrator Future canceled successfully?: " + isCanceled);
-                logger.info("Finish closing Stepping orchestrator");
+                logger.trace("Stepping orchestrator Future canceled successfully: " + isCanceled);
             }
         } catch (Exception e) {
             logger.error("Failed closing Stepping orchestrator", e);
