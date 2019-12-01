@@ -186,7 +186,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
             if (packages == null || packages.trim().equals(""))
                 throw new SteppingException("'packages' list field is required to initialize PerfSamplerStep");
-            containerRegistrar.add(BuiltinTypes.PERFSAMPLER.name(), new PerfSamplerStep(interval, packages));
+            containerRegistrar.add(new PerfSamplerStep(interval, packages));
         }
 
         return containerRegistrar;

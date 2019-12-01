@@ -14,6 +14,12 @@ public class PerfSamplerStep implements Step {
         this.reportInterval = reportInterval;
         this.packges = packges;
     }
+
+    @Override
+    public String getId(){
+        return BuiltinTypes.PERFSAMPLER.name();
+    }
+
     @Override
     public void init(Container cntr, Shouter shouter) {
         ts = new ThreadsSampler();
