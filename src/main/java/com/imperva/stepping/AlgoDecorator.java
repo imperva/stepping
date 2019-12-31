@@ -90,11 +90,12 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             Object obj = iden.get();
             if (obj instanceof Step ||
                     obj instanceof Algo ||
-                    obj instanceof IRunning) {//* TODO obj instanceof Subject. Can't remove them as we need them for the follower flow. Can be fixed
+                    obj instanceof IRunning) {//* TODO obj instanceof Subject. Can't remove them as we need them for the follower flow. Can be fixed with __STEPPING_PRIVATE_CONTAINER__
                 continue;
             }
             cntrPublic.add(iden);
         }
+        cntrPublic.add(cntr,"__STEPPING_PRIVATE_CONTAINER__");
     }
 
     private ContainerRegistrar autoSubjectsRegistration() {
@@ -121,7 +122,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             if (step.getId() == null || "".equals(step.getId().trim())) {
                 throw new SteppingException("Step Object must contain an ID name");
             }
-            String decoratorId = step.getId() + "." + "decorator";
+            String decoratorId = step.getId() + ".decorator";
             stepDecorator.setId(decoratorId);
             cntr.add(stepDecorator, decoratorId);
         }
@@ -148,7 +149,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     }
 
                     StepDecorator stepDecorator = new StepDecorator(duplicatedStp);
-                    String stepDecoratorId = iStepDecoratorToDuplicate.getId() + "." + i;
+                    String stepDecoratorId = iStepDecoratorToDuplicate.getStep().getId() + "." + i + ".decorator";
                     stepDecorator.setId(stepDecoratorId);
 
                     String distId = stepDecorator.getStep().getClass().getName();
