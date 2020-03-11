@@ -104,6 +104,8 @@ class StepDecorator implements IStepDecorator {
             throw new SteppingSystemException(e);
         } catch (Exception e) {
             throw new IdentifiableSteppingException(getStep().getId(), "DataSink FAILED", e);
+        } catch (Error err) {
+            throw new IdentifiableSteppingError(getStep().getId(), "DataSink FAILED - ERROR", err);
         }
     }
 

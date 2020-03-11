@@ -68,6 +68,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (Exception e) {
             logger.error("Algo initialization FAILED", e);
             handle(e);
+        } catch (Error err) {
+            logger.error("Algo initialization FAILED - ERROR", err);
+            handle(err);
         }
     }
 
@@ -257,7 +260,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                                 cb.await();
                             } catch (Exception e) {
                                 handle(e);
+                            } catch (Error err) {
+                                handle(err);
                             }
+
                         });
                 cntr.add(runningScheduled, runnerScheduledID);
                 runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
@@ -270,8 +276,16 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                         if (!handle(e)) {
                             logger.debug("Exception was NOT handled successfully, re-opening DataSink");
                             break;
-                        }else{
+                        } else {
                             logger.debug("Exception was handled, re-opening DataSink ");
+                        }
+
+                    } catch (Error err) {
+                        if (!handle(err)) {
+                            logger.debug("Error was NOT handled successfully, re-opening DataSink");
+                            break;
+                        } else {
+                            logger.debug("Error was handled, re-opening DataSink ");
                         }
                     }
                 }
@@ -288,6 +302,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                             onTickCallBack();
                         } catch (Exception e) {
                             handle(e);
+                        } catch (Error err) {
+                            handle(err);
                         }
                     });
             cntr.add(runningScheduledAlgo, this.getClass().getName());
@@ -318,7 +334,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             if (isClosed)
                 return false;
 
-            if (delegateExceptionHandling(e))
+            if(e instanceof SteppingExceptionError){
+                SteppingExceptionError err = (SteppingExceptionError)e;
+                if(delegateExceptionHandling((Error)err.getCause()))
+                    return true;
+            } else if (delegateExceptionHandling(e))
                 return true;
 
 
@@ -337,6 +357,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             closingLock.unlock();
         }
         return false;
+    }
+
+    @Override
+    public boolean handle(Error err) {
+        return handle(new SteppingExceptionError(err));
     }
 
     @Override
@@ -456,7 +481,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         System.exit(1);
     }
 
-    private boolean delegateExceptionHandling(Exception e) {
+    private boolean delegateExceptionHandling(Throwable e) {
         logger.info("Try delegate Exception to custom Exception Handler", e);
         IExceptionHandler customExceptionHandler = getConfig().getCustomExceptionHandler();
         if (customExceptionHandler == null) {
@@ -464,7 +489,12 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             return false;
         }
         try {
-            boolean handle = customExceptionHandler.handle(e);
+
+            boolean handle = false;
+            if (e instanceof Exception)
+                handle = customExceptionHandler.handle((Exception) e);
+            else if (e instanceof Error)
+                handle = customExceptionHandler.handle((Error) e);
             if (!handle)
                 logger.debug("Custom Exception Handler was not able to fully handle the Exception");
             else
