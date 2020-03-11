@@ -58,5 +58,13 @@ class Q<T> {
     public int getCapacity() {
         return capacity;
     }
+
+    public boolean offer(T message) {
+        try {
+        return blockingQueue.offer(message);
+        } catch (Exception e) {
+            throw new SteppingSystemException("Queue was not able to Offer a new item", e);
+        }
+    }
 }
 

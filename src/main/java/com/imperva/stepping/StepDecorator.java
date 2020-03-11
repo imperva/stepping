@@ -62,6 +62,13 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
+    public boolean offerQueueSubjectUpdate(Data data, String subjectType) {
+        if (StringUtils.isEmpty(subjectType) || data == null)
+            throw new SteppingException("Can't offer an empty Subject or empty Data");
+       return q.offer(new Message(data, subjectType));
+    }
+
+    @Override
     public void onTickCallBack() {
         try {
             step.onTickCallBack();
