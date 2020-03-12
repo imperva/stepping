@@ -19,9 +19,12 @@ public class EvenDistributionStrategy implements IDistributionStrategy {
             chopped.get(chopped.size() - 2).addAll(chopped.get(chopped.size() - 1));
             chopped.remove(chopped.size() - 1);
         }
+        Distribution[] arr  = new Distribution[iStepDecorators.size()];
         for (int u = 0; u < iStepDecorators.size(); u++) {
-            iStepDecorators.get(u).queueSubjectUpdate(new Data(chopped.get(u)), subjectType);
+            //iStepDecorators.get(u).queueSubjectUpdate(new Data(chopped.get(u)), subjectType);
+            arr[u] = new Distribution(iStepDecorators.get(u),new Data(chopped.get(u)), subjectType);
         }
+        distribute(arr);
     }
 
     private  <T> List<List<T>> chopped(List<T> list, final int L) {
