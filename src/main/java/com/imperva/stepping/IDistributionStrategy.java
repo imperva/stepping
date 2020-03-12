@@ -2,10 +2,10 @@ package com.imperva.stepping;
 
 import java.util.List;
 
-public interface IDistributionStrategy {
+public  abstract class IDistributionStrategy {
     //todo StepDecorator should not be exposed to API consumers
-    void distribute(List<IStepDecorator> steps, Data data, String subjectType);
-    default void distribute(Distribution[] distributionList, int iterationNum) {
+   abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
+   void distribute(Distribution[] distributionList, int iterationNum) {
         Distribution[] busy = null;
 
         for (int inc = 0; inc < distributionList.length; inc++) {
@@ -32,7 +32,7 @@ public interface IDistributionStrategy {
         }
     }
 
-    default void distribute(Distribution[] distributionList) {
+    void distribute(Distribution[] distributionList) {
         distribute(distributionList, 0);
     }
 }

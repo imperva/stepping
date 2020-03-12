@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //todo - very expensive - fix
-public class EvenDistributionStrategy implements IDistributionStrategy {
+public class EvenDistributionStrategy extends IDistributionStrategy {
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
         if (!(data.getValue() instanceof List))

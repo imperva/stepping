@@ -2,7 +2,7 @@ package com.imperva.stepping;
 
 import java.util.*;
 
-public class All2AllDistributionStrategy implements IDistributionStrategy {
+public class All2AllDistributionStrategy extends IDistributionStrategy {
 
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
