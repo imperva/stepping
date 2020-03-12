@@ -21,7 +21,6 @@ public class EvenDistributionStrategy extends IDistributionStrategy {
         }
         Distribution[] arr  = new Distribution[iStepDecorators.size()];
         for (int u = 0; u < iStepDecorators.size(); u++) {
-            //iStepDecorators.get(u).queueSubjectUpdate(new Data(chopped.get(u)), subjectType);
             arr[u] = new Distribution(iStepDecorators.get(u),new Data(chopped.get(u)), subjectType);
         }
         distribute(arr);
