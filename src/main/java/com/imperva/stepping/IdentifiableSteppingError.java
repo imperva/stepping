@@ -1,6 +1,6 @@
 package com.imperva.stepping;
 
-public class IdentifiableSteppingError extends SteppingError {
+class IdentifiableSteppingError extends SteppingError {
     private final String stepId;
 
     IdentifiableSteppingError(String stepId, Error e) {

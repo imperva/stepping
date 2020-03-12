@@ -1,6 +1,6 @@
 package com.imperva.stepping;
 
-public class SteppingError extends Error {
+class SteppingError extends Error {
 
     SteppingError(String message) {
         super(message);

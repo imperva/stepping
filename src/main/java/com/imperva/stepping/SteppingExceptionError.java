@@ -1,6 +1,6 @@
 package com.imperva.stepping;
 
-public class SteppingExceptionError extends RuntimeException {
+class SteppingExceptionError extends RuntimeException {
 
 
 
