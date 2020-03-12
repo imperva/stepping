@@ -542,7 +542,7 @@ Stepping contains a single configuration file at this location:
 
 # Advanced Topics
 
-### Exception Handling
+### Exception & Error Handling
 Steeping provides its internal error handling for un-handled exception. 
 
 The builtin implementation will try to delegate the exception handling to client's custom ExceptionHandler if provided 
@@ -551,7 +551,7 @@ all Steps to cleanup and die gracefully.
 
 ### Custom ExceptionHandling
 Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
-exception, in this case the builtin Exception handling is suppressed, otherwise Stepping will trigger the default behaviour.
+exception (return true), in this case the builtin Exception handling is suppressed, otherwise (return false) Stepping will trigger the default behaviour.
 
 To set your customeException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
 ```java
@@ -562,10 +562,19 @@ To set your customeException Handler you just need to supply an IExceptionHandle
             public boolean handle(Exception e) {
                 return false;
             }
+            
+             @Override
+             public boolean handle(Error err) {
+                return false;
+            }
         });
         return algoConfig;
     }
 ```
+
+Since version 3.8.x Stepping supports Java Errors (i.e. OutOfMemoryError). When Stepping detects an un-handled Error it will
+try to delegate the Error to IExceptionHandler in a dedicated new function boolean handle(Error err). This method behaves exactly 
+as the boolean handle(Exception e). 
 
 ### Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
@@ -588,8 +597,12 @@ and delegates the handling to its the distribution logic. Stepping delivers two 
 - All2AllDistributionStrategy: This policy is the default and the simplest one. It is designed to send the same data to each 
 Step that is registered to the specific 'Subject'
 
-- EvenDistributionStrategy - This policy is the default behaviour used for Duplicated Nodes (more about this in the next paragraph).
+- EvenDistributionStrategy - This policy comes in handy is use cases where we use Duplicated *stateless* Nodes (more about this in the next paragraph).
 In this case each duplicated node will get an even chunk of data.
+
+- SharedDistributionStrategy - This policy comes in handy is use cases where we use Duplicated *stateless* Nodes (more about this in the next paragraph).
+By using the SharedDistributionStrategy, Stepping will make sure that all the nodes competes on the same poll of events in a "First come, first start" manner.
+This is the default behaviour used for Duplicated Nodes.
 
 Stepping enables consumers to specify their own behaviour be supply a custom Distribution Policy. 
 The Distribution Policy must implements the IDistributionStrategy interface, and configure the Step's configuration:
@@ -635,6 +648,25 @@ As mentioned above consumers can specify their own policy.
 
 As mentioned in the "Step Identity" section, when duplicating Steps it is mandatory to implement the getId() and setId() 
 methods and supply a meaningful name to your Step.
+
+```java
+public class LoggerDefaultStep implements Step {
+
+    private String id = "LoggerDefaultStep";
+    
+     @Override
+     public String getId() { 
+         return id;
+     }
+    
+     @Override
+     public void setId(String id) { 
+         this.id = id; 
+     }
+     
+}
+    
+```
 
 Stepping will make sure to create new instances of the duplicated Step and give each one the name supplied by you via the getId()
 method with an additional suffix: .<INCREMENTAL-STEP_NUMBER>. i.e. 'myCustomStep.2'
