@@ -60,6 +60,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.info("Starting Restate stage...");
             restate();
 
+            logger.debug("Q dependency injection");
+            Qinjection();
+
             logger.debug("Run Steps...");
             wakenRunners();
 
@@ -71,6 +74,23 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (Error err) {
             logger.error("Algo initialization FAILED - ERROR", err);
             handle(err);
+        }
+    }
+
+    private void Qinjection() {
+        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+            Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
+            String distributionID = iStepDecorator.getDistributionNodeID();
+            for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+                if (iStepDecorator2.getQ() != null)
+                    continue;
+                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
+                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
+                    continue;
+                }
+                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy)
+                    iStepDecorator2.setQ(q);
+            }
         }
     }
 

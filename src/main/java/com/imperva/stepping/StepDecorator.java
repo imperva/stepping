@@ -35,7 +35,6 @@ class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getId());
         container = cntr;
         step.init(container, shouter);
-        q = new Q<>(getConfig().getBoundQueueCapacity());
     }
 
     @Override
@@ -178,6 +177,16 @@ class StepDecorator implements IStepDecorator {
     @Override
     public int getQCapacity() {
         return q.getCapacity();
+    }
+
+    @Override
+    public void setQ(Q q) {
+        this.q = q;
+    }
+
+    @Override
+    public Q getQ() {
+        return q;
     }
 
     @Override
