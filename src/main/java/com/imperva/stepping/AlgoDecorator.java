@@ -381,6 +381,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     @Override
     public boolean handle(Error err) {
+        logger.error("Handling Error :" + err.toString() + ". Converting to SteppingExceptionError");
         return handle(new SteppingExceptionError(err));
     }
 
@@ -502,30 +503,33 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     private boolean delegateExceptionHandling(Throwable e) {
-        logger.info("Try delegate Exception to custom Exception Handler", e);
+        logger.info("Try delegate Exception/Error to custom Exception Handler", e);
         IExceptionHandler customExceptionHandler = getConfig().getCustomExceptionHandler();
         if (customExceptionHandler == null) {
-            logger.info("Custom Exception Handler MISSING");
+            logger.info("Custom Exception/Error Handler MISSING");
             return false;
         }
         try {
 
             boolean handle = false;
-            if (e instanceof Exception)
+            if (e instanceof Exception) {
                 handle = customExceptionHandler.handle((Exception) e);
-            else if (e instanceof Error)
+            } else if (e instanceof Error) {
                 handle = customExceptionHandler.handle((Error) e);
+            }
+
             if (!handle)
-                logger.debug("Custom Exception Handler was not able to fully handle the Exception");
+                logger.debug("Custom Exception/Error Handler was not able to fully handle the Exception");
             else
-                logger.debug("Custom Exception Handler fully handled the Exception");
+                logger.debug("Custom Exception/Error Handler fully handled the Exception");
+
             return handle;
         } catch (SteppingSystemCriticalException ex) {
-            logger.error("Custom Exception Handler throw SteppingSystemCriticalException", ex);
+            logger.error("Custom Exception/Error Handler throw SteppingSystemCriticalException", ex);
             closeAndKillIfNeeded(ex);
             return false;
         } catch (Exception ex) {
-            logger.error("Custom Exception Handler FAILED", ex);
+            logger.error("Custom Exception/Error Handler FAILED", ex);
             return false;
         }
     }
