@@ -573,8 +573,9 @@ To set your customeException Handler you just need to supply an IExceptionHandle
 ```
 
 Since version 3.8.x Stepping supports Java Errors (i.e. OutOfMemoryError). When Stepping detects an un-handled Error it will
-try to delegate the Error to IExceptionHandler in a dedicated new function boolean handle(Error err). This method behaves exactly 
-as the boolean handle(Exception e). 
+try to delegate the Error to IExceptionHandler in a dedicated new function 'boolean handle(Error err)'. This method behaves exactly 
+as the 'boolean handle(Exception e)'. 
+In case 'boolean handle(Error err)' method is not implemented, the default Error handling implementation will throw a SteppingSystemCriticalException().
 
 ### Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
