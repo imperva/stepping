@@ -1,8 +1,12 @@
 package com.imperva.stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 public abstract class IDistributionStrategy {
+    private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
     private static final int MAXIMUM_OFFERS_RETRIES = 10;
     private static final int WAIT_PERIOD_MILLI = 500;
 
@@ -27,7 +31,9 @@ public abstract class IDistributionStrategy {
         }
 
         if (!isEmpty(busy)) {
+            logger.debug("Distribution not succeeded. Moving to Retardation Mode for Subject: "  + busy[0].getSubject() + ". Iteration number - " + iterationNum);
             if (iterationNum > MAXIMUM_OFFERS_RETRIES) {
+                logger.debug("Retardation Mode failed after " + iterationNum + " retries. Moving back to normal distribution");
                 for (Distribution dist : distributionList) {
                     if (dist == null)
                         continue;
@@ -35,7 +41,7 @@ public abstract class IDistributionStrategy {
                 }
             }
             try {
-                System.out.println("Postponing " + iterationNum);
+                logger.debug("Retarding the distribution for " + WAIT_PERIOD_MILLI * iterationNum + " milliseconds");
                 Thread.sleep(WAIT_PERIOD_MILLI * iterationNum);
             } catch (InterruptedException e) {
                 throw new SteppingSystemException("Distribution timeout failed");
