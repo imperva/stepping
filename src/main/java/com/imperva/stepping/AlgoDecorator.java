@@ -61,7 +61,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             restate();
 
             logger.debug("Q dependency injection");
-            Qinjection();
+            QDependencyInjection();
 
             logger.debug("Run Steps...");
             wakenRunners();
@@ -77,7 +77,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void Qinjection() {
+    private void QDependencyInjection() {
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
             String distributionID = iStepDecorator.getDistributionNodeID();
