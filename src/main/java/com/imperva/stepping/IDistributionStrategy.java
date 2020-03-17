@@ -8,7 +8,7 @@ import java.util.List;
 public abstract class IDistributionStrategy {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
     private static final int MAXIMUM_OFFERS_RETRIES = 10;
-    private static final int WAIT_PERIOD_MILLI = 500;
+    private static final int WAIT_PERIOD_MILLI = 300;
 
     abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
 
