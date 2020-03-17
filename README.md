@@ -553,7 +553,7 @@ all Steps to cleanup and die gracefully.
 Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
 exception (return true), in this case the builtin Exception handling is suppressed, otherwise (return false) Stepping will trigger the default behaviour.
 
-To set your customeException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
+To set your CustomException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
 ```java
     public AlgoConfig getConfig() {
         AlgoConfig algoConfig = new AlgoConfig();
@@ -563,8 +563,8 @@ To set your customeException Handler you just need to supply an IExceptionHandle
                 return false;
             }
             
-             @Override
-             public boolean handle(Error err) {
+            @Override
+            public boolean handle(Error err) {
                 return false;
             }
         });
@@ -597,13 +597,14 @@ and delegates the handling to its the distribution logic. Stepping delivers two 
 
 - All2AllDistributionStrategy: This policy is the default and the simplest one. It is designed to send the same data to each 
 Step that is registered to the specific 'Subject'
+NOTE: For Duplicated nodes we will need to explicitly a different strategy
 
-- EvenDistributionStrategy - This policy comes in handy is use cases where we use Duplicated *stateless* Nodes (more about this in the next paragraph).
+- EvenDistributionStrategy - This policy comes in handy when we use Duplicated *stateless* Nodes (more about this in the next paragraph).
 In this case each duplicated node will get an even chunk of data.
 
-- SharedDistributionStrategy - This policy comes in handy is use cases where we use Duplicated *stateless* Nodes (more about this in the next paragraph).
+- SharedDistributionStrategy - This policy comes in handy when we use Duplicated *stateless* Nodes (more about this in the next paragraph).
 By using the SharedDistributionStrategy, Stepping will make sure that all the nodes competes on the same poll of events in a "First come, first start" manner.
-This is the default behaviour used for Duplicated Nodes.
+
 
 Stepping enables consumers to specify their own behaviour be supply a custom Distribution Policy. 
 The Distribution Policy must implements the IDistributionStrategy interface, and configure the Step's configuration:

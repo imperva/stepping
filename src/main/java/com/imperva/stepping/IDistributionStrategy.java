@@ -13,10 +13,19 @@ public abstract class IDistributionStrategy {
     abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
 
     protected void distribute(Distribution[] distributionList) {
-        distribute(distributionList, 1);
+        try {
+            distribute(distributionList, 1);
+        } catch (Exception ex) {
+            logger.error("Distribution failed with Exception: " + ex.toString());
+            throw new SteppingSystemException(ex);
+        } catch (Error error) {
+            logger.error("Distribution failed with Error: " + error.toString());
+            throw error;
+        }
     }
 
     private void distribute(Distribution[] distributionList, int iterationNum) {
+
         Distribution[] busy = null;
 
         for (int inc = 0; inc < distributionList.length; inc++) {
@@ -27,13 +36,15 @@ public abstract class IDistributionStrategy {
                     busy = new Distribution[distributionList.length];
                 }
                 busy[inc] = distributionList[inc];
+                logger.debug("Distribution not succeeded. Moving to Retardation Mode for Subject: "  + busy[inc].getSubject() + ". Iteration number - " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES);
             }
         }
 
+
         if (!isEmpty(busy)) {
-            logger.debug("Distribution not succeeded. Moving to Retardation Mode for Subject: "  + busy[0].getSubject() + ". Iteration number - " + iterationNum);
+            //* ***** Retardation Mode *****
             if (iterationNum > MAXIMUM_OFFERS_RETRIES) {
-                logger.debug("Retardation Mode failed after " + iterationNum + " retries. Moving back to normal distribution");
+                logger.debug("Retardation Mode failed after " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES + " retries. Moving back to normal distribution");
                 for (Distribution dist : distributionList) {
                     if (dist == null)
                         continue;

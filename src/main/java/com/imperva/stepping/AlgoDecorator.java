@@ -86,10 +86,13 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     continue;
                 if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
                     iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
+                    logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
                     continue;
                 }
-                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy)
+                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy) {
                     iStepDecorator2.setQ(q);
+                    logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
+                }
             }
         }
     }
