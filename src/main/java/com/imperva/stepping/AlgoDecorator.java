@@ -493,6 +493,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         try {
             List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
             for (IStepDecorator step : stepDecorators) {
+                step.clearQueueSubject();
                 step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
             }
         } catch (Exception e) {

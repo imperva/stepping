@@ -68,6 +68,11 @@ class StepDecorator implements IStepDecorator {
     }
 
     @Override
+    public void clearQueueSubject() {
+        q.clear();
+    }
+
+    @Override
     public void onTickCallBack() {
         try {
             step.onTickCallBack();
