@@ -3,9 +3,7 @@ package com.imperva.stepping;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Deprecated
-//* SharedDistributionStrategy should be considered instead of EvenDistributionStrategy
+//todo - very expensive - fix
 public class EvenDistributionStrategy extends IDistributionStrategy {
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
