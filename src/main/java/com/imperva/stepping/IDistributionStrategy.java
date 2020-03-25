@@ -8,7 +8,7 @@ import java.util.List;
 public abstract class IDistributionStrategy {
     private final Logger logger = LoggerFactory.getLogger(AlgoDecorator.class);
     private static final int MAXIMUM_OFFERS_RETRIES = 10;
-    private static final int WAIT_PERIOD_MILLI = 300;
+    private static final int WAIT_PERIOD_MILLI = 250;
 
     abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
 
@@ -26,7 +26,7 @@ public abstract class IDistributionStrategy {
 
     private void distribute(Distribution[] distributionList, int iterationNum) {
 
-        Distribution[] busy = null;
+        Distribution[] busy = null; //* MAYBE USE LIST WITH INIT SIZE
 
         for (int inc = 0; inc < distributionList.length; inc++) {
             if (distributionList[inc] == null)
@@ -42,8 +42,8 @@ public abstract class IDistributionStrategy {
 
 
         if (!isEmpty(busy)) {
-            //* ***** Retardation Mode *****
-            if (iterationNum > MAXIMUM_OFFERS_RETRIES) {
+            //* ***** Retardation Mode ***** //* NOT GOOD NAME
+            if (iterationNum >= MAXIMUM_OFFERS_RETRIES) {
                 logger.debug("Retardation Mode failed after " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES + " retries. Moving back to normal distribution");
                 for (Distribution dist : distributionList) {
                     if (dist == null)

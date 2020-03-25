@@ -620,6 +620,9 @@ public class MyStep implements Step {
 }
 ```
 
+NOTE: When the Distribution strategy is set to SharedDistributionStrategy and Bound Queue Capacity is configured, the 
+capacity size the *total* capacity *for all* the duplicated nodes together.
+
 ### Steps Identity
 Since version 3.6.x each Step implements interface Identity meant to give each Step a unique friendly name. This interface 
 has a default implementation which concatenates the Step class name and the object hashcode.

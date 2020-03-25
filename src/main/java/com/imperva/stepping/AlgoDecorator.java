@@ -77,14 +77,14 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void QDependencyInjection() {
+    private void QDependencyInjection() {//* Split in two loops
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
             String distributionID = iStepDecorator.getDistributionNodeID();
             for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
                 if (iStepDecorator2.getQ() != null)
                     continue;
-                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
+                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {//* 0 CONFUSING
                     iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
                     logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
                     continue;
@@ -92,6 +92,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy) {
                     iStepDecorator2.setQ(q);
                     logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
+                } else {
+                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));//* CHECK!!
                 }
             }
         }
@@ -358,8 +360,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 return false;
 
             if(e instanceof SteppingExceptionError){
-                SteppingExceptionError err = (SteppingExceptionError)e;
-                if(delegateExceptionHandling((Error)err.getCause()))
+                SteppingExceptionError exceptionError = (SteppingExceptionError)e;
+                Throwable error = exceptionError.getCause();
+                if(delegateExceptionHandling(error));
                     return true;
             } else if (delegateExceptionHandling(e))
                 return true;
