@@ -77,7 +77,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
-    private void QDependencyInjection() {//* Split in two loops
+    private void QDependencyInjection() {//*TODO Split in two loops
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
             String distributionID = iStepDecorator.getDistributionNodeID();
@@ -93,7 +93,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     iStepDecorator2.setQ(q);
                     logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
                 } else {
-                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));//* CHECK!!
+                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
                 }
             }
         }

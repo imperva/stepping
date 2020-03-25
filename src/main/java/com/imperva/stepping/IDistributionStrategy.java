@@ -26,7 +26,7 @@ public abstract class IDistributionStrategy {
 
     private void distribute(Distribution[] distributionList, int iterationNum) {
 
-        Distribution[] busy = null; //* MAYBE USE LIST WITH INIT SIZE
+        Distribution[] busy = null; //*TODO CONSIDER USE LIST WITH INITIAL CAP SIZE
 
         for (int inc = 0; inc < distributionList.length; inc++) {
             if (distributionList[inc] == null)
@@ -36,15 +36,15 @@ public abstract class IDistributionStrategy {
                     busy = new Distribution[distributionList.length];
                 }
                 busy[inc] = distributionList[inc];
-                logger.debug("Distribution not succeeded. Moving to Retardation Mode for Subject: "  + busy[inc].getSubject() + ". Iteration number - " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES);
+                logger.debug("Distribution not succeeded. Moving to Deceleration Mode for Subject: "  + busy[inc].getSubject() + ". Iteration number - " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES);
             }
         }
 
 
         if (!isEmpty(busy)) {
-            //* ***** Retardation Mode ***** //* NOT GOOD NAME
+            //* ***** Deceleration Mode *****
             if (iterationNum >= MAXIMUM_OFFERS_RETRIES) {
-                logger.debug("Retardation Mode failed after " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES + " retries. Moving back to normal distribution");
+                logger.debug("Deceleration Mode failed after " + iterationNum + "/" + MAXIMUM_OFFERS_RETRIES + " retries. Moving back to normal distribution");
                 for (Distribution dist : distributionList) {
                     if (dist == null)
                         continue;
@@ -71,7 +71,6 @@ public abstract class IDistributionStrategy {
                 }
             }
         }
-
         return true;
     }
 }
