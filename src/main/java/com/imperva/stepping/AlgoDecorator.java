@@ -494,7 +494,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             List<IStepDecorator> stepDecorators = cntr.getSonOf(IStepDecorator.class);
             for (IStepDecorator step : stepDecorators) {
                 step.clearQueueSubject();
-                step.queueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
+                boolean poisonSent = step.offerQueueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
+                if(!poisonSent){
+                    logger.error("Could not send a poison pill for Step: " + step.getId());
+                }
             }
         } catch (Exception e) {
             logger.error("Failed to send poison pill in Algo " + this.algo.getClass(), e);
