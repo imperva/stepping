@@ -84,7 +84,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
                 if (iStepDecorator2.getQ() != null)
                     continue;
-                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {//* 0 CONFUSING
+                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
                     iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
                     logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
                     continue;
