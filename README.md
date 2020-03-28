@@ -146,6 +146,8 @@ explicitly register it in Algo's containerRegistration():
 listSubjectsToFollow(), if implemented will be called and used by default while followsSubject() will be called only in
 cases where listSubjectsToFollow() was left empty.
 
+followsSubject() default return value is 'true', thus by default the Step will automatically be registered 
+to *all* the Subjects in the Algo.
 
 ### onTickCallBack
 TickCallBack is not a player in Stepping but is a fundamental functionality.
