@@ -606,22 +606,60 @@ In this case each duplicated node will get an even chunk of data.
 By using the SharedDistributionStrategy, Stepping will make sure that all the nodes competes on the same poll of events in a "First come, first start" manner.
 
 
-Stepping enables consumers to specify their own behaviour be supply a custom Distribution Policy. 
-The Distribution Policy must implements the IDistributionStrategy interface, and configure the Step's configuration:
+Stepping enables consumers to specify their own behaviour be supply a custom Distribution Strategy. 
+The Distribution Strategy must implement the IDistributionStrategy base class, and configure the Step's configuration.
 
+IDistributionStrategy base class expose the distribute(Distribution[] distributionList) method which accepts an array of Distributions.
+Each Distribution object encapsulates all the data needed to distribute a Subject to the desired Step. 
+
+```java
+public class Distribution {
+    private Data data;
+    private IStepDecorator iStepDecorator;
+    private String subject;
+    
+    .
+    .
+    .
+```
+As result the array represents the entire distribution  list of Subjects to Steps. Implementors of custom IDistributionStrategy must 
+supply this list to the distribute(Distribution[] distributionList) method, which will then take core of the distribution logic.
+
+For example, All2AllDistributionStrategy is implemented as follow:
+
+```java
+public class All2AllDistributionStrategy extends IDistributionStrategy {
+
+
+    @Override
+    public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
+        Distribution[] arr = new Distribution[iStepDecorators.size()];
+
+        //* Preparing the Distribution List
+        for (int inc = 0; inc < iStepDecorators.size(); inc++) {
+            arr[inc] = new Distribution(iStepDecorators.get(inc), data, subjectType);
+        }
+        //* Send the list to the base class for further processing
+        distribute(arr);
+    }
+} 
+```
+
+Once implemented, the Step must be configured to use the custom strategy:
 
 ```java
 public class MyStep implements Step {
 
     public StepConfig getConfig() {
-        stepConfig.setDistributionStrategy(new MyCustomDistributionPolicy());;//MyCustomDistributionPolicy must implement IDistributionStrategy
+        stepConfig.setDistributionStrategy(new MyCustomDistributionStrategy());;//MyCustomDistributionStrategy must implement IDistributionStrategy
         return stepConfig;
     }
 }
 ```
 
+
 NOTE: When the Distribution strategy is set to SharedDistributionStrategy and Bound Queue Capacity is configured, the 
-capacity size the *total* capacity *for all* the duplicated nodes together.
+configured capacity size turns to be the *total* capacity *for all* the duplicated nodes together.
 
 ### Steps Identity
 Since version 3.6.x each Step implements interface Identity meant to give each Step a unique friendly name. This interface 
