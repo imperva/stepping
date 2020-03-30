@@ -362,7 +362,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             if(e instanceof SteppingExceptionError){
                 SteppingExceptionError exceptionError = (SteppingExceptionError)e;
                 Throwable error = exceptionError.getCause();
-                if(delegateExceptionHandling(error));
+                if(delegateExceptionHandling(error))
                     return true;
             } else if (delegateExceptionHandling(e))
                 return true;
