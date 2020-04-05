@@ -262,6 +262,7 @@ public class KafkaDBMergerAlgo implements Algo {
         //* init Steps
         containerRegistrar.add(new DBFetcher());
         containerRegistrar.add(new KafkaFetcher());
+        containerRegistrar.add(new Merger());
         return containerRegistrar;
     }
 
