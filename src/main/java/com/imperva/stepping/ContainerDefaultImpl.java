@@ -91,6 +91,7 @@ public class ContainerDefaultImpl implements Container{
         return ts;
     }
 
+    //TODO junit: change parameter name interf to clazz
     public <T> List<T> getTypeOf(Class<?> interf) {
         List<T> ts = new ArrayList<>();
         List<Object> objects2 = objects.entrySet().stream().map((obj) -> (obj.getValue()).get()).collect(Collectors.toList());
