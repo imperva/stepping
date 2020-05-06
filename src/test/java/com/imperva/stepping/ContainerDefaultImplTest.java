@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -71,7 +72,7 @@ class ContainerDefaultImplTest {
     }
 
     @Test
-    void add3_duplicateIntegerId2() {
+    void add3_duplicateIds() {
         Assertions.assertThrows(IdentifiableSteppingException.class, () -> {
             containerDefault.add(new Identifiable(2, "test"));
             containerDefault.add(new Identifiable(2, "test"));
@@ -90,6 +91,42 @@ class ContainerDefaultImplTest {
             put("val1", "id");
             put("val2", "ID");
         }});
+    }
+
+    @Test
+    void add4_nullHashMap() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            containerDefault.add((HashMap) null);
+        });
+    }
+
+    @Test
+    void add5() {
+        List<Identifiable> identifiables = Arrays.asList(
+                new Identifiable(1, "id1"),
+                new Identifiable(2, "id2"));
+
+        containerDefault.add(identifiables);
+
+        Assert.assertEquals(identifiables.size(), containerDefault.size());
+    }
+
+    @Test
+    void add5_duplicateIds() {
+        Assertions.assertThrows(IdentifiableSteppingException.class, () -> {
+            List<Identifiable> identifiables = Arrays.asList(
+                    new Identifiable(1, "id"),
+                    new Identifiable(new Object(), "id"));
+
+            containerDefault.add(identifiables);
+        });
+    }
+
+    @Test
+    void add5_nullList() {
+        Assertions.assertThrows(SteppingException.class, () -> {
+            containerDefault.add((List) null);
+        });
     }
 
     @Test
@@ -219,7 +256,6 @@ class ContainerDefaultImplTest {
 
         containerDefault.clear();
         Assert.assertEquals(0, containerDefault.size());
-
     }
 
     @Test
