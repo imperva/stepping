@@ -131,11 +131,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Follower follower = step.listSubjectsToFollow();
             if (follower != null && follower.size() != 0) {
-                for (String subjectType : follower.get()) {
-                    ISubject s = cntr.getById(subjectType);
+                for (FollowRequest followRequest : follower.get()) {
+                    ISubject s = cntr.getById(followRequest.getSubjectType());
                     if (s == null) { //* If exist do nothing
-                        s = new Subject(subjectType);
-                        containerRegistrar.add(subjectType, s);
+                        s = new Subject(followRequest.getSubjectType());
+                        containerRegistrar.add(followRequest.getSubjectType(), s);
                     }
 
                 }

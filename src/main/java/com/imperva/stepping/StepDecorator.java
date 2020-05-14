@@ -128,8 +128,8 @@ class StepDecorator implements IStepDecorator {
     public void attachSubjects() {
         Follower follower = listSubjectsToFollow();
         if (follower != null && follower.size() != 0) {
-            for (String subjectType : follower.get()) {
-                ISubject s = container.getById(subjectType);
+            for (FollowRequest followRequest : follower.get()) {
+                ISubject s = container.getById(followRequest.getSubjectType());
                 if (s == null) {
                     throw new SteppingSystemException("Can't attach null Subject to be followed. Step id: " + this.step.getId());
                 }
