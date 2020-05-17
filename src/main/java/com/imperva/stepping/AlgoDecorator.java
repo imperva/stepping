@@ -273,12 +273,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         AlgoConfig globConf = getConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             if (iStepDecorator.getConfig().isEnableTickCallback()) {
-                long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
-                long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
-                TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
                 String runnerScheduledID = iStepDecorator.getStep().getId() + ".runningScheduled";
-                RunningScheduled runningScheduled = new RunningScheduled(runnerScheduledID, delay, initialDelay, timeUnit,
+                RunningScheduled runningScheduled = new RunningScheduled(runnerScheduledID,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -290,6 +287,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                             }
 
                         });
+                setRunningScheduledDelay(runningScheduled, iStepDecorator.getStep().getConfig());
                 cntr.add(runningScheduled, runnerScheduledID);
                 runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
             }
@@ -333,6 +331,18 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     });
             cntr.add(runningScheduledAlgo, this.getClass().getName());
             runnersController.addScheduledRunner(runningScheduledAlgo.getScheduledExecutorService());
+        }
+    }
+
+
+    private void setRunningScheduledDelay(RunningScheduled runningScheduled, StepConfig stepConfig) {
+        if (stepConfig.getRunningPeriodicCronDelay() != null) {
+            runningScheduled.setDelay(stepConfig.getRunningPeriodicCronDelay(), stepConfig.getRunningInitialDelay(), stepConfig.getRunningPeriodicDelayUnit());
+        } else {
+//            long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
+//            long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
+//            TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
+            runningScheduled.setDelay(stepConfig.getRunningPeriodicDelay(), stepConfig.getRunningInitialDelay(), stepConfig.getRunningPeriodicDelayUnit());
         }
     }
 

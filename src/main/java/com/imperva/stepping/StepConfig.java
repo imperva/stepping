@@ -3,6 +3,7 @@ package com.imperva.stepping;
 import java.util.concurrent.TimeUnit;
 
 public class StepConfig {
+    private  String runningPeriodicCronDelay;
     private long runningInitialDelay;
     private long runningPeriodicDelay;
     private TimeUnit runningPeriodicDelayUnit;
@@ -74,5 +75,13 @@ public class StepConfig {
 
     public void setBoundQueueCapacity(int boundQueueCapacity) {
         this.boundQueueCapacity = boundQueueCapacity;
+    }
+
+    public String getRunningPeriodicCronDelay() {
+        return runningPeriodicCronDelay;
+    }
+
+    public void setRunningPeriodicCronDelay(String runningPeriodicCronDelay) {
+        this.runningPeriodicCronDelay = runningPeriodicCronDelay;
     }
 }

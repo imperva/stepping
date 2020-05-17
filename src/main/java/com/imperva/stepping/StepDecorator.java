@@ -2,10 +2,13 @@ package com.imperva.stepping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
 
 class StepDecorator implements IStepDecorator {
     private final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
@@ -104,6 +107,13 @@ class StepDecorator implements IStepDecorator {
                     } else {
                         try {
                             onTickCallBack();
+                            if (getConfig().getRunningPeriodicCronDelay() != null) {
+                                try {
+                                    changeTickCallBackDelay(getConfig().getRunningPeriodicCronDelay());
+                                } catch (Exception x) {
+                                   throw new SteppingException(x.toString());
+                                }
+                            }
                         } finally {
                             cb = (CyclicBarrier) message.getData().getValue();
                             cb.await();
@@ -118,6 +128,11 @@ class StepDecorator implements IStepDecorator {
         } catch (Error err) {
             throw new IdentifiableSteppingError(getStep().getId(), "DataSink FAILED - ERROR", err);
         }
+    }
+
+    private void changeTickCallBackDelay(String cronExpression) {
+        RunningScheduled runningScheduled = ((ContainerService) container).getTickCallbackRunning(getStep().getId());
+        runningScheduled.changeDelay(cronExpression);
     }
 
     private void setThreadName() {

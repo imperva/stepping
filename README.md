@@ -36,6 +36,7 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 - slf4j-simple
 - slf4j-api
 - perf-sampler
+- org.springframework.spring-context
 
 # How To Use It - First Steps
 Stepping is a Maven project (binaries are deployed in Maven Central) so you can import the projects manually or via Maven by adding the following Dependencies to your project's POM file:
@@ -173,6 +174,41 @@ public class MyStep implements Step {
     }
 }
 ```
+
+From version 3.9.* Stepping supports Cron expressions as delay parameters.
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setRunningPeriodicCronDelay("* * 01 * * *");//The TickCallBack function will be called every day at 01:00 am 
+        return stepConfig;
+    }
+}
+```
+In case both afe configured, cron expression and a numeric delay, the cron expression will be used.
+Exactly as the traditional API, you can also set the InitialDelay and the PeriodicDelayUnit.
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setRunningInitialDelay(10);
+        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setRunningPeriodicCronDelay("* * 01 * * *");
+        return stepConfig;
+    }
+}
+```
+
+For example in the case above TickCallBack will be called for the first time after 10 seconds from startup time and then 
+periodically every day at 01:00 am.
+
+
 #### Adjust onTickCallBack at runtime
 Since version 3.6.x it is possible to adjust or cancel TickCallBack timeout at runtime:
 
