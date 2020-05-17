@@ -150,6 +150,44 @@ cases where listSubjectsToFollow() was left empty.
 followsSubject() default return value is 'true', thus by default the Step will automatically be registered 
 to *all* the Subjects in the Algo.
 
+Since version 3.9.x a new capability is introduced to the listSubjectsToFollow(Follower follower) api.
+Now when attaching a subject to the follower you can also specify the specific Distribution policy for the specific subject:
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower) {
+        IDistributionStrategy distributionStrategy = new SharedDistributionStrategy();
+        
+        follower.follow("SubjectA", sharedDistributionStrategy)
+                .follow("SubjectB", sharedDistributionStrategy)
+                .follow("SubjectC", new All2AllDistributionStrategy());
+    }
+    
+```
+In the example above we configured our Step with two different Distribution Strategies which will be used accordingly depending on the fired Subject.
+In case no specific Distribution Strategy is set, Stepping will use the regular Distribution Strategy configured via StepConfig.
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower) {
+        
+        follower.follow("SubjectA", new SharedDistributionStrategy())
+                .follow("SubjectB")
+                .follow("SubjectC")
+                .follow("SubjectD");
+    }
+    
+     public StepConfig getConfig() {
+            stepConfig.setDistributionStrategy(new All2AllDistributionStrategy())
+            return stepConfig;
+        }
+    
+```
+In the example above when SubjectA will be fired SharedDistributionStrategy() will be used to dustribute the message to the different nodes
+of the Step, while All2AllDistributionStrategy() will be used for all the other Subjects.
+
 ### onTickCallBack
 TickCallBack is not a player in Stepping but is a fundamental functionality.
 
@@ -699,6 +737,9 @@ public class MyStep implements Step {
 
 NOTE: When the Distribution strategy is set to SharedDistributionStrategy and Bound Queue Capacity is configured, the 
 configured capacity size turns to be the *total* capacity *for all* the duplicated nodes together.
+
+Since version 3.9.x Stepping enables consumers to specify different Distribution Strategy to different Subjects.
+For more information please see 'followsSubject vs Follower' chapter.
 
 ### Steps Identity
 Since version 3.6.x each Step implements interface Identity meant to give each Step a unique friendly name. This interface 

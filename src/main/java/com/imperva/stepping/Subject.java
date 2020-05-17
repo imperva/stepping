@@ -64,20 +64,17 @@ public class Subject implements ISubject {
     }
 
     private IDistributionStrategy getDistributionStrategy(IStepDecorator step) {
-        IDistributionStrategy distributionStrategy;
-        IDistributionStrategy specificDistributionStrategy = null;
         IDistributionStrategy stepConfigDistributionStrategy = step.getConfig().getDistributionStrategy();
+
         Optional<FollowRequest> followRequestData = step.listSubjectsToFollow().get().stream().filter((c)->c.getSubjectType().equals(type)).findFirst();
+
+        if(!followRequestData.isPresent() && stepConfigDistributionStrategy == null)
+            throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
+
         if(followRequestData.isPresent()) {
-             specificDistributionStrategy = followRequestData.get().getiDistributionStrategy();
+             return followRequestData.get().getiDistributionStrategy();
         }
-
-        if(specificDistributionStrategy == null)
-            distributionStrategy = stepConfigDistributionStrategy;
-        else
-            distributionStrategy = specificDistributionStrategy;
-
-        return distributionStrategy;
+        return stepConfigDistributionStrategy;
     }
 
     private class SubjectKey {
