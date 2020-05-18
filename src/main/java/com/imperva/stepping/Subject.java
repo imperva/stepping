@@ -68,10 +68,10 @@ public class Subject implements ISubject {
 
         Optional<FollowRequest> followRequestData = step.listSubjectsToFollow().get().stream().filter((c)->c.getSubjectType().equals(type)).findFirst();
 
-        if(!followRequestData.isPresent() && stepConfigDistributionStrategy == null)
+        if((!followRequestData.isPresent() || followRequestData.get().getiDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
             throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
 
-        if(followRequestData.isPresent()) {
+        if(followRequestData.isPresent() && followRequestData.get().getiDistributionStrategy() != null) {
              return followRequestData.get().getiDistributionStrategy();
         }
         return stepConfigDistributionStrategy;
