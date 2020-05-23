@@ -77,6 +77,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
     }
 
+
+
     private void QDependencyInjection() {//*TODO Split in two loops
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
@@ -209,6 +211,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
+
+        if(getConfig().getExternalPropertiesPath() != null)
+            cntrPublic.add(new SteppingExternalProperties(getConfig().getExternalPropertiesPath()), BuiltinSubjectType.STEPPING_PROPERTIES.name());
 
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
             int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
