@@ -32,7 +32,7 @@ public class Identifiable<T> {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = 53 * hash + (this.id.toLowerCase() != null ? this.id.toLowerCase().hashCode() : 0);
         return hash;
     }
 }
