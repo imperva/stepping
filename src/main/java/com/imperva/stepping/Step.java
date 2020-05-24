@@ -12,7 +12,9 @@ public interface Step extends IIdentity {
             return new StepConfig();
       }
 
-      void onSubjectUpdate(Data data, String subjectType);
+      default void onSubjectUpdate(Data data, String subjectType){
+            return;
+      }
 
       default void onTickCallBack() {
             throw new SteppingSystemException("onTickCallBack not implemented");

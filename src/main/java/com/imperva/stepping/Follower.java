@@ -22,6 +22,16 @@ public class Follower {
         return this;
     }
 
+    public Follower follow(String subjectType, IDistributionStrategy distributionStrategy, SubjectUpdateEvent subjectUpdate) {
+        toFollow.add(new FollowRequest(subjectType, distributionStrategy, subjectUpdate));
+        return this;
+    }
+
+    public Follower follow(String subjectType, SubjectUpdateEvent subjectUpdate) {
+        toFollow.add(new FollowRequest(subjectType, subjectUpdate));
+        return this;
+    }
+
     public int size() {
         return toFollow.size();
     }

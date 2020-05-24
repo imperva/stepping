@@ -2,13 +2,11 @@ package com.imperva.stepping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.support.CronSequenceGenerator;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
 
 class StepDecorator implements IStepDecorator {
     private final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
@@ -22,6 +20,7 @@ class StepDecorator implements IStepDecorator {
     private Follower follower = null;
     private CyclicBarrier cb;
     private String id;
+    private HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
 
 
     StepDecorator(Step step) {
@@ -103,7 +102,13 @@ class StepDecorator implements IStepDecorator {
 
                 if (message != null && message.getData() != null) {
                     if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+
+                        SubjectUpdateEvent subjectUpdateEvent = subjectUpdateEvents.get(message.getSubjectType());
+                        if (subjectUpdateEvent != null)
+                            subjectUpdateEvent.onUpdate(message.getData());
+
                         onSubjectUpdate(message.getData(), message.getSubjectType());
+
                     } else {
                         try {
                             onTickCallBack();
@@ -111,7 +116,7 @@ class StepDecorator implements IStepDecorator {
                                 try {
                                     changeTickCallBackDelay(getConfig().getRunningPeriodicCronDelay());
                                 } catch (Exception x) {
-                                   throw new SteppingException(x.toString());
+                                    throw new SteppingException(x.toString());
                                 }
                             }
                         } finally {
@@ -149,6 +154,10 @@ class StepDecorator implements IStepDecorator {
                     throw new SteppingSystemException("Can't attach null Subject to be followed. Step id: " + this.step.getId());
                 }
                 s.attach(this);
+
+
+                if(followRequest.getSubjectUpdateEvent() != null)
+                    subjectUpdateEvents.put(followRequest.getSubjectType(), followRequest.getSubjectUpdateEvent());
             }
         } else {
             List<ISubject> subjects = container.getSonOf(ISubject.class);
