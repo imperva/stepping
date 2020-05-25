@@ -4,7 +4,7 @@ public interface Step extends IIdentity {
 
       void init(Container cntr, Shouter shouter);
 
-      default boolean followsSubject(String subjectType){ return true;}
+      default boolean followsSubject(String subjectType){ return false;}
 
       default void listSubjectsToFollow(Follower follower){}
 
