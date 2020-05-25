@@ -36,9 +36,5 @@ interface IStepDecorator extends Step, Closeable {
 
     int getQCapacity();
 
-//    void setQ(Q q);
-//
-//    Q getQ();
-
     IDistributionStrategy getDistributionStrategy(String subjectType);
 }
