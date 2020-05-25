@@ -60,8 +60,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.info("Starting Restate stage...");
             restate();
 
-            logger.debug("Q dependency injection");
-            QDependencyInjection();
+//            logger.debug("Q dependency injection");
+//            QDependencyInjection();
 
             logger.debug("Run Steps...");
             wakenRunners();
@@ -79,27 +79,27 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
 
 
-    private void QDependencyInjection() {//*TODO Split in two loops
-        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
-            String distributionID = iStepDecorator.getDistributionNodeID();
-            for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-                if (iStepDecorator2.getQ() != null)
-                    continue;
-                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
-                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
-                    logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
-                    continue;
-                }
-                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy) {
-                    iStepDecorator2.setQ(q);
-                    logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
-                } else {
-                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
-                }
-            }
-        }
-    }
+//    private void QDependencyInjection() {//*TODO Split in two loops
+//        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+//            Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
+//            String distributionID = iStepDecorator.getDistributionNodeID();
+//            for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+//                if (iStepDecorator2.getQ() != null)
+//                    continue;
+//                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
+//                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
+//                    logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
+//                    continue;
+//                }
+//                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy) {
+//                    iStepDecorator2.setQ(q);
+//                    logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
+//                } else {
+//                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
+//                }
+//            }
+//        }
+//    }
 
     private void fillAutoCreatedSubjectsInContainer() {
         ContainerRegistrar autoSubjectsRegistration = autoSubjectsRegistration();

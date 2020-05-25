@@ -38,6 +38,7 @@ class StepDecorator implements IStepDecorator {
         logger.debug("Initializing Step - " + getStep().getId());
         container = cntr;
         step.init(container, shouter);
+        q = new Q<>(getConfig().getBoundQueueCapacity());
     }
 
     @Override
@@ -67,7 +68,7 @@ class StepDecorator implements IStepDecorator {
     public boolean offerQueueSubjectUpdate(Data data, String subjectType) {
         if (StringUtils.isEmpty(subjectType) || data == null)
             throw new SteppingException("Can't offer an empty Subject or empty Data");
-       return q.offer(new Message(data, subjectType));
+        return q.offer(new Message(data, subjectType));
     }
 
     @Override
@@ -93,6 +94,13 @@ class StepDecorator implements IStepDecorator {
                 if (Thread.currentThread().isInterrupted())
                     throw new InterruptedException();
                 Message message = q.take();
+
+                if (message.getData().isExpirable()) {
+                    boolean succeeded = message.getData().tryGrabAndDeprecate();
+                    if (!succeeded) {
+                        continue;
+                    }
+                }
 
                 if (message.getSubjectType().equals("POISON-PILL")) {
                     logger.info("Taking a Poison Pill. " + getStep().getId() + " is going to die");
@@ -157,7 +165,7 @@ class StepDecorator implements IStepDecorator {
                 s.attach(this);
 
 
-                if(followRequest.getSubjectUpdateEvent() != null)
+                if (followRequest.getSubjectUpdateEvent() != null)
                     subjectUpdateEvents.put(followRequest.getSubjectType(), followRequest.getSubjectUpdateEvent());
             }
         } else {
@@ -209,30 +217,30 @@ class StepDecorator implements IStepDecorator {
         return q.getCapacity();
     }
 
-    @Override
-    public void setQ(Q q) {
-        this.q = q;
-    }
-
-    @Override
-    public Q getQ() {
-        return q;
-    }
+//    @Override
+//    public void setQ(Q q) {
+//        this.q = q;
+//    }
+//
+//    @Override
+//    public Q getQ() {
+//        return q;
+//    }
 
     @Override
     public IDistributionStrategy getDistributionStrategy(String subjectType) {
 
-            IDistributionStrategy stepConfigDistributionStrategy = getConfig().getDistributionStrategy();
+        IDistributionStrategy stepConfigDistributionStrategy = getConfig().getDistributionStrategy();
 
-            Optional<FollowRequest> followRequestData = listSubjectsToFollow().get().stream().filter((c)->c.getSubjectType().equals(subjectType)).findFirst();
+        Optional<FollowRequest> followRequestData = listSubjectsToFollow().get().stream().filter((c) -> c.getSubjectType().equals(subjectType)).findFirst();
 
-            if((!followRequestData.isPresent() || followRequestData.get().getDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
-                throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
+        if ((!followRequestData.isPresent() || followRequestData.get().getDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
+            throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
 
-            if(followRequestData.isPresent() && followRequestData.get().getDistributionStrategy() != null) {
-                return followRequestData.get().getDistributionStrategy();
-            }
-            return stepConfigDistributionStrategy;
+        if (followRequestData.isPresent() && followRequestData.get().getDistributionStrategy() != null) {
+            return followRequestData.get().getDistributionStrategy();
+        }
+        return stepConfigDistributionStrategy;
 
     }
 
@@ -250,7 +258,7 @@ class StepDecorator implements IStepDecorator {
 
     @Override
     public StepConfig getConfig() {
-        if(localStepConfig != null)
+        if (localStepConfig != null)
             return localStepConfig;
         localStepConfig = step.getConfig();
         if (localStepConfig == null)
