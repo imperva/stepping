@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
@@ -216,6 +217,23 @@ class StepDecorator implements IStepDecorator {
     @Override
     public Q getQ() {
         return q;
+    }
+
+    @Override
+    public IDistributionStrategy getDistributionStrategy(String subjectType) {
+
+            IDistributionStrategy stepConfigDistributionStrategy = getConfig().getDistributionStrategy();
+
+            Optional<FollowRequest> followRequestData = listSubjectsToFollow().get().stream().filter((c)->c.getSubjectType().equals(subjectType)).findFirst();
+
+            if((!followRequestData.isPresent() || followRequestData.get().getDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
+                throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
+
+            if(followRequestData.isPresent() && followRequestData.get().getDistributionStrategy() != null) {
+                return followRequestData.get().getDistributionStrategy();
+            }
+            return stepConfigDistributionStrategy;
+
     }
 
     @Override
