@@ -96,7 +96,7 @@ class StepDecorator implements IStepDecorator {
                 Message message = q.take();
 
                 if (message.getData().isExpirable()) {
-                    boolean succeeded = message.getData().tryGrabAndDeprecate();
+                    boolean succeeded = message.getData().tryGrabAndExpire();
                     if (!succeeded) {
                         continue;
                     }

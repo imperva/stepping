@@ -2,7 +2,6 @@ package com.imperva.stepping;
 
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by gabi.beyo on 12/13/2017.
@@ -12,9 +11,9 @@ public class Data {
     private final int size;
 
     private boolean isExpirable;
-    private int expectedValue;
-    private int newValue;
-    private AtomicInteger atomicInteger;
+    private Object expirationContext;
+    private IExpirationCondition expirationCondition;
+
 
     public Data(Object value) {
         this.value = value;
@@ -42,14 +41,17 @@ public class Data {
         return isExpirable;
     }
 
-    void setExpirationCondition(int expectedValue, int newValue) {
-        this.expectedValue = expectedValue;
-        this.newValue = newValue;
-        this.atomicInteger = new AtomicInteger(expectedValue);
+    void setExpirationCondition(IExpirationCondition expirationCondition, Object expirationConditionContext){
+        this.expirationCondition = expirationCondition;
+        this.expirationContext = expirationConditionContext;
         this.isExpirable = true;
     }
+    boolean tryGrabAndExpire() {
+       return expirationCondition.check(this, expirationContext);
+    }
 
-    boolean tryGrabAndDeprecate() {
-        return atomicInteger.compareAndSet(expectedValue, newValue);
+
+    interface IExpirationCondition {
+        boolean check(Data data, Object context);
     }
 }
