@@ -302,7 +302,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                         iStepDecorator.openDataSink();
                     } catch (Exception e) {
                         if (!handle(e)) {
-                            logger.debug("Exception was NOT handled successfully, re-opening DataSink");
+                            logger.debug("Exception was NOT handled successfully, Step is stopped");
                             break;
                         } else {
                             logger.debug("Exception was handled, re-opening DataSink ");
