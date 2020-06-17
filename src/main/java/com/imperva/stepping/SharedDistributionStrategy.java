@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SharedDistributionStrategy extends IDistributionStrategy {
+
+    //* TODO - use super.distribute()?
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
         data.setExpirationCondition((d, c) -> {
