@@ -75,7 +75,7 @@ import java.util.concurrent.*;
 
      public void changeDelay(long delay, long initialdelay, TimeUnit timeUnit) {
          scheduledFuture.cancel(false);
-         scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
+         scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialdelay, delay, timeUnit);
      }
 
      public void setDelay(long delay, TimeUnit timeUnit) {
@@ -86,7 +86,7 @@ import java.util.concurrent.*;
 
      public void changeDelay(long delay, TimeUnit timeUnit) {
          scheduledFuture.cancel(false);
-         scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, timeUnit);
+         scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, timeUnit);
      }
 
      public void setDelay(String cronExpression){
@@ -113,7 +113,7 @@ import java.util.concurrent.*;
      public void changeDelay(String cronExpression){
          long delay = calculateDelay(cronExpression);
          scheduledFuture.cancel(false);
-         scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, TimeUnit.MILLISECONDS);
+         scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, TimeUnit.MILLISECONDS);
      }
 
 
