@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * Created by gabi.beyo on 12/13/2017.
+ * If List is passed as the value to this object, it must not be modified later.
  */
 public class Data {
     private final Object value;
