@@ -1,14 +1,36 @@
 package com.imperva.stepping;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SharedDistributionStrategy extends IDistributionStrategy {
 
+    //* TODO - use super.distribute()?
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
-        //* In this mode the Q is shared by all nodes in the same distributionID.
-        //* Sending the event to a random node will enable all the others to access it
-        iStepDecorators.get(0).queueSubjectUpdate(data,subjectType);
+        data.setExpirationCondition((d, c) -> {
+            SharedDistributionExpirationContext context = ((SharedDistributionExpirationContext) c);
+            return context.getAtomicBarrier().compareAndSet(context.expectedValue, context.newValue);
+        }, new SharedDistributionExpirationContext(1, 0));
+        for (IStepDecorator step : iStepDecorators) {
+            step.queueSubjectUpdate(data, subjectType);
+        }
+    }
+
+    class SharedDistributionExpirationContext {
+        private AtomicInteger atomicBarrier;
+        private int expectedValue;
+        private int newValue;
+
+        SharedDistributionExpirationContext(int expectedValue, int newValue) {
+            this.atomicBarrier = new AtomicInteger(expectedValue);
+            this.expectedValue = expectedValue;
+            this.newValue = newValue;
+        }
+
+        AtomicInteger getAtomicBarrier() {
+            return atomicBarrier;
+        }
     }
 }
 

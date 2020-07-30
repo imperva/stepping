@@ -60,9 +60,6 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.info("Starting Restate stage...");
             restate();
 
-            logger.debug("Q dependency injection");
-            QDependencyInjection();
-
             logger.debug("Run Steps...");
             wakenRunners();
 
@@ -74,28 +71,6 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (Error err) {
             logger.error("Algo initialization FAILED - ERROR", err);
             handle(err);
-        }
-    }
-
-    private void QDependencyInjection() {//*TODO Split in two loops
-        for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            Q q = new Q<>(iStepDecorator.getConfig().getBoundQueueCapacity());
-            String distributionID = iStepDecorator.getDistributionNodeID();
-            for (IStepDecorator iStepDecorator2 : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-                if (iStepDecorator2.getQ() != null)
-                    continue;
-                if (iStepDecorator2.getConfig().getNumOfNodes() == 0) {
-                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
-                    logger.debug("Injecting regular Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
-                    continue;
-                }
-                if (iStepDecorator2.getDistributionNodeID().equals(distributionID) && iStepDecorator2.getConfig().getDistributionStrategy() instanceof SharedDistributionStrategy) {
-                    iStepDecorator2.setQ(q);
-                    logger.debug("Injecting SharedDistributionStrategy Q with " + iStepDecorator2.getConfig().getBoundQueueCapacity() + " 'BoundQueueCapacity' to StepDecorator " + iStepDecorator2.getId());
-                } else {
-                    iStepDecorator2.setQ(new Q<>(iStepDecorator2.getConfig().getBoundQueueCapacity()));
-                }
-            }
         }
     }
 
@@ -131,11 +106,11 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             Follower follower = step.listSubjectsToFollow();
             if (follower != null && follower.size() != 0) {
-                for (String subjectType : follower.get()) {
-                    ISubject s = cntr.getById(subjectType);
+                for (FollowRequest followRequest : follower.get()) {
+                    ISubject s = cntr.getById(followRequest.getSubjectType());
                     if (s == null) { //* If exist do nothing
-                        s = new Subject(subjectType);
-                        containerRegistrar.add(subjectType, s);
+                        s = new Subject(followRequest.getSubjectType());
+                        containerRegistrar.add(followRequest.getSubjectType(), s);
                     }
 
                 }
@@ -210,6 +185,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
 
+        if(getConfig().getExternalPropertiesPath() != null)
+            cntrPublic.add(new SteppingExternalProperties(getConfig().getExternalPropertiesPath()), BuiltinSubjectType.STEPPING_EXTERNAL_PROPERTIES.name());
+
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
             int interval = getConfig().getPerfSamplerStepConfig().getReportInterval();
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
@@ -273,12 +251,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         AlgoConfig globConf = getConfig();
         for (IStepDecorator iStepDecorator : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             if (iStepDecorator.getConfig().isEnableTickCallback()) {
-                long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
-                long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
                 CyclicBarrier cb = new CyclicBarrier(2);
-                TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
                 String runnerScheduledID = iStepDecorator.getStep().getId() + ".runningScheduled";
-                RunningScheduled runningScheduled = new RunningScheduled(runnerScheduledID, delay, initialDelay, timeUnit,
+                RunningScheduled runningScheduled = new RunningScheduled(runnerScheduledID,
                         () -> {
                             try {
                                 iStepDecorator.queueSubjectUpdate(new Data(cb), BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
@@ -290,6 +265,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                             }
 
                         });
+                setRunningScheduledDelay(runningScheduled, iStepDecorator.getStep().getConfig());
                 cntr.add(runningScheduled, runnerScheduledID);
                 runnersController.addScheduledRunner(runningScheduled.getScheduledExecutorService());
             }
@@ -299,7 +275,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                         iStepDecorator.openDataSink();
                     } catch (Exception e) {
                         if (!handle(e)) {
-                            logger.debug("Exception was NOT handled successfully, re-opening DataSink");
+                            logger.debug("Exception was NOT handled successfully, Step is stopped");
                             break;
                         } else {
                             logger.debug("Exception was handled, re-opening DataSink ");
@@ -333,6 +309,18 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                     });
             cntr.add(runningScheduledAlgo, this.getClass().getName());
             runnersController.addScheduledRunner(runningScheduledAlgo.getScheduledExecutorService());
+        }
+    }
+
+
+    private void setRunningScheduledDelay(RunningScheduled runningScheduled, StepConfig stepConfig) {
+        if (stepConfig.getRunningPeriodicCronDelay() != null) {
+            runningScheduled.setDelay(stepConfig.getRunningPeriodicCronDelay(), stepConfig.getRunningInitialDelay(), stepConfig.getRunningPeriodicDelayUnit());
+        } else {
+//            long delay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningPeriodicDelay() : globConf.getRunningPeriodicDelay();
+//            long initialDelay = iStepDecorator.getStep().getConfig() != null ? iStepDecorator.getStep().getConfig().getRunningInitialDelay() : globConf.getRunningInitialDelay();
+//            TimeUnit timeUnit = iStepDecorator.getConfig().getRunningPeriodicDelayUnit();
+            runningScheduled.setDelay(stepConfig.getRunningPeriodicDelay(), stepConfig.getRunningInitialDelay(), stepConfig.getRunningPeriodicDelayUnit());
         }
     }
 

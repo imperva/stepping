@@ -33,9 +33,11 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 - Enable customers to implement custom error handling policies
 
 # Dependencies
-- slf4j-simple
 - slf4j-api
 - perf-sampler
+- spring-context
+- spring-core
+- unit-vintage-engine
 
 # How To Use It - First Steps
 Stepping is a Maven project (binaries are deployed in Maven Central) so you can import the projects manually or via Maven by adding the following Dependencies to your project's POM file:
@@ -44,7 +46,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.8.0</version>
+  <version>3.9.1</version>
 </dependency>
 ~~~
 
@@ -149,6 +151,84 @@ cases where listSubjectsToFollow() was left empty.
 followsSubject() default return value is 'true', thus by default the Step will automatically be registered 
 to *all* the Subjects in the Algo.
 
+Since version 3.9.x a new capability is introduced to the listSubjectsToFollow(Follower follower) api.
+Now when attaching a subject to the follower you can also specify the specific Distribution policy for the specific subject:
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower) {
+        IDistributionStrategy distributionStrategy = new SharedDistributionStrategy();
+        
+        follower.follow("SubjectA", sharedDistributionStrategy)
+                .follow("SubjectB", sharedDistributionStrategy)
+                .follow("SubjectC", new All2AllDistributionStrategy());
+    }
+    
+```
+In the example above we configured our Step with two different Distribution Strategies which will be used accordingly depending on the fired Subject.
+In case no specific Distribution Strategy is set, Stepping will use the regular Distribution Strategy configured via StepConfig.
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower) {
+        
+        follower.follow("SubjectA", new SharedDistributionStrategy())
+                .follow("SubjectB")
+                .follow("SubjectC")
+                .follow("SubjectD");
+    }
+    
+     public StepConfig getConfig() {
+            stepConfig.setDistributionStrategy(new All2AllDistributionStrategy())
+            return stepConfig;
+        }
+    
+```
+In the example above when SubjectA will be fired SharedDistributionStrategy() will be used to distribute the message to the different nodes
+of the Step, while All2AllDistributionStrategy() will be used for all the other Subjects.
+
+In addition from version 3.9.0 Stepping introduce a new API that allows consumers to specify the callback to use for each
+subject by using the Follower.follow() API.
+
+```java
+
+    @Override
+    public void listSubjectsToFollow(Follower follower) {
+        
+        follower.follow("SubjectA",this::onSubjectA)
+                .follow("SubjectB",this::onSubjectB)
+                .follow("SubjectB",(data)->{ 
+                    //* do something
+                });
+    }
+    
+     private onSubjectA(Data data) {
+          //* do something
+     }
+     
+     private onSubjectA(Data data) {
+          //* do something
+     }
+    
+```
+This can be used instead of the old onSubjectUpdate(Data data, String subjectType) API that requires to distinguish between 
+the different Subjects by using many if-else statements:
+
+```java
+    public void onSubjectUpdate(Data data, String subjectType) {
+        if(subjectType.equals("SubjectA")){
+            
+        } else if (subjectType.equals("SubjectB")){
+            
+        }
+    }
+```
+onSubjectUpdate() API will be still available for compatibility reasons and as a catch-all subjects, in cases you have a 
+common logic to perform on multiple Subjects.
+
+
 ### onTickCallBack
 TickCallBack is not a player in Stepping but is a fundamental functionality.
 
@@ -173,6 +253,41 @@ public class MyStep implements Step {
     }
 }
 ```
+
+From version 3.9.* Stepping supports Cron expressions as delay parameters.
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setRunningPeriodicCronDelay("* * 01 * * *");//The TickCallBack function will be called every day at 01:00 am 
+        return stepConfig;
+    }
+}
+```
+In case both afe configured, cron expression and a numeric delay, the cron expression will be used.
+Exactly as the traditional API, you can also set the InitialDelay and the PeriodicDelayUnit.
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        StepConfig stepConfig = new StepConfig();
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setRunningInitialDelay(10);
+        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setRunningPeriodicCronDelay("* * 01 * * *");
+        return stepConfig;
+    }
+}
+```
+
+For example in the case above TickCallBack will be called for the first time after 10 seconds from startup time and then 
+periodically every day at 01:00 am.
+
+
 #### Adjust onTickCallBack at runtime
 Since version 3.6.x it is possible to adjust or cancel TickCallBack timeout at runtime:
 
@@ -500,6 +615,11 @@ functions.
 data but their work does not depend on external events of other Steps therefore they do not register to any event.
 
 In this example "Merger" is the first Step that depends on events triggered be other Steps, "DBFetcher" and "KafkaFetcher".
+When "DBDataArrived" or "KafkaDataArrived" Subjects are 'Shouted' Stepping will call the onSubjectUpdate(Data data, String subjectType) 
+method. As you can see the "subjectType" is used to distinguish between the different Subjects.
+
+Since version 3.9.x a new API is introduced that allows consumers to specify the callback to use for each subject by using the Follower.follow() api.
+For more information please see followsSubject vs Follower section.
 
 Now you are probably curios to see how we run it. Actually it is very simple:
 
@@ -662,7 +782,11 @@ public class MyStep implements Step {
 
 
 NOTE: When the Distribution strategy is set to SharedDistributionStrategy and Bound Queue Capacity is configured, the 
-configured capacity size turns to be the *total* capacity *for all* the duplicated nodes together.
+configured capacity size turns to be the capacity for each node. So if you have 4 nodes and bounded the queue to 1000 messages, 
+the total amount of messages will be 4000.
+
+Since version 3.9.x Stepping enables consumers to specify different Distribution Strategy for different Subjects.
+For more information please see 'followsSubject vs Follower' chapter.
 
 ### Steps Identity
 Since version 3.6.x each Step implements interface Identity meant to give each Step a unique friendly name. This interface 

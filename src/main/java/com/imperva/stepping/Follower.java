@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Follower {
-    private List<String> toFollow = new ArrayList<>();
+    private List<FollowRequest> toFollow = new ArrayList<>();
 
     public Follower(){}
 
@@ -13,7 +13,22 @@ public class Follower {
     }
 
     public Follower follow(String subjectType) {
-        toFollow.add(subjectType);
+        toFollow.add(new FollowRequest(subjectType));
+        return this;
+    }
+
+    public Follower follow(String subjectType, IDistributionStrategy distributionStrategy) {
+        toFollow.add(new FollowRequest(subjectType, distributionStrategy));
+        return this;
+    }
+
+    public Follower follow(String subjectType, IDistributionStrategy distributionStrategy, SubjectUpdateEvent subjectUpdate) {
+        toFollow.add(new FollowRequest(subjectType, distributionStrategy, subjectUpdate));
+        return this;
+    }
+
+    public Follower follow(String subjectType, SubjectUpdateEvent subjectUpdate) {
+        toFollow.add(new FollowRequest(subjectType, subjectUpdate));
         return this;
     }
 
@@ -21,7 +36,7 @@ public class Follower {
         return toFollow.size();
     }
 
-    public List<String> get(){
+    public List<FollowRequest> get(){
         return new ArrayList<>(toFollow);
     }
 }
