@@ -6,7 +6,7 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>3.9.0</version>
+    <version>3.9.1</version>
     <name>Stepping</name>
     <description>
         Stepping is a framework designed to ease the implementation of data processing solutions.
@@ -38,21 +38,21 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
-        </dependency>
+
         <dependency>
             <groupId>com.imperva.sampler</groupId>
             <artifactId>perf-sampler</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!--LOGGER-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <!--TESTS-->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
@@ -71,10 +71,12 @@
             <version>5.6.1</version>
             <scope>test</scope>
         </dependency>
+
+        <!--CRON to LONG TRANSLATOR-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.3.7.RELEASE</version>
+            <version>4.3.27.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
@@ -88,10 +90,6 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-expression</artifactId>
                 </exclusion>
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework</groupId>-->
-                    <!--<artifactId>spring-core</artifactId>-->
-                <!--</exclusion>-->
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
