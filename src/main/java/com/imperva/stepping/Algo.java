@@ -10,5 +10,7 @@ public interface Algo extends Closeable {
 
     void onTickCallBack();
 
-    AlgoConfig getConfig();
+    default AlgoConfig getConfig(){
+        return new AlgoConfig();
+    }
 }

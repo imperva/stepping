@@ -4,7 +4,7 @@ public interface Step extends IIdentity {
 
       void init(Container cntr, Shouter shouter);
 
-      default boolean followsSubject(String subjectType){ return true;}
+      default boolean followsSubject(String subjectType){ return false;}
 
       default void listSubjectsToFollow(Follower follower){}
 
@@ -12,13 +12,13 @@ public interface Step extends IIdentity {
             return new StepConfig();
       }
 
-      void onSubjectUpdate(Data data, String subjectType);
+      default void onSubjectUpdate(Data data, String subjectType){ }
 
       default void onTickCallBack() {
             throw new SteppingSystemException("onTickCallBack not implemented");
       }
 
-      void onRestate();
+      default void onRestate(){ }
 
       void onKill();
 }

@@ -31,7 +31,8 @@ public abstract class IDistributionStrategy {
         for (int inc = 0; inc < distributionList.length; inc++) {
             if (distributionList[inc] == null)
                 continue;
-            if (!distributionList[inc].getiStepDecorator().offerQueueSubjectUpdate(distributionList[inc].getData(), distributionList[inc].getSubject())) {
+            boolean isDistributed = distributionList[inc].getiStepDecorator().offerQueueSubjectUpdate(distributionList[inc].getData(), distributionList[inc].getSubject());
+            if (!isDistributed) {
                 if (busy == null) {
                     busy = new Distribution[distributionList.length];
                 }

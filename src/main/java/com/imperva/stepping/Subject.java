@@ -47,7 +47,9 @@ public class Subject implements ISubject {
 
     @Override
     public void attach(IStepDecorator step) {
-        IDistributionStrategy distributionStrategy = step.getConfig().getDistributionStrategy();
+
+        IDistributionStrategy distributionStrategy = step.getDistributionStrategy(type);
+
         if (distributionStrategy == null)
             throw new SteppingException("IDistributionStrategy missing distribution id: " + step.getDistributionNodeID());
         SubjectKey subjectKey = new SubjectKey(step.getDistributionNodeID(), distributionStrategy);

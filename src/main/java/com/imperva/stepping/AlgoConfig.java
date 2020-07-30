@@ -6,6 +6,7 @@ public class AlgoConfig {
     private boolean enableTickCallback;
     private PerfSamplerStepConfig perfSamplerStepConfig;
     private IExceptionHandler customExceptionHandler;
+    private String externalPropertiesPath;
 
     public AlgoConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -49,5 +50,13 @@ public class AlgoConfig {
 
     public void setCustomExceptionHandler(IExceptionHandler customExceptionHandler) {
         this.customExceptionHandler = customExceptionHandler;
+    }
+
+    public String getExternalPropertiesPath() {
+        return externalPropertiesPath;
+    }
+
+    public void setExternalPropertiesPath(String externalPropertiesPath) {
+        this.externalPropertiesPath = externalPropertiesPath;
     }
 }
