@@ -9,13 +9,12 @@ import java.util.function.BiFunction;
 public class SteppingTestingToolkit {
     private String algoName;
     private Algo algo;
-    private BiFunction<Data, String, Data> function;
     private Object syncObj = new Object();
+    private  ContainerRegistrar containerRegistrar = new ContainerRegistrar();
 
     Data res = null;
     List<String> subjects = new ArrayList<>();
     HashMap<String, Data> subjectsStatus = new HashMap<>();
-    private ContainerRegistrar containerRegistrar;
     private StepConfig stepConfig;
 
 
@@ -28,13 +27,16 @@ public class SteppingTestingToolkit {
 
 
     public SteppingTestingToolkit withSubject(String subject) {
-
         subjects.add(subject);
-        for (String sub :
-                subjects) {
+        for (String sub : subjects) {
             subjectsStatus.put(sub,null);
-
         }
+        return this;
+    }
+
+    public SteppingTestingToolkit withStep(Step step) {
+
+        containerRegistrar.add(step);
         return this;
     }
 
@@ -48,8 +50,8 @@ public class SteppingTestingToolkit {
         return this;
     }
 
-    public  HashMap<String, Data> test() {
-        AlgoDecoratorTesting algoDecoratorTesting = new AlgoDecoratorTesting(algo, containerRegistrar, stepConfig, subjects, this::f);
+    public  TestingResults test() {
+        AlgoDecoratorTesting algoDecoratorTesting = new AlgoDecoratorTesting(algo, containerRegistrar, stepConfig, subjects, this::testingCallbackListener);
         new Stepping().registerAndControl(algoName, algoDecoratorTesting).go();
 
         synchronized (syncObj) {
@@ -60,10 +62,10 @@ public class SteppingTestingToolkit {
             }
         }
 
-        return subjectsStatus;
+        return new TestingResults(subjectsStatus);
     }
 
-    boolean f(Data d, String s) {
+    boolean testingCallbackListener(Data d, String s) {
 
         subjectsStatus.put(s,d);
 
@@ -72,9 +74,7 @@ public class SteppingTestingToolkit {
            if(entry.getValue() == null) {
                allArrived = false;
                break;
-
            }
-
         }
 
         if(allArrived) {
