@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SteppingTestingToolkit {
+public class SteppingLauncher {
     private String algoName;
     private Algo algo;
     private Object syncObj = new Object();
@@ -14,18 +14,25 @@ public class SteppingTestingToolkit {
 
     private volatile List<String> subjects = new ArrayList<>();//* todo need?
     HashMap<String, Data> subjectsStatus = new HashMap<>();
-    private StepConfig stepConfig;
+    private StepConfig stepConfig = new StepConfig();
 
 
-    public SteppingTestingToolkit withAlgo(String algoName, Algo algo) {
+    public SteppingLauncher withAlgo(String algoName, Algo algo) {
 
         this.algoName = algoName;
         this.algo = algo;
         return this;
     }
 
+    public SteppingLauncher withAlgo(Algo algo) {
 
-    public SteppingTestingToolkit withSubject(String subject) {
+        this.algoName = algo.getClass().getName();
+        this.algo = algo;
+        return this;
+    }
+
+
+    public SteppingLauncher stopOnSubject(String subject) {
         subjects.add(subject);
         for (String sub : subjects) {
             subjectsStatus.put(sub, null);
@@ -33,27 +40,27 @@ public class SteppingTestingToolkit {
         return this;
     }
 
-    public SteppingTestingToolkit withStep(Step step) {
+    public SteppingLauncher withStep(Step step) {
 
         containerRegistrar.add(step);
         return this;
     }
 
-    public SteppingTestingToolkit withContainerRegistrar(ContainerRegistrar containerRegistrar) {
+    public SteppingLauncher withContainerRegistrar(ContainerRegistrar containerRegistrar) {
         this.containerRegistrar = containerRegistrar;
         return this;
     }
 
-    public SteppingTestingToolkit withStepConfig(StepConfig stepConfig) {//* todo need  for each step
+    public SteppingLauncher withStepConfig(StepConfig stepConfig) {//* todo need  for each step
         this.stepConfig = stepConfig;
         return this;
     }
 
-    public TestingResults test() {
-        AlgoDecoratorTesting algoDecoratorTesting = new AlgoDecoratorTesting(algo, containerRegistrar, stepConfig, subjects, this::testingCallbackListener);
+    public TestingResults launch() {
+        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, stepConfig, subjects, this::testingCallbackListener);
 
         new Stepping()
-                .registerAndControl(algoName, algoDecoratorTesting)
+                .registerAndControl(algoName, algoDecoratorLauncher)
                 .go();
 
         waitTillDone();

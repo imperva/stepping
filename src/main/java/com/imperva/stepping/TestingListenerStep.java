@@ -28,11 +28,11 @@ public class TestingListenerStep implements Step {
 
     @Override
     public StepConfig getConfig() {
-        StepConfig res = stepConfig == null ? new StepConfig() : stepConfig;
+       // StepConfig res = stepConfig == null ? new StepConfig() : stepConfig;
         /* todo BUG this should be for the registered steps.
         * need to create a decorator that overrides the config
         * */
-        return res;
+        return stepConfig;
     }
 
     @Override

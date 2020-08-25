@@ -3,19 +3,19 @@ package com.imperva.stepping;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class AlgoDecoratorTesting extends AlgoDecorator {
+public class AlgoDecoratorLauncher extends AlgoDecorator {
     private Algo algo;//todo not in use
     private  ContainerRegistrar containerRegistrar;
     private  StepConfig stepConfig;
     private List<String> subjects;
     private BiFunction<Data, String, Boolean> onSubjectUpdate;
 
-    public AlgoDecoratorTesting(Algo algo) {
+    public AlgoDecoratorLauncher(Algo algo) {
         super(algo);
         this.algo = algo;
     }
 
-    public AlgoDecoratorTesting(Algo algo, ContainerRegistrar containerRegistrar, StepConfig stepConfig, List<String> subjects,  BiFunction<Data,String, Boolean> onSubjectUpdate) {
+    public AlgoDecoratorLauncher(Algo algo, ContainerRegistrar containerRegistrar, StepConfig stepConfig, List<String> subjects, BiFunction<Data,String, Boolean> onSubjectUpdate) {
         super(algo);
         this.algo = algo;
         this.containerRegistrar = containerRegistrar;
@@ -25,7 +25,7 @@ public class AlgoDecoratorTesting extends AlgoDecorator {
     }
 
 
-    AlgoDecoratorTesting(Algo algo, String c) {
+    AlgoDecoratorLauncher(Algo algo, String c) {
         super(algo);
     }
 
