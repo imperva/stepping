@@ -1,17 +1,19 @@
 package com.imperva.stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class TestingListenerStep implements Step {
+class LauncherListenerStep implements Step {
+    private final Logger logger = LoggerFactory.getLogger(LauncherListenerStep.class);
     private final List<String> subjects;
     private final BiFunction<Data, String, Boolean> onSubjectUpdateCallback;
-    private StepConfig stepConfig;
 
-    public TestingListenerStep(List<String> subjects, BiFunction<Data, String, Boolean> onSubjectUpdate, StepConfig stepConfig) {
+    LauncherListenerStep(List<String> subjects, BiFunction<Data, String, Boolean> onSubjectUpdate) {
         this.subjects = subjects;
         this.onSubjectUpdateCallback = onSubjectUpdate;
-        this.stepConfig = stepConfig;
     }
 
     @Override
@@ -27,15 +29,6 @@ public class TestingListenerStep implements Step {
     }
 
     @Override
-    public StepConfig getConfig() {
-       // StepConfig res = stepConfig == null ? new StepConfig() : stepConfig;
-        /* todo BUG this should be for the registered steps.
-        * need to create a decorator that overrides the config
-        * */
-        return stepConfig;
-    }
-
-    @Override
     public void onSubjectUpdate(Data data, String subjectType) {
         onSubjectUpdateCallback.apply(data, subjectType);
 
@@ -43,6 +36,7 @@ public class TestingListenerStep implements Step {
 
     @Override
     public void onKill() {
+        logger.info("LauncherListenerStep stopped");
 
     }
 }

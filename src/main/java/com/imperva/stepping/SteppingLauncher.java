@@ -10,11 +10,8 @@ public class SteppingLauncher {
     private Algo algo;
     private Object syncObj = new Object();
     private ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-
-
     private volatile List<String> subjects = new ArrayList<>();//* todo need?
-    HashMap<String, Data> subjectsStatus = new HashMap<>();
-    private StepConfig stepConfig = new StepConfig();
+    private HashMap<String, Data> subjectsStatus = new HashMap<>();
 
 
     public SteppingLauncher withAlgo(String algoName, Algo algo) {
@@ -31,7 +28,6 @@ public class SteppingLauncher {
         return this;
     }
 
-
     public SteppingLauncher stopOnSubject(String subject) {
         subjects.add(subject);
         for (String sub : subjects) {
@@ -40,8 +36,13 @@ public class SteppingLauncher {
         return this;
     }
 
-    public SteppingLauncher withStep(Step step) {
+    public SteppingLauncher withStep(Step step, StepConfig stepConfig) {
+        StepExternalConfig stepExternalConfig = new StepExternalConfig(step, stepConfig);
+        containerRegistrar.add(stepExternalConfig);
+        return this;
+    }
 
+    public SteppingLauncher withStep(Step step) {
         containerRegistrar.add(step);
         return this;
     }
@@ -51,13 +52,8 @@ public class SteppingLauncher {
         return this;
     }
 
-    public SteppingLauncher withStepConfig(StepConfig stepConfig) {//* todo need  for each step
-        this.stepConfig = stepConfig;
-        return this;
-    }
-
     public LauncherResults launch() {
-        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, stepConfig, subjects, this::testingCallbackListener);
+        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, subjects, this::testingCallbackListener);
 
         new Stepping()
                 .registerAndControl(algoName, algoDecoratorLauncher)
@@ -66,6 +62,15 @@ public class SteppingLauncher {
         waitTillDone();
 
         return new LauncherResults(subjectsStatus);
+    }
+
+
+    public void go() {
+        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, subjects, this::testingCallbackListener);
+
+        new Stepping()
+                .registerAndControl(algoName, algoDecoratorLauncher)
+                .go();
     }
 
     private void waitTillDone() {
@@ -92,7 +97,6 @@ public class SteppingLauncher {
     }
 
     private void releaseWait() {
-        System.out.println("Notifying");
         synchronized (syncObj) {
             syncObj.notifyAll();
         }
