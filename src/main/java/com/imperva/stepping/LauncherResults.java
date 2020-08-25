@@ -2,11 +2,11 @@ package com.imperva.stepping;
 
 import java.util.HashMap;
 
-public class TestingResults {
+public class LauncherResults {
 
     private HashMap<String, Data> results = new HashMap<>();
 
-    TestingResults(HashMap<String, Data> results) {
+    LauncherResults(HashMap<String, Data> results) {
         this.results = results;
     }
 

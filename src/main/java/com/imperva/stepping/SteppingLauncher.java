@@ -56,7 +56,7 @@ public class SteppingLauncher {
         return this;
     }
 
-    public TestingResults launch() {
+    public LauncherResults launch() {
         AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, stepConfig, subjects, this::testingCallbackListener);
 
         new Stepping()
@@ -65,7 +65,7 @@ public class SteppingLauncher {
 
         waitTillDone();
 
-        return new TestingResults(subjectsStatus);
+        return new LauncherResults(subjectsStatus);
     }
 
     private void waitTillDone() {
