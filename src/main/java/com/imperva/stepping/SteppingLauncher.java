@@ -1,17 +1,23 @@
 package com.imperva.stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SteppingLauncher {
+    private final Logger logger = LoggerFactory.getLogger(SteppingLauncher.class);
     private String algoName;
     private Algo algo;
     private Object syncObj = new Object();
     private ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-    private volatile List<String> subjects = new ArrayList<>();//* todo need?
+    private volatile List<String> subjects = new ArrayList<>();//* todo need volatile?
     private HashMap<String, Data> subjectsStatus = new HashMap<>();
+    private RemoteController remoteController;
 
 
     public SteppingLauncher withAlgo(String algoName, Algo algo) {
@@ -22,6 +28,10 @@ public class SteppingLauncher {
     }
 
     public SteppingLauncher withAlgo(Algo algo) {
+
+        if(this.algo != null){
+            throw new SteppingException("Currently SteppingLauncher supports launching a single Algo per launch");
+        }
 
         this.algoName = algo.getClass().getName();
         this.algo = algo;
@@ -53,11 +63,16 @@ public class SteppingLauncher {
     }
 
     public LauncherResults launch() {
-        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, subjects, this::testingCallbackListener);
+        if (subjects.isEmpty())
+            throw new SteppingException("The lunch() function is used when there is a need for Stepping to wait for the accomplishment one or more Subjects before proceeding with the flow. Please attach one or more the Subjects via the stopOnSubject() API, or use the launchAndGo() function instead.");
 
-        new Stepping()
+        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, subjects, this::launcherCallbackListener);
+
+
+        remoteController = new Stepping()
                 .registerAndControl(algoName, algoDecoratorLauncher)
-                .go();
+                .go().get(algoName);
+
 
         waitTillDone();
 
@@ -65,11 +80,12 @@ public class SteppingLauncher {
     }
 
 
-    public void go() {
-        AlgoDecoratorLauncher algoDecoratorLauncher = new AlgoDecoratorLauncher(algo, containerRegistrar, subjects, this::testingCallbackListener);
+    public void lunchAndGo() {
+        if (!subjects.isEmpty())
+            throw new SteppingException("The lunchAndGo() function is used when there is no need for Stepping to wait for the accomplishment Subjects. Please remove the Subjects attached via the stopOnSubject() API, or use the launch() function instead.");
 
         new Stepping()
-                .registerAndControl(algoName, algoDecoratorLauncher)
+                .registerAndControl(algoName, algo)
                 .go();
     }
 
@@ -77,13 +93,18 @@ public class SteppingLauncher {
         synchronized (syncObj) {
             try {
                 syncObj.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                try {
+                    remoteController.close();
+                } catch (IOException ex) {
+                    logger.debug(ex.getMessage());
+                }
+                throw new SteppingSystemException(e);
             }
         }
     }
 
-    boolean testingCallbackListener(Data d, String s) {
+    boolean launcherCallbackListener(Data d, String s) {
 
         subjectsStatus.put(s, d);
 
