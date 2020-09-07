@@ -40,7 +40,7 @@ class StepExternalConfig implements Step {
     }
 
     @Override
-    public void onRestate(){ }
+    public void onRestate(){ step.onRestate(); }
 
     @Override
     public StepConfig getConfig() {
