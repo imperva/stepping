@@ -19,6 +19,7 @@ public class SteppingLauncher {
     private HashMap<String, Data> subjectsStatus = new HashMap<>();
     private RemoteController remoteController;
     private long millisecondsTimeout = 0;
+    private HashMap<String, Data> shouts = new HashMap<>();
 
 
     public SteppingLauncher withAlgo(String algoName, Algo algo) {
@@ -62,6 +63,12 @@ public class SteppingLauncher {
         this.millisecondsTimeout = millisecondsTimeout;
         return this;
     }
+
+    public SteppingLauncher withShout(String subject, Data data) {
+        shouts.put(subject, data);
+        return this;
+    }
+
     public SteppingLauncher withContainerRegistrar(ContainerRegistrar containerRegistrar) {
         this.containerRegistrar = containerRegistrar;
         return this;
@@ -80,6 +87,8 @@ public class SteppingLauncher {
                 .go().get(algoName);
 
 
+        tryShout();
+
         waitTillDone();
 
         return new LauncherResults(subjectsStatus);
@@ -92,6 +101,15 @@ public class SteppingLauncher {
         new Stepping()
                 .registerAndControl(algoName, algo)
                 .go();
+
+        tryShout();
+    }
+
+
+    private void tryShout() {
+        for (Map.Entry<String, Data> entry : shouts.entrySet()) {
+            remoteController.getShouter().shout(entry.getKey(), entry.getValue());
+        }
     }
 
     private void waitTillDone() {
