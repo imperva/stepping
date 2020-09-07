@@ -37,8 +37,8 @@ class LauncherListenerStep implements Step {
     @Override
     public void onKill() {
         logger.info("Stopping LauncherListenerStep");
-        boolean stoped = onSubjectUpdateCallback.apply(null,"POISON-PILL");
-        logger.info("LauncherListenerStep Stopped successfully: " + stoped);
+        boolean stopped = onSubjectUpdateCallback.apply(null,"POISON-PILL");
+        logger.info("LauncherListenerStep Stopped successfully: " + stopped);
 
     }
 }

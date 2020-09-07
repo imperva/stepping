@@ -13,11 +13,12 @@ public class SteppingLauncher {
     private final Logger logger = LoggerFactory.getLogger(SteppingLauncher.class);
     private String algoName;
     private Algo algo;
-    private Object syncObj = new Object();
+    private final Object syncObj = new Object();
     private ContainerRegistrar containerRegistrar = new ContainerRegistrar();
     private volatile List<String> subjects = new ArrayList<>();//* todo need volatile?
     private HashMap<String, Data> subjectsStatus = new HashMap<>();
     private RemoteController remoteController;
+    private long millisecondsTimeout = 0;
 
 
     public SteppingLauncher withAlgo(String algoName, Algo algo) {
@@ -29,7 +30,7 @@ public class SteppingLauncher {
 
     public SteppingLauncher withAlgo(Algo algo) {
 
-        if(this.algo != null){
+        if (this.algo != null) {
             throw new SteppingException("Currently SteppingLauncher supports launching a single Algo per launch");
         }
 
@@ -57,10 +58,15 @@ public class SteppingLauncher {
         return this;
     }
 
+    public SteppingLauncher withTimeout(long millisecondsTimeout) {
+        this.millisecondsTimeout = millisecondsTimeout;
+        return this;
+    }
     public SteppingLauncher withContainerRegistrar(ContainerRegistrar containerRegistrar) {
         this.containerRegistrar = containerRegistrar;
         return this;
     }
+
 
     public LauncherResults launch() {
         if (subjects.isEmpty())
@@ -79,7 +85,6 @@ public class SteppingLauncher {
         return new LauncherResults(subjectsStatus);
     }
 
-
     public void lunchAndGo() {
         if (!subjects.isEmpty())
             throw new SteppingException("The lunchAndGo() function is used when there is no need for Stepping to wait for the accomplishment Subjects. Please remove the Subjects attached via the stopOnSubject() API, or use the launch() function instead.");
@@ -92,20 +97,30 @@ public class SteppingLauncher {
     private void waitTillDone() {
         synchronized (syncObj) {
             try {
-                syncObj.wait();
+                syncObj.wait(millisecondsTimeout);
+                boolean allArrived = isAllArrived();
+                if (!allArrived)
+                    throw new SteppingLauncherTimeoutException("SteppingLauncher Timeout of " + millisecondsTimeout + " milli has exceeded");
+            } catch (SteppingLauncherTimeoutException xe) {
+                tryCloseAlgo();
+                throw xe;
             } catch (Exception e) {
-                try {
-                    remoteController.close();
-                } catch (IOException ex) {
-                    logger.debug(ex.getMessage());
-                }
+                tryCloseAlgo();
                 throw new SteppingSystemException(e);
             }
         }
     }
 
+    private void tryCloseAlgo() {
+        try {
+            remoteController.close();
+        } catch (IOException ex) {
+            logger.debug(ex.getMessage());
+        }
+    }
+
     boolean launcherCallbackListener(Data d, String s) {
-        if(s.equals("POISON-PILL")){
+        if (s.equals("POISON-PILL")) {
             releaseWait();
             return true;
         }
