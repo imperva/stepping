@@ -105,6 +105,10 @@ public class SteppingLauncher {
     }
 
     boolean launcherCallbackListener(Data d, String s) {
+        if(s.equals("POISON-PILL")){
+            releaseWait();
+            return true;
+        }
 
         subjectsStatus.put(s, d);
 
