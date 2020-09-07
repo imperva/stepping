@@ -63,7 +63,7 @@ class ShouterTest {
     void shout1_subjectNotExist() {
         shouter.shout(SUBJECT_TYPE_NOT_EXIST, objValue);
         Assert.assertEquals(0, publishCounter);
-        Assert.assertEquals(1, exceptionHandlerCounter);
+        Assert.assertEquals(0, exceptionHandlerCounter);
     }
 
     @Test
@@ -77,6 +77,6 @@ class ShouterTest {
     void shout2_subjectNotExist() {
         shouter.shout(SUBJECT_TYPE_NOT_EXIST, dataValue);
         Assert.assertEquals(0, publishCounter);
-        Assert.assertEquals(1, exceptionHandlerCounter);
+        Assert.assertEquals(0, exceptionHandlerCounter);
     }
 }

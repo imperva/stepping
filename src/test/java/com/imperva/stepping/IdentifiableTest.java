@@ -19,7 +19,7 @@ class IdentifiableTest {
     @Test
     void getId() {
         Identifiable identifiable = new Identifiable(2, "id");
-        Assert.assertEquals("key", identifiable.getId());
+        Assert.assertEquals("id", identifiable.getId());
     }
 
     //TODO junit: remove the ignore, hashCode and equals should sync
