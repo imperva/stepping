@@ -1,9 +1,14 @@
 package com.imperva.stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiFunction;
 
 class AlgoDecoratorLauncher extends AlgoDecorator {
+    private final Logger logger = LoggerFactory.getLogger(AlgoDecoratorLauncher.class);
     private Algo algo;//todo not in use
     private ContainerRegistrar containerRegistrar;
     private List<String> subjects;
@@ -22,5 +27,30 @@ class AlgoDecoratorLauncher extends AlgoDecorator {
     public ContainerRegistrar containerRegistration() {
         containerRegistrar.add(new LauncherListenerStep(subjects, onSubjectUpdate));
         return containerRegistrar;
+    }
+
+    @Override
+    public void init() {
+        algo.init();
+    }
+
+    @Override
+    public void onTickCallBack() {
+        algo.onTickCallBack();
+    }
+
+    @Override
+    public AlgoConfig getConfig() {
+        return algo.getConfig();
+    }
+
+
+    @Override
+    public void close() {
+        try {
+            algo.close();
+        } catch (IOException e) {
+            logger.error("Failed closing AlgoDecoratorLauncher", e);
+        }
     }
 }
