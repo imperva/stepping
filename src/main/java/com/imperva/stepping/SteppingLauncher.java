@@ -20,6 +20,7 @@ public class SteppingLauncher {
     private RemoteController remoteController;
     private long millisecondsTimeout = 0;
     private HashMap<String, Data> shouts = new HashMap<>();
+    private volatile boolean allSubjectsDetected;
 
 
     public SteppingLauncher withAlgo(String algoName, Algo algo) {
@@ -94,6 +95,19 @@ public class SteppingLauncher {
         return new LauncherResults(subjectsStatus);
     }
 
+    private boolean launcherCallbackListener(Data d, String s) {
+        boolean isPoisonPill = s.equals("LAUNCHER-POISON-PILL");
+        if (!isPoisonPill)
+            subjectsStatus.put(s, d);
+
+        allSubjectsDetected = checkAllSubjectsDetected();
+        if (allSubjectsDetected || isPoisonPill) {
+            releaseWait();
+            return true;
+        }
+        return false;
+    }
+
     public void lunchAndGo() {
         if (!subjects.isEmpty())
             throw new SteppingException("The lunchAndGo() function is used when there is no need for Stepping to wait for the accomplishment Subjects. Please remove the Subjects attached via the stopOnSubject() API, or use the launch() function instead.");
@@ -115,16 +129,19 @@ public class SteppingLauncher {
     private void waitTillDone() {
         synchronized (syncObj) {
             try {
-                syncObj.wait(millisecondsTimeout);
-                boolean allArrived = isAllArrived();
-                if (!allArrived)
+                if (allSubjectsDetected)
+                    return;
+
+                syncObj.wait(millisecondsTimeout);//todo: maybe surround by while as described by documentation
+                if (!allSubjectsDetected) {
                     throw new SteppingLauncherTimeoutException("SteppingLauncher Timeout of " + millisecondsTimeout + " milli has exceeded");
+                }
             } catch (SteppingLauncherTimeoutException xe) {
-                tryCloseAlgo();
                 throw xe;
             } catch (Exception e) {
-                tryCloseAlgo();
                 throw new SteppingSystemException(e);
+            } finally {
+                tryCloseAlgo();
             }
         }
     }
@@ -137,22 +154,7 @@ public class SteppingLauncher {
         }
     }
 
-    boolean launcherCallbackListener(Data d, String s) {
-        if (s.equals("POISON-PILL")) {
-            releaseWait();
-            return true;
-        }
 
-        subjectsStatus.put(s, d);
-
-        boolean allArrived = isAllArrived();
-
-        if (allArrived) {
-            releaseWait();
-            return true;
-        }
-        return false;
-    }
 
     private void releaseWait() {
         synchronized (syncObj) {
@@ -160,7 +162,7 @@ public class SteppingLauncher {
         }
     }
 
-    private boolean isAllArrived() {
+    private boolean checkAllSubjectsDetected() {
         boolean allArrived = true;
         for (Map.Entry<String, Data> entry : subjectsStatus.entrySet()) {
             if (entry.getValue() == null) {

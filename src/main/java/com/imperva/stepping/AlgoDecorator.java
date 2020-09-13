@@ -97,7 +97,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             }
             cntrPublic.add(iden);
         }
-        cntrPublic.add(cntr,"__STEPPING_PRIVATE_CONTAINER__");
+        cntrPublic.add(cntr, "__STEPPING_PRIVATE_CONTAINER__");
     }
 
     private ContainerRegistrar autoSubjectsRegistration() {
@@ -184,7 +184,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
 
-        if(getConfig().getExternalPropertiesPath() != null)
+        if (getConfig().getExternalPropertiesPath() != null)
             cntrPublic.add(new SteppingExternalProperties(getConfig().getExternalPropertiesPath()), BuiltinSubjectType.STEPPING_EXTERNAL_PROPERTIES.name());
 
         if (getConfig().getPerfSamplerStepConfig().isEnable()) {
@@ -346,10 +346,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             if (isClosed)
                 return false;
 
-            if(e instanceof SteppingExceptionError){
-                SteppingExceptionError exceptionError = (SteppingExceptionError)e;
+            if (e instanceof SteppingExceptionError) {
+                SteppingExceptionError exceptionError = (SteppingExceptionError) e;
                 Throwable error = exceptionError.getCause();
-                if(delegateExceptionHandling(error))
+                if (delegateExceptionHandling(error))
                     return true;
             } else if (delegateExceptionHandling(e))
                 return true;
@@ -368,11 +368,12 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (InterruptedException e1) {
             logger.error("tryLock was interrupted", e);
             return false;
-        }catch (Exception ex){
+        } catch (Exception ex) {
             logger.error("Something wrong happened while closing algo ", ex);
         } finally {
-            if (closingLock.isHeldByCurrentThread())
+            if (closingLock.isHeldByCurrentThread()) {
                 closingLock.unlock();
+            }
         }
         return false;
     }
@@ -413,8 +414,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (Exception ex) {
             logger.error("Something wrong happened while closing algo ", ex);
         } finally {
-            if (closingLock.isHeldByCurrentThread())
+            if (closingLock.isHeldByCurrentThread()) {
                 closingLock.unlock();
+            }
         }
     }
 
@@ -494,7 +496,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             for (IStepDecorator step : stepDecorators) {
                 step.clearQueueSubject();
                 boolean poisonSent = step.offerQueueSubjectUpdate(new Data("cyanide"), "POISON-PILL");
-                if(!poisonSent){
+                if (!poisonSent) {
                     logger.error("Could not send a poison pill for Step: " + step.getId());
                 }
             }
