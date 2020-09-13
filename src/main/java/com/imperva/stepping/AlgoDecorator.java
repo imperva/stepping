@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
@@ -17,7 +16,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private Algo algo;
     private RunnersController runnersController = new RunnersController();//* todo Use CompletionService
     private volatile boolean isClosed = false;
-    private final Lock closingLock = new ReentrantLock();
+    private final ReentrantLock closingLock = new ReentrantLock();
     private final int closingLockWaitDuration = 1;//* in seconds
     private final int poisonPillWaitDuration = 3000;
 
@@ -364,11 +363,16 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.error(error, e);
 
             closeAndKillIfNeeded(e);
+
+
         } catch (InterruptedException e1) {
             logger.error("tryLock was interrupted", e);
             return false;
+        }catch (Exception ex){
+            logger.error("Something wrong happened while closing algo ", ex);
         } finally {
-            closingLock.unlock();
+            if (closingLock.isHeldByCurrentThread())
+                closingLock.unlock();
         }
         return false;
     }
@@ -403,10 +407,14 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
             isClosed = true;
             /* this is located here and not inside finally because we want to make sure all the prev steps were taken */
+
         } catch (InterruptedException e) {
             logger.error("tryLock interrupted", e);
+        } catch (Exception ex) {
+            logger.error("Something wrong happened while closing algo ", ex);
         } finally {
-            closingLock.unlock();
+            if (closingLock.isHeldByCurrentThread())
+                closingLock.unlock();
         }
     }
 
