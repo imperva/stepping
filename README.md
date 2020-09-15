@@ -2,6 +2,7 @@
 
 [![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=master)](https://www.travis-ci.org/imperva/stepping?branch=master)
 
+[![Coverage Status](https://coveralls.io/repos/github/gabibeyo/stepping/badge.svg?branch=master)](https://coveralls.io/github/gabibeyo/stepping?branch=master)
 
 # Stepping 
 Stepping is a framework designed to ease the implementation of data processing solutions.
