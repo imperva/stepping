@@ -32,12 +32,6 @@ Stepping is an event-driven, multithreaded, thread-safe (lockless) framework tha
 - Expose an extremely easy API to implement on top of it data-streaming processes logic 
 - Enable customers to implement custom error handling policies
 
-# Dependencies
-- slf4j-api
-- perf-sampler
-- spring-context
-- spring-core
-- unit-vintage-engine
 
 # How To Use It - First Steps
 Stepping is a Maven project (binaries are deployed in Maven Central) so you can import the projects manually or via Maven by adding the following Dependencies to your project's POM file:
@@ -46,7 +40,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.9.1</version>
+  <version>3.9.2</version>
 </dependency>
 ~~~
 
@@ -90,6 +84,8 @@ it can be done smoothly without fearing of un-expected behaviour:
     .register(algo2)
     .register(algo3).go();
 ```
+
+See more initialization options in SteppingLauncher section.
 
 ### Set Bound Queue Capacity
 Since version 3.6.x, Stepping enables clients to bound each Step's internal queue to a specific amount of messages, in case
@@ -896,6 +892,57 @@ public AlgoConfig getConfig() {
 ```
 
 Currently the report will be output its findings in the default Logger.
+
+
+# SteppingLauncher
+SteepingLauncher is a new wrapper for Stepping that enables enhanced capabilities related to Stepping initialization.
+Till version 3.9.1 Stepping exposed a simple initialization API:
+```java
+new Stepping().register(new MyAlgo()).go();
+```
+
+This API is perfect for simple cases, but sometimes we need more then that. There are cases we want to initialize our algo
+with different StepConfig, decide which specific Steps should be initialized while keeping the others "down", be able to set stop conditions
+to Stepping and freeze (idle) the Main Thread that initialized Stepping till the condition are satisfied.
+
+All these features are now exposed by the SteppingLauncher API. Let's say that you want to create some Component Tests to our
+hands-on sample above, the KafkaDBMergerAlgo, where we had three steps - "DBFetcher", "KafkaFetcher", "Merger".
+Let's say that we want to make sure that our fetchers ("DBFetcher", "KafkaFetcher") works as designed, but we want to keep 
+the "MergerStep" down:
+
+```java
+      
+LauncherResults launcherResults = new SteppingLauncher()
+    .withAlgo(new KafkaDBMergerAlgo())
+    .stopOnSubject("DBDataArrived")
+    .stopOnSubject("KafkaDataArrived")
+    .withStep(new DBFetcher(), new StepConfig())
+    .withStep(new KafkaFetcher())
+    .withTimeout(10000)//* 10 sec
+    .launch();
+
+
+    Assertions.assertEquals(300, (int) launcherResults.get("DBDataArrived").getValue().size());
+    Assertions.assertEquals(400, (int) launcherResults.get("KafkaDataArrived").getValue().size);
+```
+In this example we configured the Launcher to init our algo with only the DBFetcher and the KafkaDataArrived.
+We also overrode DBFetcher StepConfig by proving it externally.
+As we know that these two Steps Shouts "DBDataArrived" and "KafkaDataArrived" subjects, we configured the Launcher to stop
+waiting for Stepping to return after triggering the *synchronous* launch() method.
+In any case the Launcher will internally close Stepping and exit if the stop conditions are not satisfied, in 10 seconds.  
+
+These capabilities enables us to retrieve the values of the Subjects and compare in order to create component tests.
+
+SteppingLauncher it not only a testing tool, but can be used for debugging and even in production where we have more sophisticated 
+needs. For example if we want to dynamically allocate different Algos or different Steps externally based on some custom logic.
+
+### More Capabilities
+- Alongside with the launch() synchronous method the Launcher exposes an async method lunchAndGo() which works as like the 
+standard new Stepping()...go() method. In this case no return value is expected and the main thread dies while keeping Stepping alive.
+
+- withContainerRegistrar() 
+
+ 
 
 # Getting Help
 If you have questions about the library, please be sure to check out the API documentation. 
