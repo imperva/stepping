@@ -895,53 +895,59 @@ Currently the report will be output its findings in the default Logger.
 
 
 # SteppingLauncher
-SteepingLauncher is a new wrapper for Stepping that enables enhanced capabilities related to Stepping initialization.
-Till version 3.9.1 Stepping exposed a simple initialization API:
+SteepingLauncher is a new Stepping wrapper that enables enhanced capabilities related to Stepping initialization.
+Till version 3.9.1 Stepping exposed a single initialization API:
+
 ```java
 new Stepping().register(new MyAlgo()).go();
 ```
 
 This API is perfect for simple cases, but sometimes we need more then that. There are cases we want to initialize our algo
-with different StepConfig, decide which specific Steps should be initialized while keeping the others "down", be able to set stop conditions
-to Stepping and freeze (idle) the Main Thread that initialized Stepping till the condition are satisfied.
+but decide which specific Steps should be initialized while keeping the others "down",  override the StepConfig of some of those Steps, be able to set stop conditions
+and freeze (idle) the Main Thread till the conditions are satisfied.
 
-All these features are now exposed by the SteppingLauncher API. Let's say that you want to create some Component Tests to our
-hands-on sample above, the KafkaDBMergerAlgo, where we had three steps - "DBFetcher", "KafkaFetcher", "Merger".
-Let's say that we want to make sure that our fetchers ("DBFetcher", "KafkaFetcher") works as designed, but we want to keep 
-the "MergerStep" down:
+All these features and more, are now exposed by the SteppingLauncher API. Let's say that you want to create some Component Tests to our
+hands-on sample above, the KafkaDBMergerAlgo.  In KafkaDBMergerAlgo we had three steps - "DBFetcher", "KafkaFetcher", "Merger".
+Let's say that we want to make sure that our fetchers ("DBFetcher" & "KafkaFetcher") works as designed, but we want to keep 
+the "MergerStep" down, then we could do the following:
 
 ```java
       
 LauncherResults launcherResults = new SteppingLauncher()
     .withAlgo(new KafkaDBMergerAlgo())
-    .stopOnSubject("DBDataArrived")
-    .stopOnSubject("KafkaDataArrived")
-    .withStep(new DBFetcher(), new StepConfig())
+    .stopOnSubject("DBDataArrived")   
+    .stopOnSubject("KafkaDataArrived")//* When DBDataArrived and KafkaDataArrived arrives as well, stop the run and return the results of each Subject
+    .withStep(new DBFetcher(), new StepConfig())//* Register DBFetcher Step but overrides its StepConfig
     .withStep(new KafkaFetcher())
-    .withTimeout(10000)//* 10 sec
-    .launch();
+    .withTimeout(10000)//* If "stopOnSubject" conditions are not satisfied in 10 seconds, stop the run and throw a SteppingLauncherTimeoutException.
+    .launch();//* Run and wait
 
 
+    //* Returning back the results of the Subjects and use them for testing:
     Assertions.assertEquals(300, (int) launcherResults.get("DBDataArrived").getValue().size());
     Assertions.assertEquals(400, (int) launcherResults.get("KafkaDataArrived").getValue().size);
 ```
-In this example we configured the Launcher to init our algo with only the DBFetcher and the KafkaDataArrived.
-We also overrode DBFetcher StepConfig by proving it externally.
-As we know that these two Steps Shouts "DBDataArrived" and "KafkaDataArrived" subjects, we configured the Launcher to stop
-waiting for Stepping to return after triggering the *synchronous* launch() method.
+In this example we configured the Launcher to initialize our algo with only the DBFetcher and the KafkaFetcher.
+We also overrode DBFetcher StepConfig by providing it externally.
+
+As we know, these two Steps Shouts "DBDataArrived" and "KafkaDataArrived" Subjects, so we configured the Launcher to stop
+waiting for Stepping to return as soon as these Subjects are triggered.
 In any case the Launcher will internally close Stepping and exit if the stop conditions are not satisfied, in 10 seconds.  
 
-These capabilities enables us to retrieve the values of the Subjects and compare in order to create component tests.
 
-SteppingLauncher it not only a testing tool, but can be used for debugging and even in production where we have more sophisticated 
-needs. For example if we want to dynamically allocate different Algos or different Steps externally based on some custom logic.
+SteppingLauncher brings benefits not only for Component Tests use cases, but can be used for debugging, or even in production where we have more sophisticated 
+needs. For example if we want to dynamically allocate different Algos or different Steps based on some external configuration.
 
-### More Capabilities
-- Alongside with the launch() synchronous method the Launcher exposes an async method lunchAndGo() which works as like the 
+#### Additional Capabilities
+- Alongside the synchronous launch() method, which waits for the Launcher to finish the current run, the Launcher expose an async method lunchAndGo() which works like the 
 standard new Stepping()...go() method. In this case no return value is expected and the main thread dies while keeping Stepping alive.
 
-- withContainerRegistrar() 
+*NOTE:* Obviously the lunchAndGo() method can't be used for Component Tests as no results are expected to be returned. 
 
+- withContainerRegistrar(ContainerRegistrar containerRegistrar) is a way to entirely replace the Registrar, usable in cases we use the Registrar to keep other objects for Container usage
+
+- withShout(String subject, Data data) this method can be used in cases we register some Steps which waits for some subjects to be triggered in order to initiate.
+The Launcher will Shout all the registered Subjects right after initializing Stepping. 
  
 
 # Getting Help
