@@ -96,18 +96,17 @@ import java.util.concurrent.*;
 
      }
 
-     public void setDelay(String cronExpression, long initialdelay){
+     public void setDelay(String cronExpression, long initialDelay){
          this.delay = calculateDelay(cronExpression);
-         this.initialdelay = initialdelay;
+         this.initialdelay = initialDelay;
          this.timeUnit = TimeUnit.MILLISECONDS;
 
      }
 
-     public void setDelay(String cronExpression, long initialdelay, TimeUnit timeUnit){
+     public void setDelay(String cronExpression, long initialDelay, TimeUnit timeUnit){
          this.delay = calculateDelay(cronExpression);
-         this.initialdelay = initialdelay;
-         this.timeUnit = timeUnit;
-
+         this.initialdelay = timeUnit.toMillis(initialDelay);
+         this.timeUnit = TimeUnit.MILLISECONDS;
      }
 
      public void changeDelay(String cronExpression){
@@ -116,9 +115,7 @@ import java.util.concurrent.*;
          scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, TimeUnit.MILLISECONDS);
      }
 
-
-     private long calculateDelay(String cronExpression)
-     {
+     private long calculateDelay(String cronExpression) {
          try {
              CronSequenceGenerator cronSequenceGenerator = new CronSequenceGenerator(cronExpression);
              Date now = new Date();
@@ -128,7 +125,6 @@ import java.util.concurrent.*;
          }catch (Exception exe){
              throw new SteppingException(exe.toString());
          }
-
      }
 
      public void stop() {
