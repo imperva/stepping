@@ -903,10 +903,10 @@ new Stepping().register(new MyAlgo()).go();
 ```
 
 This API is perfect for simple cases, but sometimes we need more then that. There are cases we want to initialize our algo
-but decide which specific Steps should be initialized while keeping the others "down",  override the StepConfig of some of those Steps, be able to set stop conditions
+but decide which specific Steps should be initialized while keeping the others "down",  override the StepConfig of some of those Steps or be able to set stop conditions
 and freeze (idle) the Main Thread till the conditions are satisfied.
 
-All these features and more, are now exposed by the SteppingLauncher API. Let's say that you want to create some Component Tests to our
+All these features and more, are now exposed by the SteppingLauncher API. Let's say that you want to create some Component Tests for our
 hands-on sample above, the KafkaDBMergerAlgo.  In KafkaDBMergerAlgo we had three steps - "DBFetcher", "KafkaFetcher", "Merger".
 Let's say that we want to make sure that our fetchers ("DBFetcher" & "KafkaFetcher") works as designed, but we want to keep 
 the "MergerStep" down, then we could do the following:
@@ -930,7 +930,7 @@ LauncherResults launcherResults = new SteppingLauncher()
 In this example we configured the Launcher to initialize our algo with only the DBFetcher and the KafkaFetcher.
 We also overrode DBFetcher StepConfig by providing it externally.
 
-As we know, these two Steps Shouts "DBDataArrived" and "KafkaDataArrived" Subjects, so we configured the Launcher to stop
+As described above, these two Steps Shouts "DBDataArrived" and "KafkaDataArrived" Subjects, so we configured the Launcher to stop
 waiting for Stepping to return as soon as these Subjects are triggered.
 In any case the Launcher will internally close Stepping and exit if the stop conditions are not satisfied, in 10 seconds.  
 
