@@ -96,16 +96,18 @@ public class SteppingLauncher {
     }
 
     private boolean launcherCallbackListener(Data d, String s) {
-        boolean isPoisonPill = s.equals("LAUNCHER-POISON-PILL");
-        if (!isPoisonPill)
-            subjectsStatus.put(s, d);
+        synchronized (syncObj) {
+            boolean isPoisonPill = s.equals("LAUNCHER-POISON-PILL");
+            if (!isPoisonPill)
+                subjectsStatus.put(s, d);
 
-        allSubjectsDetected = checkAllSubjectsDetected();
-        if (allSubjectsDetected || isPoisonPill) {
-            releaseWait();
-            return true;
+            allSubjectsDetected = checkAllSubjectsDetected();
+            if (allSubjectsDetected || isPoisonPill) {
+                syncObj.notifyAll();
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     public void lunchAndGo() {
@@ -151,14 +153,6 @@ public class SteppingLauncher {
             remoteController.close();
         } catch (IOException ex) {
             logger.debug(ex.getMessage());
-        }
-    }
-
-
-
-    private void releaseWait() {
-        synchronized (syncObj) {
-            syncObj.notifyAll();
         }
     }
 
