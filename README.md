@@ -1,8 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/com.imperva.stepping/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.stepping%22%20AND%20a:%22stepping%22)
-
-[![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=master)](https://www.travis-ci.org/imperva/stepping?branch=master)
-
-[![Coverage Status](https://coveralls.io/repos/github/imperva/stepping/badge.svg?branch=master)](https://coveralls.io/github/imperva/stepping?branch=master)
+[![Maven Central](https://img.shields.io/maven-central/v/com.imperva.stepping/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.stepping%22%20AND%20a:%22stepping%22) [![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=master)](https://www.travis-ci.org/imperva/stepping?branch=master) [![Coverage Status](https://coveralls.io/repos/github/imperva/stepping/badge.svg?branch=master)](https://coveralls.io/github/imperva/stepping?branch=master)
 
 # Stepping 
 Stepping is a framework designed to ease the implementation of data processing solutions.
