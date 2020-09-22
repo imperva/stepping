@@ -341,7 +341,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     public boolean handle(Exception e) {
         try {
             if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
-                return true;
+                return true; //* todo: in some cases  waiting threads will not handle their exceptions
 
             if (isClosed)
                 return false;
