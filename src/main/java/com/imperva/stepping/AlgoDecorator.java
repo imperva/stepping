@@ -340,34 +340,25 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public boolean handle(Exception e) {
         try {
-            if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
-                return true; //* todo: in some cases  waiting threads will not handle their exceptions
+//            if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
+//                return false; //* todo: in some cases  waiting threads will not handle their exceptions
 
             if (isClosed)
                 return false;
 
-            if (e instanceof SteppingExceptionError) {
-                SteppingExceptionError exceptionError = (SteppingExceptionError) e;
-                Throwable error = exceptionError.getCause();
-                if (delegateExceptionHandling(error))
-                    return true;
-            } else if (delegateExceptionHandling(e))
-                return true;
+           if(delegateErrorHandling(e)) return true;
 
 
-            String error = "Exception Detected";
-            if (e instanceof IdentifiableSteppingException)
-                error += " in Step Id: " + ((IdentifiableSteppingException) e).getStepId();
-            else if (e instanceof SteppingDistributionException)
-                error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
+            String error = generateLogMessage(e);
             logger.error(error, e);
+
+            if (!closingLock.tryLock() && isClosed)
+                return false;
 
             closeAndKillIfNeeded(e);
 
-
-        } catch (InterruptedException e1) {
-            logger.error("tryLock was interrupted", e);
-            return false;
+            isClosed = true;
+            /* this is located here and not inside finally because we want to make sure all the prev steps were taken */
         } catch (Exception ex) {
             logger.error("Something wrong happened while closing algo ", ex);
         } finally {
@@ -375,6 +366,27 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 closingLock.unlock();
             }
         }
+        return false;
+    }
+
+    private String generateLogMessage(Exception e) {
+        String error = "Exception Detected";
+        if (e instanceof IdentifiableSteppingException)
+            error += " in Step Id: " + ((IdentifiableSteppingException) e).getStepId();
+        else if (e instanceof SteppingDistributionException)
+            error += " while distributing Subject - " + ((SteppingDistributionException) e).getSubjectType();
+        return error;
+    }
+
+
+    private boolean delegateErrorHandling(Exception e) {
+        if (e instanceof SteppingExceptionError) {
+            SteppingExceptionError exceptionError = (SteppingExceptionError) e;
+            Throwable error = exceptionError.getCause();
+            if (delegateExceptionHandling(error))
+                return true;
+        } else if (delegateExceptionHandling(e))
+            return true;
         return false;
     }
 
@@ -387,13 +399,6 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     @Override
     public void close() {
         try {
-
-            if (isClosed)
-                return;
-
-            if (!closingLock.tryLock(closingLockWaitDuration, TimeUnit.SECONDS))
-                return;
-
             if (isClosed)
                 return;
 
@@ -406,17 +411,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
             closeAlgo();
 
-            isClosed = true;
-            /* this is located here and not inside finally because we want to make sure all the prev steps were taken */
-
         } catch (InterruptedException e) {
             logger.error("tryLock interrupted", e);
         } catch (Exception ex) {
             logger.error("Something wrong happened while closing algo ", ex);
-        } finally {
-            if (closingLock.isHeldByCurrentThread()) {
-                closingLock.unlock();
-            }
         }
     }
 
