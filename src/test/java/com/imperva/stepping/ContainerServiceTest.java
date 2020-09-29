@@ -1,11 +1,8 @@
 package com.imperva.stepping;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +24,7 @@ class ContainerServiceTest {
 
         RunningScheduled actual = containerService.getTickCallbackRunning("stepId3");
 
-        Assert.assertEquals(value, actual);
+        Assertions.assertEquals(value, actual);
     }
 
     @Test
@@ -43,6 +40,6 @@ class ContainerServiceTest {
 
         int qSize = containerService.getQSize("stepId1");
 
-        Assert.assertEquals(34, qSize);
+        Assertions.assertEquals(34, qSize);
     }
 }

@@ -12,16 +12,15 @@ import java.util.concurrent.CyclicBarrier;
 class StepDecorator implements IStepDecorator {
     private final Logger logger = LoggerFactory.getLogger(StepDecorator.class);
     protected Container container;
-    private Q<Message> q;
+    Q<Message> q;
     private Step step;
-    private AlgoConfig algoConfig;
     private StepConfig localStepConfig;
     private String subjectDistributionID = "default";
-    private volatile boolean dead = false;
-    private Follower follower = null;
+    volatile boolean dead = false;
+    private Follower follower;
     private CyclicBarrier cb;
     private String id;
-    private HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
+    HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
 
 
     StepDecorator(Step step) {
@@ -109,29 +108,27 @@ class StepDecorator implements IStepDecorator {
                     throw new InterruptedException();
                 }
 
-                if (message != null && message.getData() != null) {
-                    if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+                if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
 
-                        SubjectUpdateEvent subjectUpdateEvent = subjectUpdateEvents.get(message.getSubjectType());
-                        if (subjectUpdateEvent != null)
-                            subjectUpdateEvent.onUpdate(message.getData());
+                    SubjectUpdateEvent subjectUpdateEvent = subjectUpdateEvents.get(message.getSubjectType());
+                    if (subjectUpdateEvent != null)
+                        subjectUpdateEvent.onUpdate(message.getData());
 
-                        onSubjectUpdate(message.getData(), message.getSubjectType());
+                    onSubjectUpdate(message.getData(), message.getSubjectType());
 
-                    } else {
-                        try {
-                            onTickCallBack();
-                            if (getConfig().getRunningPeriodicCronDelay() != null) {
-                                try {
-                                    changeTickCallBackDelay(getConfig().getRunningPeriodicCronDelay());
-                                } catch (Exception x) {
-                                    throw new SteppingException(x.toString());
-                                }
+                } else {
+                    try {
+                        onTickCallBack();
+                        if (getConfig().getRunningPeriodicCronDelay() != null) {
+                            try {
+                                changeTickCallBackDelay(getConfig().getRunningPeriodicCronDelay());
+                            } catch (Exception x) {
+                                throw new SteppingException(x.toString());
                             }
-                        } finally {
-                            cb = (CyclicBarrier) message.getData().getValue();
-                            cb.await();
                         }
+                    } finally {
+                        cb = (CyclicBarrier) message.getData().getValue();
+                        cb.await();
                     }
                 }
             }
@@ -156,7 +153,7 @@ class StepDecorator implements IStepDecorator {
     @Override
     public void attachSubjects() {
         Follower follower = listSubjectsToFollow();
-        if (follower != null && follower.size() != 0) {
+        if (follower.size() != 0) {
             for (FollowRequest followRequest : follower.get()) {
                 ISubject s = container.getById(followRequest.getSubjectType());
                 if (s == null) {
@@ -247,13 +244,6 @@ class StepDecorator implements IStepDecorator {
     @Override
     public Step getStep() {
         return step;
-    }
-
-    @Override
-    public void setAlgoConfig(AlgoConfig algoConfig) {
-        if (algoConfig == null)
-            throw new IdentifiableSteppingException(this.step.getId(), "AlgoConfig is required");
-        this.algoConfig = algoConfig;
     }
 
     @Override

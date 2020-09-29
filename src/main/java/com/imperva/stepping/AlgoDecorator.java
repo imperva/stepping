@@ -2,9 +2,11 @@ package com.imperva.stepping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -326,7 +328,6 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
             step.init(cntrPublic);
-            step.setAlgoConfig(getConfig());
         }
     }
 
