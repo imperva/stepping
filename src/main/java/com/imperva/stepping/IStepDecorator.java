@@ -20,8 +20,6 @@ interface IStepDecorator extends Step, Closeable {
 
     Step getStep();
 
-    void setAlgoConfig(AlgoConfig algoConfig);
-
     void setDistributionNodeID(String name);
 
     String getDistributionNodeID();
