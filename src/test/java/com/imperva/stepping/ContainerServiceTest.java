@@ -3,6 +3,8 @@ package com.imperva.stepping;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,18 +15,21 @@ import static org.mockito.Mockito.when;
 class ContainerServiceTest {
 
     @Test
-    void getTickCallbackRunning() {
-        RunningScheduled value = mock(RunningScheduled.class);
+    void changeDelay_delay_changed() {
+        RunningScheduled runningScheduled = new RunningScheduled("test", 2, 2, TimeUnit.SECONDS, () -> {
+        });
 
         Container innerContainer = new ContainerService();
-        innerContainer.add(value, "stepId3" + ContainerService.RUNNING_SCHEDULED);
+        innerContainer.add(runningScheduled, "stepId3" + ContainerService.RUNNING_SCHEDULED);
 
         ContainerService containerService = new ContainerService();
         containerService.add(innerContainer, ContainerService.STEPPING_PRIVATE_CONTAINER);
+        runningScheduled.awake();
+        containerService.changeDelay("stepId3", 20, 20, TimeUnit.SECONDS);
+        RunningScheduled e = ((RunningScheduled) ((Container) containerService.getById(ContainerService.STEPPING_PRIVATE_CONTAINER)).getById("stepId3" + ContainerService.RUNNING_SCHEDULED));
+        runningScheduled.close();
 
-        RunningScheduled actual = containerService.getTickCallbackRunning("stepId3");
-
-        Assertions.assertEquals(value, actual);
+        Assertions.assertNotEquals(2, e.getDelay(TimeUnit.SECONDS));
     }
 
     @Test

@@ -142,8 +142,7 @@ class StepDecorator implements IStepDecorator {
     }
 
     private void changeTickCallBackDelay(String cronExpression) {
-        RunningScheduled runningScheduled = ((ContainerService) container).getTickCallbackRunning(getStep().getId());
-        runningScheduled.changeDelay(cronExpression);
+      ((ContainerService) container).changeDelay(getStep().getId(), cronExpression);
     }
 
     private void setThreadName() {

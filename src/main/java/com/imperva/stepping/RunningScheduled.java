@@ -115,6 +115,10 @@ import java.util.concurrent.*;
          scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(runnable, delay, delay, TimeUnit.MILLISECONDS);
      }
 
+     public long getDelay(TimeUnit timeUnit){
+        return scheduledFuture.getDelay(timeUnit);
+     }
+
      private long calculateDelay(String cronExpression) {
          try {
              CronSequenceGenerator cronSequenceGenerator = new CronSequenceGenerator(cronExpression);
