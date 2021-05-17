@@ -49,7 +49,7 @@ class ShouterTest {
         doAnswer(a -> {exceptionHandlerCounter++; return true;}).when(rootExceptionHandler).handle(any(SteppingDistributionException.class));
 
         //create shouter
-        shouter = new Shouter(container, rootExceptionHandler);
+        shouter = new Shouter("Test",container, rootExceptionHandler);
     }
 
     @Test

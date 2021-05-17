@@ -23,7 +23,7 @@ public class Subject implements ISubject {
     }
 
     @Override
-    public void publish(Object message) {
+    public void publish(Object message) {//*TODO stats NOT IN USE?
         Data data = null;
         if (!(message instanceof Data))
              data = new Data(message);

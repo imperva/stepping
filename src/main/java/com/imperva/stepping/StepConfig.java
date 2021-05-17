@@ -11,6 +11,7 @@ public class StepConfig {
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
     private int boundQueueCapacity;
+    private StatStepConfig statStepConfig;//TODO stas move to algo, by default false, + in all steps add ability to set specifically and by def false + add ability to set the report emition timeout
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -19,6 +20,7 @@ public class StepConfig {
         runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit").toUpperCase());
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
         boundQueueCapacity = new Integer(stepProp.getProperty("stepping.default.step.bound.queue"));
+        statStepConfig = new StatStepConfig();
     }
 
     public long getRunningInitialDelay() {
@@ -83,5 +85,14 @@ public class StepConfig {
 
     public void setRunningPeriodicCronDelay(String runningPeriodicCronDelay) {
         this.runningPeriodicCronDelay = runningPeriodicCronDelay;
+    }
+
+    public StatStepConfig getStatStepConfig() {
+        return statStepConfig;
+    }
+
+
+    public void setStatStepConfig(StatStepConfig statStepConfig) {
+        this.statStepConfig = statStepConfig;
     }
 }

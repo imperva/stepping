@@ -185,7 +185,7 @@ class StepDecoratorTest {
         doAnswer(a -> shouter).when(container).getById(eq(BuiltinTypes.STEPPING_SHOUTER.name()));
 
         StepDecorator decorator = createDoubleStep();
-        decorator.init(container);
+        decorator.init(container, shouter);
 
         Assertions.assertSame(shouter, ((ContainerShouterStep) decorator.getStep()).shouter);
     }

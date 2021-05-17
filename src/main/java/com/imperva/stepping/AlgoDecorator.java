@@ -181,7 +181,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private ContainerRegistrar builtinContainerRegistration() {
         ContainerRegistrar containerRegistrar = new ContainerRegistrar();
-        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter(cntr, this));
+        containerRegistrar.add(BuiltinTypes.STEPPING_SHOUTER.name(), new Shouter("DEFAULT_EXTERNAL_SHOUTER",cntr, this));
 
         containerRegistrar.add(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name(), new Subject(BuiltinSubjectType.STEPPING_DATA_ARRIVED.name()));
         containerRegistrar.add(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name(), new Subject(BuiltinSubjectType.STEPPING_PUBLISH_DATA.name()));
@@ -194,8 +194,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             String packages = getConfig().getPerfSamplerStepConfig().getPackages();
             if (packages == null || packages.trim().equals(""))
                 throw new SteppingException("'packages' list field is required to initialize PerfSamplerStep");
-            containerRegistrar.add(new PerfSamplerStep(interval, packages));
+            containerRegistrar.add(new SystemStepPerfSampler(interval, packages));
         }
+        //TODO stats ADD CONDITIONS
+        containerRegistrar.add(new SystemStepStatistics());
 
         return containerRegistrar;
     }
@@ -327,7 +329,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init(cntrPublic);
+            step.init(cntrPublic, new Shouter(step.getStep().getId(), cntr, this));//TODO stats maybe the id can be resolved internally by the decorator?
         }
     }
 

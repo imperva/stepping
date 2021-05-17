@@ -3,6 +3,7 @@ package com.imperva.stepping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -20,16 +21,13 @@ class StepDecorator implements IStepDecorator {
     private Follower follower;
     private CyclicBarrier cb;
     private String id;
+    private Shouter shouter;
     HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
+    private boolean isSystemStep;
 
 
     StepDecorator(Step step) {
         this.step = step;
-    }
-
-    @Override
-    public void init(Container cntr) {
-        init(cntr, cntr.getById(BuiltinTypes.STEPPING_SHOUTER.name()));
     }
 
     @Override
@@ -38,6 +36,8 @@ class StepDecorator implements IStepDecorator {
         container = cntr;
         step.init(container, shouter);
         q = new Q<>(getConfig().getBoundQueueCapacity());
+        this.shouter = shouter;
+        isSystemStep = isSystemStep();
     }
 
     @Override
@@ -94,6 +94,13 @@ class StepDecorator implements IStepDecorator {
                     throw new InterruptedException();
                 Message message = q.take();
 
+                StepsRuntimeMetadata stepsRuntimeMetadata = null;
+                if (localStepConfig.getStatStepConfig().isEnable()){
+                    stepsRuntimeMetadata = new StepsRuntimeMetadata();
+                    stepsRuntimeMetadata.setStartTime(new Date());//TODO stats use StopWatch
+                    stepsRuntimeMetadata.setChunkSize(message.getData().getSize());
+                }
+
                 if (message.getData().isExpirable()) {
                     boolean succeeded = message.getData().tryGrabAndExpire();
                     if (!succeeded) {
@@ -109,13 +116,16 @@ class StepDecorator implements IStepDecorator {
                 }
 
                 if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
-
                     SubjectUpdateEvent subjectUpdateEvent = subjectUpdateEvents.get(message.getSubjectType());
                     if (subjectUpdateEvent != null)
                         subjectUpdateEvent.onUpdate(message.getData());
 
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
+                    if (localStepConfig.getStatStepConfig().isEnable() && !isSystemStep) {
+                        stepsRuntimeMetadata.setEndTime(new Date());
+                        sendStatReport(stepsRuntimeMetadata);
+                    }
                 } else {
                     try {
                         onTickCallBack();
@@ -131,6 +141,7 @@ class StepDecorator implements IStepDecorator {
                         cb.await();
                     }
                 }
+
             }
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);
@@ -139,6 +150,11 @@ class StepDecorator implements IStepDecorator {
         } catch (Error err) {
             throw new IdentifiableSteppingError(getStep().getId(), "DataSink FAILED - ERROR", err);
         }
+    }
+
+    private void sendStatReport(StepsRuntimeMetadata stepsRuntimeMetadata) {
+        //TODO stat add new 'receiverId' and add it to Data and fill it here?
+        shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(stepsRuntimeMetadata));
     }
 
     private void changeTickCallBackDelay(String cronExpression) {
@@ -281,6 +297,10 @@ class StepDecorator implements IStepDecorator {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    private boolean isSystemStep() {
+        return getStep().getClass().isAnnotationPresent(SystemStep.class);
     }
 }
 

@@ -50,8 +50,8 @@ public class SteppingLauncher {
     }
 
     public SteppingLauncher withStep(Step step, StepConfig stepConfig) {
-        StepExternalConfig stepExternalConfig = new StepExternalConfig(step, stepConfig);
-        containerRegistrar.add(stepExternalConfig);
+        SystemStepExternalConfig systemStepExternalConfig = new SystemStepExternalConfig(step, stepConfig);
+        containerRegistrar.add(systemStepExternalConfig);
         return this;
     }
 

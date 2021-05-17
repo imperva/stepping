@@ -25,7 +25,7 @@ class AlgoDecoratorLauncher extends AlgoDecorator {
 
     @Override
     public ContainerRegistrar containerRegistration() {
-        containerRegistrar.add(new LauncherListenerStep(subjects, onSubjectUpdate));
+        containerRegistrar.add(new SystemStepLauncherListener(subjects, onSubjectUpdate));
         return containerRegistrar;
     }
 

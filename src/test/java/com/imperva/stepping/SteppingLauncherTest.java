@@ -3,7 +3,10 @@ package com.imperva.stepping;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 class SteppingLauncherTest {
@@ -147,6 +150,71 @@ class SteppingLauncherTest {
         Assertions.assertEquals(2, (int) res.getValue());
     }
 
+    @Test
+    void launcher_stats_test() {
+
+        Step step = new Step() {
+            private Container cntr;
+            private Shouter shouter;
+
+            @Override
+            public void listSubjectsToFollow(Follower follower) {
+                follower.follow("STARTED1", this::handler);
+                follower.follow("STARTED2", this::handler);
+                follower.follow("STARTED3", this::handler);
+                follower.follow("STARTED4", this::handler);
+                follower.follow("STARTED5", this::handler);
+            }
+
+            void handler(Data d){
+                System.out.println("here");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void init(Container cntr, Shouter shouter) {
+                this.cntr = cntr;
+                this.shouter = shouter;
+            }
+
+            @Override
+            public void onKill() {
+            }
+
+            @Override
+            public String getId() {
+                return "launcher_stats_test";
+            }
+        };
+
+
+        List<String> datas = new ArrayList<>();
+        datas.add("Hello");
+        datas.add("Hello");
+        datas.add("Hello");
+        Data d = new Data(datas);
+        LauncherResults launcherResults = new SteppingLauncher()
+                .withAlgo(simpleAlgo)
+                .withStep(step)
+                .withShout("STARTED1", d)//TODO stats support re-occurrences
+                .withShout("STARTED2", d)
+                .withShout("STARTED3", d)
+                .withShout("STARTED4", d)
+                .withShout("STARTED5", d)
+                .stopOnSubject(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name())
+                .withTimeout(1000000)
+                .launch();
+
+        Data res = launcherResults.get(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name()); //TODO stats support re-occurrences and remove timeout
+        StatisticsReport statistic = ((StatisticsReport)res.getValue());
+        Assertions.assertEquals(0, statistic.getLatestQSize());
+        Assertions.assertEquals(3, statistic.getAvgChunkSize());
+        Assertions.assertEquals(3.0, statistic.getAvgProcessingTime()); //TODO stats add total items + calc avg based on total
+    }
 
     @Test
     void launcher_timeout_exception() {

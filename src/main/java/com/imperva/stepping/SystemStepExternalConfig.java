@@ -1,10 +1,11 @@
 package com.imperva.stepping;
 
-class StepExternalConfig implements Step {
+@SystemStep
+class SystemStepExternalConfig implements Step {
     private Step step;
     private StepConfig stepConfig;
 
-    StepExternalConfig(Step step, StepConfig stepConfig) {
+    SystemStepExternalConfig(Step step, StepConfig stepConfig) {
         this.step = step;
         this.stepConfig = stepConfig;
     }
@@ -47,4 +48,8 @@ class StepExternalConfig implements Step {
         return stepConfig;
     }
 
+    @Override
+    public String getId() {
+        return "SYSTEM_STEP_EXTERNAL_CONFIG";
+    }
 }

@@ -5,19 +5,20 @@ import com.imperva.sampler.outputer.LoggerSamplingOutputer;
 
 import java.io.IOException;
 
-public class PerfSamplerStep implements Step {
+@SystemStep
+class SystemStepPerfSampler implements Step {
     private final int reportInterval;
     private final String packges;
     private ThreadsSampler ts;
 
-    PerfSamplerStep(int reportInterval,String packges){
+    SystemStepPerfSampler(int reportInterval, String packges){
         this.reportInterval = reportInterval;
         this.packges = packges;
     }
 
     @Override
     public String getId(){
-        return BuiltinTypes.PERFSAMPLER.name();
+        return "SYSTEM_STEP_PERF_SAMPLER";
     }
 
     @Override

@@ -6,12 +6,13 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.function.BiFunction;
 
-class LauncherListenerStep implements Step {
-    private final Logger logger = LoggerFactory.getLogger(LauncherListenerStep.class);
+@SystemStep
+class SystemStepLauncherListener implements Step {
+    private final Logger logger = LoggerFactory.getLogger(SystemStepLauncherListener.class);
     private final List<String> subjects;
     private final BiFunction<Data, String, Boolean> onSubjectUpdateCallback;
 
-    LauncherListenerStep(List<String> subjects, BiFunction<Data, String, Boolean> onSubjectUpdate) {
+    SystemStepLauncherListener(List<String> subjects, BiFunction<Data, String, Boolean> onSubjectUpdate) {
         this.subjects = subjects;
         this.onSubjectUpdateCallback = onSubjectUpdate;
     }
@@ -41,4 +42,10 @@ class LauncherListenerStep implements Step {
         logger.info("LauncherListenerStep Stopped successfully: " + stopped);
 
     }
+
+    @Override
+    public String getId() {
+        return "SYSTEM_STEP_LAUNCHER_LISTENER";
+    }
+
 }

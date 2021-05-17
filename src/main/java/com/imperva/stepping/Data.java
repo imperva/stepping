@@ -8,6 +8,7 @@ import java.util.List;
  * If List is passed as the value to this object, it must not be modified later.
  */
 public class Data {
+    private String senderId;
     private final Object value;
     private final int size;
 
@@ -49,6 +50,14 @@ public class Data {
     }
     boolean tryGrabAndExpire() {
        return expirationCondition.check(this, expirationContext);
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
 

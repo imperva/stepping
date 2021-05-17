@@ -6,7 +6,7 @@ import java.io.Closeable;
 
 interface IStepDecorator extends Step, Closeable {
 
-    void init(Container cntr);
+    void init(Container cntr, Shouter shouter);
 
     default void onTickCallBack() {
         throw new SteppingException("onTickCallBack not implemented");
