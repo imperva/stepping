@@ -1,5 +1,6 @@
 package com.imperva.stepping;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,9 +96,12 @@ class StepDecorator implements IStepDecorator {
                 Message message = q.take();
 
                 StepsRuntimeMetadata stepsRuntimeMetadata = null;
+                StopWatch stopWatch = null;
                 if (localStepConfig.getStatStepConfig().isEnable()){
+                    stopWatch = new StopWatch();
+                    stopWatch.start();
                     stepsRuntimeMetadata = new StepsRuntimeMetadata();
-                    stepsRuntimeMetadata.setStartTime(new Date());//TODO stats use StopWatch
+                    stepsRuntimeMetadata.setStartTime(stopWatch.getStartTime());
                     stepsRuntimeMetadata.setChunkSize(message.getData().getSize());
                 }
 
@@ -123,7 +127,8 @@ class StepDecorator implements IStepDecorator {
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
                     if (localStepConfig.getStatStepConfig().isEnable() && !isSystemStep) {
-                        stepsRuntimeMetadata.setEndTime(new Date());
+                        stopWatch.stop();
+                        stepsRuntimeMetadata.setEndTime(stopWatch.getStopTime());
                         sendStatReport(stepsRuntimeMetadata);
                     }
                 } else {

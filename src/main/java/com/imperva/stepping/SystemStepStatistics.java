@@ -66,10 +66,10 @@ class SystemStepStatistics implements Step {
 
     private long calcAvgProcessingTime(List<StepsRuntimeMetadata> statData) {
         long allChunkSize = statData.stream().mapToLong(StepsRuntimeMetadata::getChunkSize).sum();
-        Date starttime = statData.get(0).getStartTime();
-        Date endtime = statData.get(statData.size() - 1).getEndTime();
+        long starttime = statData.get(0).getStartTime();
+        long endtime = statData.get(statData.size() - 1).getEndTime();
 
-        long totTime = endtime.getTime() - starttime.getTime();
+        long totTime = endtime - starttime;
         long avg =  totTime / allChunkSize;
         return avg;
 

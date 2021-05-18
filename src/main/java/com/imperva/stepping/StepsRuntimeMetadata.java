@@ -3,24 +3,24 @@ package com.imperva.stepping;
 import java.util.Date;
 
 public class StepsRuntimeMetadata {
-    private Date startTime;
-    private Date endTime;
+    private long startTime;
+    private long endTime;
     private long QSize;
     private long chunkSize;
 
-    public Date getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
 
