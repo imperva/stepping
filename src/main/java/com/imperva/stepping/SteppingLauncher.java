@@ -19,7 +19,7 @@ public class SteppingLauncher {
     private HashMap<String, Data> subjectsStatus = new HashMap<>();
     private RemoteController remoteController;
     private long millisecondsTimeout = 0;
-    private HashMap<String, Data> shouts = new HashMap<>();
+    private HashMap<String, WithShoutConfig> shouts = new HashMap<>();
     private volatile boolean allSubjectsDetected;
 
 
@@ -66,7 +66,12 @@ public class SteppingLauncher {
     }
 
     public SteppingLauncher withShout(String subject, Data data) {
-        shouts.put(subject, data);
+        withShout(subject, data, 1);
+        return this;
+    }
+
+    public SteppingLauncher withShout(String subject, Data data, int numOfRecurrences) {
+        shouts.put(subject, new WithShoutConfig(data, numOfRecurrences));
         return this;
     }
 
@@ -123,8 +128,11 @@ public class SteppingLauncher {
 
 
     private void tryShout() {
-        for (Map.Entry<String, Data> entry : shouts.entrySet()) {
-            remoteController.getShouter().shout(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, WithShoutConfig> entry : shouts.entrySet()) {
+            int numOfRecurrencesToCheck = entry.getValue().numOfRecurrences - 1;
+            for (int i = 0 ; i <= numOfRecurrencesToCheck; i++){
+                remoteController.getShouter().shout(entry.getKey(), entry.getValue().data);
+            }
         }
     }
 
@@ -165,5 +173,32 @@ public class SteppingLauncher {
             }
         }
         return allArrived;
+    }
+
+
+    private class WithShoutConfig {
+        private Data data;
+        private int numOfRecurrences;
+
+        WithShoutConfig(Data data, int numOfRecurrences) {
+            this.data = data;
+            this.numOfRecurrences = numOfRecurrences;
+        }
+
+        public Data getData() {
+            return data;
+        }
+
+        public void setData(Data data) {
+            this.data = data;
+        }
+
+        public int getNumOfRecurrences() {
+            return numOfRecurrences;
+        }
+
+        public void setNumOfRecurrences(int numOfRecurrences) {
+            this.numOfRecurrences = numOfRecurrences;
+        }
     }
 }

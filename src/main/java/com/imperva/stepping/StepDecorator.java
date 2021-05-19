@@ -160,7 +160,6 @@ class StepDecorator implements IStepDecorator {
     }
 
     private void sendStatReport(StepsRuntimeMetadata stepsRuntimeMetadata) {
-        //TODO stat add new 'receiverId' and add it to Data and fill it here?
         shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(stepsRuntimeMetadata));
     }
 

@@ -196,7 +196,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 throw new SteppingException("'packages' list field is required to initialize PerfSamplerStep");
             containerRegistrar.add(new SystemStepPerfSampler(interval, packages));
         }
-        //TODO stats ADD CONDITIONS
+
         if(getConfig().getIsInitStatCollector()) {
             SystemStepStatistics systemStepStatistics = new SystemStepStatistics();
             systemStepStatistics.setReportReleaseTimeout(getConfig().getReportReleaseTimeout());

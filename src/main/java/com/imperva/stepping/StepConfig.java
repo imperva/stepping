@@ -11,7 +11,7 @@ public class StepConfig {
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
     private int boundQueueCapacity;
-    private StatStepConfig statStepConfig;//TODO stas move to algo, by default false, + in all steps add ability to set specifically and by def false + add ability to set the report emition timeout
+    private StatStepConfig statStepConfig;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
