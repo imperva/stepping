@@ -25,6 +25,7 @@ class StepDecorator implements IStepDecorator {
     private Shouter shouter;
     HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
     private boolean isSystemStep;
+    private Boolean isStatEnabledForStep;
 
 
     StepDecorator(Step step) {
@@ -39,6 +40,7 @@ class StepDecorator implements IStepDecorator {
         q = new Q<>(getConfig().getBoundQueueCapacity());
         this.shouter = shouter;
         isSystemStep = isSystemStep();
+        isStatEnabledForStep = localStepConfig.getIsStatEnabledForStep();
     }
 
     @Override
@@ -97,7 +99,7 @@ class StepDecorator implements IStepDecorator {
 
                 StepsRuntimeMetadata stepsRuntimeMetadata = null;
                 StopWatch stopWatch = null;
-                if (localStepConfig.getStatStepConfig().isEnable()){
+                if (isStatEnabledForStep){
                     stopWatch = new StopWatch();
                     stopWatch.start();
                     stepsRuntimeMetadata = new StepsRuntimeMetadata();
@@ -126,7 +128,7 @@ class StepDecorator implements IStepDecorator {
 
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
-                    if (localStepConfig.getStatStepConfig().isEnable() && !isSystemStep) {
+                    if (isStatEnabledForStep && !isSystemStep) {
                         stopWatch.stop();
                         stepsRuntimeMetadata.setEndTime(stopWatch.getStopTime());
                         sendStatReport(stepsRuntimeMetadata);

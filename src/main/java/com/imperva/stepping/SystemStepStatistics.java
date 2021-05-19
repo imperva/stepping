@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 @SystemStep
 class SystemStepStatistics implements Step {
+    private int reportReleaseTimeout = 60; //Seconds
     private Container cntr;
     private Shouter shouter;
     private HashMap<String, List<StepsRuntimeMetadata>> stats = new HashMap<>();
@@ -75,11 +76,15 @@ class SystemStepStatistics implements Step {
 
     }
 
+    void setReportReleaseTimeout(int timeout){
+        reportReleaseTimeout = timeout;
+    }
+
     @Override
     public StepConfig getConfig() {
         StepConfig stepConfig = new StepConfig();
         stepConfig.setEnableTickCallback(true);
-        stepConfig.setRunningPeriodicDelay(30);
+        stepConfig.setRunningPeriodicDelay(reportReleaseTimeout);
         stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
         return stepConfig;
     }

@@ -87,12 +87,12 @@ public class StepConfig {
         this.runningPeriodicCronDelay = runningPeriodicCronDelay;
     }
 
-    public StatStepConfig getStatStepConfig() {
-        return statStepConfig;
+    public Boolean getIsStatEnabledForStep() {
+        return statStepConfig.isStatEnabledForStep();
     }
 
 
-    public void setStatStepConfig(StatStepConfig statStepConfig) {
-        this.statStepConfig = statStepConfig;
+    public void setStatEnabledForStep(Boolean isStatEnabledForStep) {
+        this.statStepConfig.setIsStatEnabledForStep(isStatEnabledForStep);
     }
 }
