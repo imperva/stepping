@@ -1,6 +1,7 @@
 package com.imperva.stepping;
 
 public class StatisticsReport {
+    private String senderId;
     private long avgProcessingTime;
     private double avgChunkSize;
     private long latestQSize;
@@ -27,5 +28,13 @@ public class StatisticsReport {
 
     public void setLatestQSize(long latestQSize) {
         this.latestQSize = latestQSize;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 }

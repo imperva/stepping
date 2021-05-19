@@ -49,6 +49,7 @@ class SystemStepStatistics implements Step {
             statisticsReport.setAvgChunkSize(avgChunkSize);
             statisticsReport.setAvgProcessingTime(avgProcessingTime);
             statisticsReport.setLatestQSize(latestQSize);
+            statisticsReport.setSenderId(stepID);
 
             shouter.shout(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name(), statisticsReport);
         }
