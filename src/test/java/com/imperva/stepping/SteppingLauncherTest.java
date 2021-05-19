@@ -196,7 +196,7 @@ class SteppingLauncherTest {
         LauncherResults launcherResults = new SteppingLauncher()
                 .withAlgo(simpleAlgo)
                 .withStep(step)
-                .withShout("STARTED", d, 5)//TODO stats support re-occurrences
+                .withShout("STARTED", d, 5)
                 .stopOnSubject(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name())
                 .launch();
 
