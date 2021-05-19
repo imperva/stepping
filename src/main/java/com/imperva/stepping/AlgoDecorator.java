@@ -199,7 +199,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
         if(getConfig().getIsInitStatCollector()) {
             SystemStepStatistics systemStepStatistics = new SystemStepStatistics();
-            systemStepStatistics.setReportReleaseTimeout(getConfig().getReportReleaseTimeout());
+            systemStepStatistics.setReportReleaseTimeout(getConfig().getStatReportReleaseTimeout());
             containerRegistrar.add(systemStepStatistics);
         }
 

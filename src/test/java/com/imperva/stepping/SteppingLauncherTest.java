@@ -31,6 +31,14 @@ class SteppingLauncherTest {
             @Override
             public void close() throws IOException {
             }
+
+            @Override
+            public AlgoConfig getConfig() {
+                AlgoConfig algoConfig = new AlgoConfig();
+                algoConfig.setInitStatCollector(true);
+                algoConfig.setStatReportReleaseTimeout(10);
+                return algoConfig;
+            }
         };
     }
 
@@ -185,6 +193,13 @@ class SteppingLauncherTest {
             public String getId() {
                 return "launcher_stats_test";
             }
+
+            @Override
+            public StepConfig getConfig() {
+                StepConfig stepConfig = new StepConfig();
+                stepConfig.setStatEnabledForStep(true);
+                return stepConfig;
+            }
         };
 
 
@@ -196,7 +211,7 @@ class SteppingLauncherTest {
         LauncherResults launcherResults = new SteppingLauncher()
                 .withAlgo(simpleAlgo)
                 .withStep(step)
-                .withShout("STARTED", d, 5)
+                .withShout("STARTED", d, 3)
                 .stopOnSubject(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name())
                 .launch();
 
@@ -204,7 +219,7 @@ class SteppingLauncherTest {
         StatisticsReport statistic = ((StatisticsReport)res.getValue());
         Assertions.assertEquals(0, statistic.getLatestQSize());
         Assertions.assertEquals(3, statistic.getAvgChunkSize());
-        Assertions.assertEquals(3.0, statistic.getAvgProcessingTime()); //TODO stats add total items + calc avg based on total
+        Assertions.assertTrue(statistic.getAvgProcessingTime() < 1500.0 && statistic.getAvgProcessingTime() > 950);
     }
 
     @Test

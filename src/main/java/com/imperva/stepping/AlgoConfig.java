@@ -71,11 +71,11 @@ public class AlgoConfig {
     }
 
 
-    public int getReportReleaseTimeout() {
+    public int getStatReportReleaseTimeout() {
         return statStepConfig.getReportReleaseTimeout();
     }
 
-    public void setReportReleaseTimeout(int timeout) {
+    public void setStatReportReleaseTimeout(int timeout) {
         statStepConfig.setReportReleaseTimeout(timeout);
     }
 }

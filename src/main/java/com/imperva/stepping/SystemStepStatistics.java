@@ -71,6 +71,9 @@ class SystemStepStatistics implements Step {
         long endtime = statData.get(statData.size() - 1).getEndTime();
 
         long totTime = endtime - starttime;
+        if(totTime == 0 || allChunkSize == 0)
+            return 0;
+
         long avg =  totTime / allChunkSize;
         return avg;
 
