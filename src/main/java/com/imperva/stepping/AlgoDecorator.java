@@ -333,7 +333,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void initSteps() {
         for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
-            step.init(cntrPublic, new Shouter(step.getStep().getId(), cntr, this));//TODO stats maybe the id can be resolved internally by the decorator?
+            step.init(cntrPublic, new Shouter(step.getStep().getId(), cntr, this));
         }
     }
 
