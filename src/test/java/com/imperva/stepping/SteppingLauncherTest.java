@@ -215,7 +215,7 @@ class SteppingLauncherTest {
                 .stopOnSubject(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name())
                 .launch();
 
-        Data res = launcherResults.get(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name()); //TODO stats support re-occurrences and remove timeout
+        Data res = launcherResults.get(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name());
         StatisticsReport statistic = ((StatisticsReport)res.getValue());
         Assertions.assertEquals(0, statistic.getLatestQSize());
         Assertions.assertEquals(3, statistic.getAvgChunkSize());
