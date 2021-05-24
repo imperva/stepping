@@ -387,7 +387,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
 
     private boolean delegateErrorHandling(Exception e) {
-        if (e instanceof SteppingExceptionError) {
+        if (e instanceof SteppingSystemCriticalException | e instanceof SteppingSystemException) {
+            return false;
+        } else if (e instanceof SteppingExceptionError) {
             SteppingExceptionError exceptionError = (SteppingExceptionError) e;
             Throwable error = exceptionError.getCause();
             if (delegateExceptionHandling(error))
