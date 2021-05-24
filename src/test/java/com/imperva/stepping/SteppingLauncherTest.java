@@ -21,7 +21,10 @@ class SteppingLauncherTest {
 
             @Override
             public ContainerRegistrar containerRegistration() {
-                return new ContainerRegistrar();
+
+                ContainerRegistrar containerRegistrar = new ContainerRegistrar();
+                containerRegistrar.add("STARTED", new Subject("STARTED"));
+                return containerRegistrar;
             }
 
             @Override
@@ -35,8 +38,8 @@ class SteppingLauncherTest {
             @Override
             public AlgoConfig getConfig() {
                 AlgoConfig algoConfig = new AlgoConfig();
-                algoConfig.setInitStatCollector(true);
-                algoConfig.setStatReportReleaseTimeout(10);
+                algoConfig.setInitMonitorCollector(true);
+                algoConfig.setMonitorReportReleaseTimeout(10);
                 return algoConfig;
             }
         };
@@ -159,7 +162,7 @@ class SteppingLauncherTest {
     }
 
     @Test
-    void launcher_stats_test() {
+    void launcher_monitor_test() {
 
         Step step = new Step() {
             private Container cntr;
@@ -197,7 +200,7 @@ class SteppingLauncherTest {
             @Override
             public StepConfig getConfig() {
                 StepConfig stepConfig = new StepConfig();
-                stepConfig.setStatEnabledForStep(true);
+                stepConfig.setMonitorEnabledForStep(true);
                 return stepConfig;
             }
         };
@@ -216,7 +219,7 @@ class SteppingLauncherTest {
                 .launch();
 
         Data res = launcherResults.get(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name());
-        StatisticsReport statistic = ((StatisticsReport)res.getValue());
+        StatisticsReport statistic = ((StatisticsReport)((ArrayList)res.getValue()).get(0));
         Assertions.assertEquals(0, statistic.getLatestQSize());
         Assertions.assertEquals(3, statistic.getAvgChunkSize());
         Assertions.assertTrue(statistic.getAvgProcessingTime() < 1500.0 && statistic.getAvgProcessingTime() > 950);

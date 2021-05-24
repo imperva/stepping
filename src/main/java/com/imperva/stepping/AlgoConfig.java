@@ -7,7 +7,7 @@ public class AlgoConfig {
     private PerfSamplerStepConfig perfSamplerStepConfig;
     private IExceptionHandler customExceptionHandler;
     private String externalPropertiesPath;
-    private StatStepConfig statStepConfig;
+    private MonitorStepConfig monitorStepConfig;
 
     public AlgoConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -15,7 +15,7 @@ public class AlgoConfig {
         runningPeriodicDelay = new Long(stepProp.getProperty("stepping.default.algo.delay"));
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.algo.enable.tickcallback"));
         perfSamplerStepConfig = new PerfSamplerStepConfig();
-        statStepConfig = new StatStepConfig();
+        monitorStepConfig = new MonitorStepConfig();
     }
 
     public long getRunningInitialDelay() {
@@ -62,20 +62,20 @@ public class AlgoConfig {
         this.externalPropertiesPath = externalPropertiesPath;
     }
 
-    public Boolean getIsInitStatCollector() {
-        return statStepConfig.isInitCollector();
+    public Boolean getIsInitMonitorCollector() {
+        return monitorStepConfig.isInitCollector();
     }
 
-    public void setInitStatCollector(Boolean initStatCollector) {
-        this.statStepConfig.setIsInitCollector(initStatCollector);
+    public void setInitMonitorCollector(Boolean initMonitorCollector) {
+        this.monitorStepConfig.setIsInitCollector(initMonitorCollector);
     }
 
 
-    public int getStatReportReleaseTimeout() {
-        return statStepConfig.getReportReleaseTimeout();
+    public int getMonitorReportReleaseTimeout() {
+        return monitorStepConfig.getReportReleaseTimeout();
     }
 
-    public void setStatReportReleaseTimeout(int timeout) {
-        statStepConfig.setReportReleaseTimeout(timeout);
+    public void setMonitorReportReleaseTimeout(int timeout) {
+        monitorStepConfig.setReportReleaseTimeout(timeout);
     }
 }

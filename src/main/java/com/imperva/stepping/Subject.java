@@ -1,10 +1,13 @@
 package com.imperva.stepping;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Subject implements ISubject {
     private volatile ConcurrentHashMap<SubjectKey, List<IStepDecorator>> iSteps = new ConcurrentHashMap<>();
+    private List<String> stepsObserversNames = new ArrayList<>();
     private volatile String type;
     private volatile Data data;
 
@@ -47,7 +50,7 @@ public class Subject implements ISubject {
 
     @Override
     public void attach(IStepDecorator step) {
-
+        stepsObserversNames.add(step.getId());
         IDistributionStrategy distributionStrategy = step.getDistributionStrategy(type);
 
         if (distributionStrategy == null)
@@ -61,6 +64,14 @@ public class Subject implements ISubject {
             newDistributionList.add(step);
             iSteps.put(subjectKey, newDistributionList);
         }
+    }
+
+    List<String> getObservers() {
+        return Collections.unmodifiableList(stepsObserversNames);
+    }
+
+    String getSubjectType() {
+        return type;
     }
 
     private class SubjectKey {
@@ -99,6 +110,7 @@ public class Subject implements ISubject {
         public String getDistributionNodeID() {
             return distributionNodeID;
         }
+
 
 
     }

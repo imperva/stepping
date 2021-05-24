@@ -11,7 +11,7 @@ public class StepConfig {
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
     private int boundQueueCapacity;
-    private StatStepConfig statStepConfig;
+    private MonitorStepConfig monitorStepConfig;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -20,7 +20,7 @@ public class StepConfig {
         runningPeriodicDelayUnit = TimeUnit.valueOf(stepProp.getProperty("stepping.default.step.delay.unit").toUpperCase());
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
         boundQueueCapacity = new Integer(stepProp.getProperty("stepping.default.step.bound.queue"));
-        statStepConfig = new StatStepConfig();
+        monitorStepConfig = new MonitorStepConfig();
     }
 
     public long getRunningInitialDelay() {
@@ -87,12 +87,12 @@ public class StepConfig {
         this.runningPeriodicCronDelay = runningPeriodicCronDelay;
     }
 
-    public Boolean getIsStatEnabledForStep() {
-        return statStepConfig.isStatEnabledForStep();
+    public Boolean getIsMonitorEnabledForStep() {
+        return monitorStepConfig.isMonitorEnabledForStep();
     }
 
 
-    public void setStatEnabledForStep(Boolean isStatEnabledForStep) {
-        this.statStepConfig.setIsStatEnabledForStep(isStatEnabledForStep);
+    public void setMonitorEnabledForStep(Boolean isMonitorEnabledForStep) {
+        this.monitorStepConfig.setIsMonitorEnabledForStep(isMonitorEnabledForStep);
     }
 }

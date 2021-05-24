@@ -197,12 +197,12 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             containerRegistrar.add(new SystemStepPerfSampler(interval, packages));
         }
 
-        if(getConfig().getIsInitStatCollector()) {
-            SystemStepStatistics systemStepStatistics = new SystemStepStatistics();
-            systemStepStatistics.setReportReleaseTimeout(getConfig().getStatReportReleaseTimeout());
-            containerRegistrar.add(systemStepStatistics);
+        if(getConfig().getIsInitMonitorCollector()) {
+            SystemStepMonitor systemStepMonitor = new SystemStepMonitor();
+            systemStepMonitor.setReportReleaseTimeout(getConfig().getMonitorReportReleaseTimeout());
+            containerRegistrar.add(systemStepMonitor);
+            containerRegistrar.add(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Subject(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name()));
         }
-
         return containerRegistrar;
     }
 

@@ -4,7 +4,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +24,7 @@ class StepDecorator implements IStepDecorator {
     private Shouter shouter;
     HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
     private boolean isSystemStep;
-    private Boolean isStatEnabledForStep;
+    private Boolean isMonitorEnabledForStep;
 
 
     StepDecorator(Step step) {
@@ -40,7 +39,7 @@ class StepDecorator implements IStepDecorator {
         q = new Q<>(getConfig().getBoundQueueCapacity());
         this.shouter = shouter;
         isSystemStep = isSystemStep();
-        isStatEnabledForStep = localStepConfig.getIsStatEnabledForStep();
+        isMonitorEnabledForStep = localStepConfig.getIsMonitorEnabledForStep();
     }
 
     @Override
@@ -99,7 +98,7 @@ class StepDecorator implements IStepDecorator {
 
                 StepsRuntimeMetadata stepsRuntimeMetadata = null;
                 StopWatch stopWatch = null;
-                if (isStatEnabledForStep){
+                if (isMonitorEnabledForStep){
                     stopWatch = new StopWatch();
                     stopWatch.start();
                     stepsRuntimeMetadata = new StepsRuntimeMetadata();
@@ -128,10 +127,10 @@ class StepDecorator implements IStepDecorator {
 
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
-                    if (isStatEnabledForStep && !isSystemStep) {
+                    if (isMonitorEnabledForStep && !isSystemStep) {
                         stopWatch.stop();
                         stepsRuntimeMetadata.setEndTime(stopWatch.getStopTime());
-                        sendStatReport(stepsRuntimeMetadata);
+                        sendMonitorReport(stepsRuntimeMetadata);
                     }
                 } else {
                     try {
@@ -159,7 +158,7 @@ class StepDecorator implements IStepDecorator {
         }
     }
 
-    private void sendStatReport(StepsRuntimeMetadata stepsRuntimeMetadata) {
+    private void sendMonitorReport(StepsRuntimeMetadata stepsRuntimeMetadata) {
         shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(stepsRuntimeMetadata));
     }
 

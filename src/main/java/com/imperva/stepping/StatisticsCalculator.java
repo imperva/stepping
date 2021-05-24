@@ -1,41 +1,23 @@
 package com.imperva.stepping;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
-@SystemStep
-class SystemStepStatistics implements Step {
-    private int reportReleaseTimeout = 60; //Seconds
-    private Container cntr;
-    private Shouter shouter;
+class StatisticsCalculator {
     private HashMap<String, List<StepsRuntimeMetadata>> stats = new HashMap<>();
+    private List<StatisticsReport> statisticsReports = new ArrayList<StatisticsReport>();
 
-    @Override
-    public void init(Container cntr, Shouter shouter) {
-
-        this.cntr = cntr;
-        this.shouter = shouter;
-    }
-
-    @Override
-    public void listSubjectsToFollow(Follower follower) {
-        follower.follow(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), this::statsArrived);
-    }
-
-    void statsArrived(Data data) {
-        List<StepsRuntimeMetadata> messages = stats.get(data.getSenderId());
-        StepsRuntimeMetadata stepsRuntimeMetadata = (StepsRuntimeMetadata) data.getValue();
+    void add(String senderId, StepsRuntimeMetadata stepsRuntimeMetadata) {
+        List<StepsRuntimeMetadata> messages = stats.get(senderId);
         if (messages == null) {
             List<StepsRuntimeMetadata> stepsRuntimeMetadataList = new ArrayList<>();
             stepsRuntimeMetadataList.add(stepsRuntimeMetadata);
-            stats.put(data.getSenderId(), stepsRuntimeMetadataList);
+            stats.put(senderId, stepsRuntimeMetadataList);
         } else {
             messages.add(stepsRuntimeMetadata);
         }
     }
 
-    @Override
-    public void onTickCallBack() {
+    List<StatisticsReport> calculate() {
         Iterator<Map.Entry<String, List<StepsRuntimeMetadata>>> it = stats.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, List<StepsRuntimeMetadata>> pair = it.next();
@@ -45,18 +27,27 @@ class SystemStepStatistics implements Step {
             long avgProcessingTime = calcAvgProcessingTime(statData);
             double avgChunkSize = calcAvgChunkSize(statData);
             long latestQSize = calcLatestQSize(statData);
+
             StatisticsReport statisticsReport = new StatisticsReport();
             statisticsReport.setAvgChunkSize(avgChunkSize);
             statisticsReport.setAvgProcessingTime(avgProcessingTime);
             statisticsReport.setLatestQSize(latestQSize);
-            statisticsReport.setSenderId(stepID);
-
-            shouter.shout(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name(), statisticsReport);
+            statisticsReport.setStepSenderId(stepID);
+            statisticsReports.add(statisticsReport);
+            printStatistics(statisticsReport);
         }
-
-
         stats.clear();
+        return new ArrayList<StatisticsReport>(statisticsReports);
     }
+
+    private  void printStatistics(StatisticsReport statisticsReport) {
+        System.out.println("**** Step " + statisticsReport.getStepSenderId());
+        System.out.println("Avg Chunk Size " + statisticsReport.getAvgChunkSize());
+        System.out.println("Avg Process Time Size " + statisticsReport.getAvgProcessingTime());
+        System.out.println("Q Size " + statisticsReport.getLatestQSize());
+        System.out.println("****************");
+    }
+
 
     private long calcLatestQSize(List<StepsRuntimeMetadata> statData) {
         return statData.get(statData.size() - 1).getQSize();
@@ -72,34 +63,11 @@ class SystemStepStatistics implements Step {
         long endtime = statData.get(statData.size() - 1).getEndTime();
 
         long totTime = endtime - starttime;
-        if(totTime == 0 || allChunkSize == 0)
+        if (totTime == 0 || allChunkSize == 0)
             return 0;
 
-        long avg =  totTime / allChunkSize;
+        long avg = totTime / allChunkSize;
         return avg;
 
-    }
-
-    void setReportReleaseTimeout(int timeout){
-        reportReleaseTimeout = timeout;
-    }
-
-    @Override
-    public StepConfig getConfig() {
-        StepConfig stepConfig = new StepConfig();
-        stepConfig.setEnableTickCallback(true);
-        stepConfig.setRunningPeriodicDelay(reportReleaseTimeout);
-        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
-        return stepConfig;
-    }
-
-    @Override
-    public void onKill() {
-
-    }
-
-    @Override
-    public String getId() {
-        return "SYSTEM_STEP_STATISTICS";
     }
 }
