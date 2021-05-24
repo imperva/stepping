@@ -61,6 +61,7 @@ class SystemStepMonitor implements Step {
         stepConfig.setEnableTickCallback(true);
         stepConfig.setRunningPeriodicDelay(reportReleaseTimeout);
         stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setDistributionStrategy(new OfferAll2AllDistributionStrategy());
         return stepConfig;
     }
 
