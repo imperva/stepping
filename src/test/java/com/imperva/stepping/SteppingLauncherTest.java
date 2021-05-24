@@ -223,7 +223,7 @@ class SteppingLauncherTest {
         StatisticsReport statistic = ((StatisticsReport)((ArrayList)res.getValue()).get(0));
         Assertions.assertEquals(0, statistic.getLatestQSize());
         Assertions.assertEquals(3, statistic.getAvgChunkSize());
-        Assertions.assertTrue(statistic.getAvgProcessingTime() < 1500.0 && statistic.getAvgProcessingTime() > 950);
+        Assertions.assertTrue(statistic.getAvgProcessingTime() <= 1100 && statistic.getAvgProcessingTime() >= 1000);
     }
 
     @Test
