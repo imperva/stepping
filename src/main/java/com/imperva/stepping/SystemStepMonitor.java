@@ -40,7 +40,7 @@ class SystemStepMonitor implements Step {
     }
 
     void collectMetadata(Data data, String subjectType) {
-        StepsRuntimeMetadata stepsRuntimeMetadata = (StepsRuntimeMetadata) data.getValue();
+        List<StepsRuntimeMetadata> stepsRuntimeMetadata = (List<StepsRuntimeMetadata>) data.getValue();
         statisticsCalculator.add(data.getSenderId(), stepsRuntimeMetadata);
     }
 

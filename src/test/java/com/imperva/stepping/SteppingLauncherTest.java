@@ -201,6 +201,7 @@ class SteppingLauncherTest {
             public StepConfig getConfig() {
                 StepConfig stepConfig = new StepConfig();
                 stepConfig.setMonitorEnabledForStep(true);
+                stepConfig.setMonitorEmmitTimeout(3);
                 return stepConfig;
             }
         };

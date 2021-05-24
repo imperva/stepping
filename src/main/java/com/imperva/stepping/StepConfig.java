@@ -91,6 +91,13 @@ public class StepConfig {
         return monitorStepConfig.isMonitorEnabledForStep();
     }
 
+    public int getMonitorEmmitTimeout() {
+        return monitorStepConfig.getMetadataEmmitTimeout();
+    }
+
+    public void setMonitorEmmitTimeout(int monitorEmmitTimeout) {
+        monitorStepConfig.setMetadataEmmitTimeout(monitorEmmitTimeout);
+    }
 
     public void setMonitorEnabledForStep(Boolean isMonitorEnabledForStep) {
         this.monitorStepConfig.setIsMonitorEnabledForStep(isMonitorEnabledForStep);

@@ -25,6 +25,7 @@ class StepDecorator implements IStepDecorator {
     HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
     private boolean isSystemStep;
     private Boolean isMonitorEnabledForStep;
+    private MonitorAgent monitorAgent;
 
 
     StepDecorator(Step step) {
@@ -40,6 +41,8 @@ class StepDecorator implements IStepDecorator {
         this.shouter = shouter;
         isSystemStep = isSystemStep();
         isMonitorEnabledForStep = localStepConfig.getIsMonitorEnabledForStep();
+        if (isMonitorEnabledForStep)
+            monitorAgent = new MonitorAgent(shouter, getConfig().getMonitorEmmitTimeout());
     }
 
     @Override
@@ -98,12 +101,8 @@ class StepDecorator implements IStepDecorator {
 
                 StepsRuntimeMetadata stepsRuntimeMetadata = null;
                 StopWatch stopWatch = null;
-                if (isMonitorEnabledForStep){
-                    stopWatch = new StopWatch();
-                    stopWatch.start();
-                    stepsRuntimeMetadata = new StepsRuntimeMetadata();
-                    stepsRuntimeMetadata.setStartTime(stopWatch.getStartTime());
-                    stepsRuntimeMetadata.setChunkSize(message.getData().getSize());
+                if (isMonitorEnabledForStep) {
+                    monitorAgent.start(message.getData().getSize());
                 }
 
                 if (message.getData().isExpirable()) {
@@ -128,9 +127,7 @@ class StepDecorator implements IStepDecorator {
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
                     if (isMonitorEnabledForStep && !isSystemStep) {
-                        stopWatch.stop();
-                        stepsRuntimeMetadata.setEndTime(stopWatch.getStopTime());
-                        sendMonitorReport(stepsRuntimeMetadata);
+                        monitorAgent.stop();
                     }
                 } else {
                     try {
@@ -156,10 +153,6 @@ class StepDecorator implements IStepDecorator {
         } catch (Error err) {
             throw new IdentifiableSteppingError(getStep().getId(), "DataSink FAILED - ERROR", err);
         }
-    }
-
-    private void sendMonitorReport(StepsRuntimeMetadata stepsRuntimeMetadata) {
-        shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(stepsRuntimeMetadata));
     }
 
     private void changeTickCallBackDelay(String cronExpression) {

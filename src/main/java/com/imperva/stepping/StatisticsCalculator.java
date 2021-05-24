@@ -6,6 +6,12 @@ class StatisticsCalculator {
     private HashMap<String, List<StepsRuntimeMetadata>> stats = new HashMap<>();
     private List<StatisticsReport> statisticsReports = new ArrayList<StatisticsReport>();
 
+    void add(String senderId, List<StepsRuntimeMetadata> stepsRuntimeMetadata) {
+        stepsRuntimeMetadata.forEach(s -> {
+            add(senderId, s);
+        });
+    }
+
     void add(String senderId, StepsRuntimeMetadata stepsRuntimeMetadata) {
         List<StepsRuntimeMetadata> messages = stats.get(senderId);
         if (messages == null) {
@@ -40,7 +46,7 @@ class StatisticsCalculator {
         return new ArrayList<StatisticsReport>(statisticsReports);
     }
 
-    private  void printStatistics(StatisticsReport statisticsReport) {
+    private void printStatistics(StatisticsReport statisticsReport) {
         System.out.println("**** Step " + statisticsReport.getStepSenderId());
         System.out.println("Avg Chunk Size " + statisticsReport.getAvgChunkSize());
         System.out.println("Avg Process Time Size " + statisticsReport.getAvgProcessingTime());
