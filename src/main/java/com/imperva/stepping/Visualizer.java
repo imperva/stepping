@@ -57,7 +57,7 @@ class Visualizer extends JFrame implements ViewerListener {
 
     void draw(String senderId, String subjectType) {
         Subject relevantSubjects = subjects.stream().filter(x -> x.getSubjectType().equals(subjectType)).findFirst().get();
-        List<String> stepsReceivers = relevantSubjects.getObservers();
+        List<String> stepsReceivers = relevantSubjects.getCopyObserversNames();
         System.out.println("**** Step Id: " + senderId + " is sending Subject: " + subjectType + " to the following Steps : " + String.join(",", stepsReceivers));
         addEdge(senderId, subjectType, stepsReceivers);
     }

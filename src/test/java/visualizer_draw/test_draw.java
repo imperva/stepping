@@ -11,11 +11,7 @@ public class test_draw {
     @Ignore
     public void test1() throws InterruptedException {
         KafkaDBMergerAlgo algo = new KafkaDBMergerAlgo();
-
         new Stepping().register(algo).go();
-
-
-
         Thread.currentThread().join(3000000);
     }
 }
