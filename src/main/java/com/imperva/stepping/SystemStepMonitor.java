@@ -1,14 +1,21 @@
 package com.imperva.stepping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SystemStep
 class SystemStepMonitor implements Step {
-    private int reportReleaseTimeout = 60; //Seconds
+
+    private final Logger logger = LoggerFactory.getLogger(SystemStepMonitor.class);
+    private int reportReleaseTimeout;//Seconds
     private Container cntr;
     private Shouter shouter;
     private List<Subject> subjects;
+    private List<String> stepsIds;
     private Visualizer visualizer;
     private StatisticsCalculator statisticsCalculator;
 
@@ -17,7 +24,8 @@ class SystemStepMonitor implements Step {
         this.cntr = cntr;
         this.shouter = shouter;
         subjects = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).getTypeOf(Subject.class);
-        visualizer = new Visualizer(subjects);
+        stepsIds = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).<StepDecorator>getTypeOf(StepDecorator.class).stream().map(s-> s.getStep().getId()).collect(Collectors.toList());
+        visualizer = new Visualizer(subjects, stepsIds);
         statisticsCalculator = new StatisticsCalculator();
     }
 
@@ -41,12 +49,16 @@ class SystemStepMonitor implements Step {
 
     void collectMetadata(Data data, String subjectType) {
         List<StepsRuntimeMetadata> stepsRuntimeMetadata = (List<StepsRuntimeMetadata>) data.getValue();
+        logger.debug("Adding metadata for: " + data.getSenderId());
         statisticsCalculator.add(data.getSenderId(), stepsRuntimeMetadata);
     }
 
     @Override
     public void onTickCallBack() {
         List<StatisticsReport> statisticsReports = statisticsCalculator.calculate();
+        logger.debug("Monitor onTickCallBack: " + statisticsReports.size());
+        if(statisticsReports.size() > 0)
+            visualizer.updateMetadata(statisticsReports);
         if (!statisticsReports.isEmpty())
             shouter.shout(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name(), new Data(statisticsReports));
     }

@@ -1,4 +1,4 @@
-package Taltest;
+package visualizer_draw;
 import com.imperva.stepping.*;
 
 import java.util.Arrays;
@@ -29,21 +29,14 @@ public class LogStash implements Step {
 
     @Override
     public void listSubjectsToFollow(Follower follower){
+        follower.follow("MergerDone");
         //This function is called on Stepping initialization for each registered Subject.
         //This is the way to notify Stepping which events (Subjects) we are interested in.
         //In this case we need to subscribe to a subset of Subjects so it makes sense to use the new API:
 
-        //follower.follow("DBDataArrived").follow("KafkaDataArrived");
 
-        for(String subject : getSubjectsToFollow()) {
-            follower = follower.follow(subject);
-        }
     }
 
-    @Override
-    public List<String> getSubjectsToFollow() {
-        return Arrays.asList("MergerDone");
-    }
 
 
     /***** OLD API
@@ -80,9 +73,16 @@ public class LogStash implements Step {
     public StepConfig getConfig() {
         StepConfig stepConfig = new StepConfig();
         stepConfig.setEnableTickCallback(false);
+        stepConfig.setMonitorEnabledForStep(true);
+        stepConfig.setMonitorEmmitTimeout(11);
         return stepConfig;
     }
 
     @Override
     public void onKill() { /*see comments above*/  }
+
+    @Override
+    public String getId() {
+        return "LogStash";
+    }
 }

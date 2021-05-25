@@ -99,9 +99,11 @@ class StepDecorator implements IStepDecorator {
                     throw new InterruptedException();
                 Message message = q.take();
 
+                boolean isTickCallBack = message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
+
                 StepsRuntimeMetadata stepsRuntimeMetadata = null;
                 StopWatch stopWatch = null;
-                if (isMonitorEnabledForStep) {
+                if (isMonitorEnabledForStep && !isSystemStep) {
                     monitorAgent.start(message.getData().getSize());
                 }
 
@@ -119,16 +121,14 @@ class StepDecorator implements IStepDecorator {
                     throw new InterruptedException();
                 }
 
-                if (!message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name())) {
+                if (!isTickCallBack) {
                     SubjectUpdateEvent subjectUpdateEvent = subjectUpdateEvents.get(message.getSubjectType());
                     if (subjectUpdateEvent != null)
                         subjectUpdateEvent.onUpdate(message.getData());
 
                     onSubjectUpdate(message.getData(), message.getSubjectType());
 
-                    if (isMonitorEnabledForStep && !isSystemStep) {
-                        monitorAgent.stop();
-                    }
+
                 } else {
                     try {
                         onTickCallBack();
@@ -144,7 +144,9 @@ class StepDecorator implements IStepDecorator {
                         cb.await();
                     }
                 }
-
+                if (isMonitorEnabledForStep && !isSystemStep) {
+                    monitorAgent.stop();
+                }
             }
         } catch (InterruptedException | BrokenBarrierException e) {
             throw new SteppingSystemException(e);

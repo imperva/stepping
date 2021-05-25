@@ -1,4 +1,4 @@
-package Taltest;
+package visualizer_draw;
 
 import com.imperva.stepping.Algo;
 import com.imperva.stepping.AlgoConfig;
@@ -29,6 +29,7 @@ public class KafkaDBMergerAlgo implements Algo {
         AlgoConfig algoConfig = new AlgoConfig();
         algoConfig.setEnableTickCallback(true);
         algoConfig.setRunningPeriodicDelay(1000);//1 sec
+        algoConfig.setInitMonitorCollector(true);
         return algoConfig;
     }
 

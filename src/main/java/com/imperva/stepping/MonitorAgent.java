@@ -9,7 +9,6 @@ import java.util.List;
 class MonitorAgent {
 
     private StopWatch runtimeMetadataStopWatch;
-    private StopWatch monitorAgentSTopWatch;
     private List<StepsRuntimeMetadata> stepsRuntimeMetadataList = new ArrayList<>();
     private Shouter shouter;
     private long lastTime;
@@ -37,19 +36,25 @@ class MonitorAgent {
 
         StepsRuntimeMetadata stepsRuntimeMetadata = stepsRuntimeMetadataList.get(0);
         stepsRuntimeMetadata.setEndTime(runtimeMetadataStopWatch.getStopTime());
-        if(isTimeExceeded()) {
+        boolean isTimeExceeded = isTimeExceeded();
+        if(isTimeExceeded) {
             sendMonitorReport();
             stepsRuntimeMetadataList.clear();
+            lastTime = System.currentTimeMillis();
         }
-        lastTime = System.currentTimeMillis();
         runtimeMetadataStopWatch.reset();
     }
 
     private void sendMonitorReport() {
         shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(Collections.unmodifiableList(stepsRuntimeMetadataList)));
+        stepsRuntimeMetadataList = new ArrayList<>();
     }
 
     private boolean isTimeExceeded(){
-        return (System.currentTimeMillis() - lastTime) / 1000 >= timeout;
+        boolean isTimeExceeded = (System.currentTimeMillis() - lastTime) / 1000 >= timeout;
+        System.out.println("isTimeExceeded: " + isTimeExceeded);
+        System.out.println("Calculated time:" + (System.currentTimeMillis() - lastTime) / 1000);
+        System.out.println("timeout: " + timeout);
+        return isTimeExceeded;
     }
 }

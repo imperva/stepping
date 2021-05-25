@@ -3,7 +3,7 @@ package com.imperva.stepping;
 public class StatisticsReport {
     private String stepSenderId;
     private long avgProcessingTime;
-    private double avgChunkSize;
+    private int avgChunkSize;
     private long latestQSize;
 
     public long getAvgProcessingTime() {
@@ -14,11 +14,11 @@ public class StatisticsReport {
         this.avgProcessingTime = avgProcessingTime;
     }
 
-    public double getAvgChunkSize() {
+    public int getAvgChunkSize() {
         return avgChunkSize;
     }
 
-    public void setAvgChunkSize(double avgChunkSize) {
+    public void setAvgChunkSize(int avgChunkSize) {
         this.avgChunkSize = avgChunkSize;
     }
 
@@ -36,5 +36,18 @@ public class StatisticsReport {
 
     public void setStepSenderId(String stepSenderId) {
         this.stepSenderId = stepSenderId;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("**** Step " + getStepSenderId() + ":\n");
+        stringBuilder.append("AvgChunkSize " + getAvgChunkSize() + "\n");
+        stringBuilder.append("AvgProcessTimeSize " + getAvgProcessingTime()+ "\n");
+        stringBuilder.append("QueueSize " + getLatestQSize() + "\n");
+        stringBuilder.append("****************");
+
+        return stringBuilder.toString();
+
     }
 }

@@ -1,4 +1,4 @@
-package Taltest;
+package visualizer_draw;
 import com.imperva.stepping.*;
 
 public class DBFetcher implements Step {
@@ -34,7 +34,7 @@ public class DBFetcher implements Step {
         // In this case new data has arrived and manipulated by DBFetcher Step.
         //Shouter notifies and safely publishes the data to "DBDataArrived" event subscribers
         String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
-        shouter.shout("DBDataArrived", manipulatedData, this);
+        shouter.shout("DBDataArrived", manipulatedData);
 
     }
 
@@ -66,6 +66,8 @@ public class DBFetcher implements Step {
         StepConfig stepConfig = new StepConfig();
         stepConfig.setEnableTickCallback(true);
         stepConfig.setRunningPeriodicDelay(10000);//10 Seconds
+        stepConfig.setMonitorEnabledForStep(true);
+        stepConfig.setMonitorEmmitTimeout(13);
         return stepConfig;
     }
 
@@ -73,5 +75,10 @@ public class DBFetcher implements Step {
     @Override
     public void onKill() {
         // Cleanup before process termination
+    }
+
+    @Override
+    public String getId() {
+        return "DBFetcher";
     }
 }

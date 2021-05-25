@@ -50,7 +50,7 @@ public class Subject implements ISubject {
 
     @Override
     public void attach(IStepDecorator step) {
-        stepsObserversNames.add(step.getId());
+        stepsObserversNames.add(step.getStep().getId());
         IDistributionStrategy distributionStrategy = step.getDistributionStrategy(type);
 
         if (distributionStrategy == null)

@@ -1,5 +1,7 @@
-package Taltest;
+package visualizer_draw;
 import com.imperva.stepping.*;
+
+import java.util.concurrent.TimeUnit;
 
 public class KafkaFetcher implements Step {
     private Container cntr;
@@ -33,13 +35,10 @@ public class KafkaFetcher implements Step {
 
         //see comments above
         String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
-        shouter.shout("KafkaDataArrived", manipulatedData, this);
+        shouter.shout("KafkaDataArrived", manipulatedData);
     }
 
-    @Override
-    public String getMetaData(){
-        return "Tick Counter: " + tickCounter;
-    }
+
 
     @Override
     public boolean followsSubject(String subjectType) {
@@ -62,11 +61,19 @@ public class KafkaFetcher implements Step {
         //In this case we enable TickCallBack event and set is the PeriodicDelay to 1 millisecond
         StepConfig stepConfig = new StepConfig();
         stepConfig.setEnableTickCallback(true);
-        stepConfig.setRunningPeriodicDelay(1);//1 millisecond
+        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setRunningPeriodicDelay(10);
+        stepConfig.setMonitorEnabledForStep(true);
+        stepConfig.setMonitorEmmitTimeout(12);
         return stepConfig;
     }
 
 
     @Override
     public void onKill() { /*see comments above*/  }
+
+    @Override
+    public String getId() {
+        return "KafkaFetcher";
+    }
 }

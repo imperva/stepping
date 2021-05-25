@@ -1,8 +1,9 @@
-package Taltest;
+package visualizer_draw;
 import com.imperva.stepping.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Merger implements Step {
 
@@ -25,6 +26,8 @@ public class Merger implements Step {
     public void onTickCallBack() {
         //Will be called periodically based on Step configuration.
         //In this case the Step is *NOT* configured to request CPU at all so this function won't be called
+
+        shouter.shout("MergerDone", 1);
     }
 
     @Override
@@ -33,17 +36,11 @@ public class Merger implements Step {
         //This is the way to notify Stepping which events (Subjects) we are interested in.
         //In this case we need to subscribe to a subset of Subjects so it makes sense to use the new API:
 
-        //follower.follow("DBDataArrived").follow("KafkaDataArrived");
+        follower.follow("DBDataArrived").follow("KafkaDataArrived");
 
-        for(String subject : getSubjectsToFollow()) {
-            follower = follower.follow(subject);
-        }
+
     }
 
-    @Override
-    public List<String> getSubjectsToFollow() {
-        return Arrays.asList("DBDataArrived", "KafkaDataArrived");
-    }
 
 
     /***** OLD API
@@ -70,7 +67,7 @@ public class Merger implements Step {
         }
 
         try {
-            Thread.sleep(7000);
+            Thread.currentThread().sleep(30000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -82,7 +79,7 @@ public class Merger implements Step {
 
         // NOTE: In this case no one is subscribed to "MergerDone" event (Subject) so no Step will be notified
         String[] mergedData = {"Volvo", "BMW", "Ford", "Mazda"};
-        shouter.shout("MergerDone", mergedData, this);
+        shouter.shout("MergerDone", mergedData);
         System.out.println("Merged done!. ");
     }
 
@@ -91,10 +88,19 @@ public class Merger implements Step {
 
     public StepConfig getConfig() {
         StepConfig stepConfig = new StepConfig();
-        stepConfig.setEnableTickCallback(false);
+        stepConfig.setEnableTickCallback(true);
+        stepConfig.setMonitorEnabledForStep(true);
+        stepConfig.setRunningPeriodicDelay(3);//1 millisecond
+        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setMonitorEmmitTimeout(10);
         return stepConfig;
     }
 
     @Override
     public void onKill() { /*see comments above*/  }
+
+    @Override
+    public String getId() {
+        return "Merger";
+    }
 }
