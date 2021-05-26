@@ -24,6 +24,12 @@ public class KafkaFetcher implements Step {
     @Override
     public void onTickCallBack() {
         tickCounter++;
+
+        try {
+            Thread.currentThread().sleep(1800);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //Will be called periodically based on Step configuration.
         //In this case the Step is configured to request CPU time every 1 millisecond see getConfig()
 

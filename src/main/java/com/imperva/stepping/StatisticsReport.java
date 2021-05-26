@@ -2,23 +2,23 @@ package com.imperva.stepping;
 
 public class StatisticsReport {
     private String stepSenderId;
-    private long avgProcessingTime;
-    private int avgChunkSize;
+    private double avgProcessingTime;
+    private long avgChunkSize;
     private long latestQSize;
 
-    public long getAvgProcessingTime() {
+    public double getAvgProcessingTime() {
         return avgProcessingTime;
     }
 
-    public void setAvgProcessingTime(long avgProcessingTime) {
+    public void setAvgProcessingTime(double avgProcessingTime) {
         this.avgProcessingTime = avgProcessingTime;
     }
 
-    public int getAvgChunkSize() {
+    public long getAvgChunkSize() {
         return avgChunkSize;
     }
 
-    public void setAvgChunkSize(int avgChunkSize) {
+    public void setAvgChunkSize(long avgChunkSize) {
         this.avgChunkSize = avgChunkSize;
     }
 

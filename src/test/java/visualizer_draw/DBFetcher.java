@@ -19,6 +19,12 @@ public class DBFetcher implements Step {
 
     @Override
     public void onTickCallBack() {
+
+        try {
+            Thread.currentThread().sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //Will be called periodically based on Step configuration.
         //In this case the Step is configured to request CPU time every 10 seconds see getConfig()
 

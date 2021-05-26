@@ -54,7 +54,11 @@ public class LogStash implements Step {
 
     @Override
     public void onSubjectUpdate(Data data, String subjectType) {
-
+        try {
+            Thread.currentThread().sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         /* PSEUDO CODE
          * - Merge Kafka and DB data

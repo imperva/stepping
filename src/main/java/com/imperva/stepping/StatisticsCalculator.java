@@ -37,8 +37,8 @@ class StatisticsCalculator {
             String stepID = pair.getKey();
             List<StepsRuntimeMetadata> statData = pair.getValue();
             logger.debug("calculating stata for: " + stepID);
-            long avgProcessingTime = calcAvgProcessingTime(statData);
-            int avgChunkSize = calcAvgChunkSize(statData);
+            double avgProcessingTime = calcAvgProcessingTime(statData);
+            long avgChunkSize = calcAvgChunkSize(statData);
             long latestQSize = calcLatestQSize(statData);
 
             StatisticsReport statisticsReport = new StatisticsReport();
@@ -63,21 +63,25 @@ class StatisticsCalculator {
         return statData.get(statData.size() - 1).getQSize();
     }
 
-    private int calcAvgChunkSize(List<StepsRuntimeMetadata> statData) {
-        return (int)statData.stream().mapToLong(xx -> xx.getChunkSize()).average().getAsDouble();
+    private long calcAvgChunkSize(List<StepsRuntimeMetadata> statData) {
+        return Math.round(statData.stream().mapToLong(xx -> xx.getChunkSize()).average().getAsDouble());
     }
 
-    private long calcAvgProcessingTime(List<StepsRuntimeMetadata> statData) {
-        long allChunkSize = statData.stream().mapToLong(StepsRuntimeMetadata::getChunkSize).sum();
-        long starttime = statData.get(statData.size() - 1).getStartTime();
-        long endtime = statData.get(0).getEndTime();
+    private double calcAvgProcessingTime(List<StepsRuntimeMetadata> statData) {
+        List<Long> totTimes = new ArrayList<>();
+        statData.forEach(meta->{
+            long starttime = meta.getStartTime();
+            long endtime = meta.getEndTime();
+            long total =  endtime - starttime;
+            totTimes.add(total);
+        });
 
-        long totTime = endtime - starttime;
-        if (totTime == 0 || allChunkSize == 0)
+        long avgTimes = Math.round(totTimes.stream().mapToLong(s->s).average().getAsDouble());
+        if (avgTimes == 0)
             return 0;
 
-        long avg = totTime / allChunkSize;
-        return avg / 1000;
+        double seconds = avgTimes / 1000.0;
+        return seconds;
 
     }
 }
