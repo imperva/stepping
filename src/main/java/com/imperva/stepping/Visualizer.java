@@ -33,7 +33,8 @@ class Visualizer extends JFrame implements ViewerListener {
     private boolean refreshing = false;
 
     private HashMap<String, EdgeData> edgeWaitingList;
-    private HashSet<String> allEdgeIds;
+    //private HashSet<String> allEdgeIds;
+    private HashMap<String, Integer> allEdgeIds;
 
     private boolean loop = true;
 
@@ -50,7 +51,7 @@ class Visualizer extends JFrame implements ViewerListener {
         System.setProperty("org.graphstream.ui", "swing");
         nodes = new HashMap<>();
         edgeWaitingList = new HashMap<>();
-        allEdgeIds = new HashSet<>();
+        allEdgeIds = new HashMap<>();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         init();
     }
@@ -63,24 +64,27 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     public void addEdge(String stepId, String subject, List<String> subjectObservers) {
-        if(!initialized) return;
+        if (!initialized) return;
 
-        for(String dest : subjectObservers) {
-//            if(step.getSubjectsToFollow().contains(subject)) { //if steps follows this subject
-//                String destinationClass = step.getClass().getSimpleName();
-                String id = renderEdgeId(stepId, subject, dest);
+        for (String dest : subjectObservers) {
+            String id = renderEdgeId(stepId, subject, dest);
 
-            if(allEdgeIds.add(id)) { //edge doesn't exist
+            if (!allEdgeIds.containsKey(id)) {//edge doesn't exist
+                allEdgeIds.put(id,1);
                 EdgeData edgeData = new EdgeData(stepId, subject, dest);
-                if(refreshing) {
+                if (refreshing) {
                     addEdge(dest, edgeData);
                 } else {
                     edgeWaitingList.put(id, edgeData);
                     updateRefreshButton();
                 }
+            } else {
+              int counter =   allEdgeIds.get(id);
+                counter++;
+                allEdgeIds.put(id, counter);
+                graph.getEdge(id).setAttribute("ui.label", subject + ":" + counter);
             }
         }
-        // }
     }
 
     private String renderEdgeId(String stepId, String subject, String dest) {
