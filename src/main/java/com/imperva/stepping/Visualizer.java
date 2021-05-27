@@ -1,7 +1,9 @@
 package com.imperva.stepping;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swing.SwingGraphRenderer;
 import org.graphstream.ui.swing_viewer.DefaultView;
@@ -19,28 +21,24 @@ import java.util.List;
 class Visualizer extends JFrame implements ViewerListener {
 
     private final String TITLE = "Stepping Live Visualizer";
-    private final String GRAPH_STYLE = "graph {padding: 60px;}";
-    private final String NODE_STYLE = "shape:circle;fill-color: Salmon;size: 80px; text-alignment: center;";
-    private final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Yellow;size: 80px; text-alignment: center;";
+    private final String GRAPH_STYLE = "graph {padding: 100px; }";
+    private final String NODE_STYLE = "shape:circle;fill-color: #4e81bd;size: 100px; text-alignment: center; text-size: 12px; text-color:#ffffff;";
+    private final String EDGE_STYLE = "edge {text-size: 60px; text-color:Blue;}";
+    private final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Yellow;size: 100px; text-alignment: center;";
     private final String REFRESH_TEXT = "Refresh";
-
-    private static Visualizer single_instance;
     private HashMap<String, String> nodes;
     private Graph graph;
     private boolean initialized = false;
     private JButton refreshButton;
     private JLabel metadataLabel;
     private boolean refreshing = false;
-
     private HashMap<String, EdgeData> edgeWaitingList;
-    //private HashSet<String> allEdgeIds;
     private HashMap<String, Integer> allEdgeIds;
 
     private boolean loop = true;
 
     private List<Subject> subjects;
     private List<String> stepIds;
-//    private List<StatisticsReport> newStatisticsReports = new ArrayList<>();
     private List<StatisticsReport> oldStatisticsReports = new ArrayList<>();
     private HashMap<String,StatisticsReport> statisticsReports = new HashMap<>();
 
@@ -48,15 +46,19 @@ class Visualizer extends JFrame implements ViewerListener {
         this.subjects = subjects;
         this.stepIds = stepIds;
 
-        System.setProperty("org.graphstream.ui", "swing");
+       // System.setProperty("org.graphstream.ui", "swing");
+        System.setProperty("org.graphstream.ui.renderer",
+                "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         nodes = new HashMap<>();
         edgeWaitingList = new HashMap<>();
         allEdgeIds = new HashMap<>();
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
         init();
     }
 
     void draw(String senderId, String subjectType) {
+        if (senderId.equals("SYSTEM_STEP_MONITOR"))
+            return;
         Subject relevantSubjects = subjects.stream().filter(x -> x.getSubjectType().equals(subjectType)).findFirst().get();
         List<String> stepsReceivers = relevantSubjects.getCopyObserversNames();
         System.out.println("**** Step Id: " + senderId + " is sending Subject: " + subjectType + " to the following Steps : " + String.join(",", stepsReceivers));
@@ -65,8 +67,9 @@ class Visualizer extends JFrame implements ViewerListener {
 
     public void addEdge(String stepId, String subject, List<String> subjectObservers) {
         if (!initialized) return;
-
         for (String dest : subjectObservers) {
+            if(dest.equals("SYSTEM_STEP_MONITOR"))
+                continue;
             String id = renderEdgeId(stepId, subject, dest);
 
             if (!allEdgeIds.containsKey(id)) {//edge doesn't exist
@@ -79,10 +82,14 @@ class Visualizer extends JFrame implements ViewerListener {
                     updateRefreshButton();
                 }
             } else {
-              int counter =   allEdgeIds.get(id);
+              int counter = allEdgeIds.get(id);
                 counter++;
                 allEdgeIds.put(id, counter);
-                graph.getEdge(id).setAttribute("ui.label", subject + ":" + counter);
+                Edge edge = graph.getEdge(id);
+                if(edge == null)
+                    return; //*IT MEANS THAT THE EDGE WAS STILL NOT DRAWN BECAUSE THE USER NEVER CLICKED ON REFRESH BUTTON
+                edge.setAttribute("ui.label", subject + ":" + counter);
+                edge.setAttribute("ui.stylesheet", EDGE_STYLE);
             }
         }
     }
@@ -92,11 +99,13 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     private void addEdge(String id, EdgeData edgeData) {
+        if(edgeData.destinationClass.equals("SYSTEM_STEP_MONITOR"))
+            return;
         graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true).setAttribute("ui.label", edgeData.subject);
     }
 
     void init(){
-        graph = new SingleGraph(TITLE);
+        graph = new MultiGraph(TITLE);
         graph.setAttribute("ui.stylesheet", GRAPH_STYLE);
         graph.setAttribute("ui.quality");
 
@@ -149,6 +158,8 @@ class Visualizer extends JFrame implements ViewerListener {
 
 
         for(String s : stepIds) {
+            if(s.equals("SYSTEM_STEP_MONITOR"))
+                continue;
             nodes.put(s, s);
 
             Node a = graph.addNode(s);
@@ -165,8 +176,6 @@ class Visualizer extends JFrame implements ViewerListener {
                     Thread.sleep(40);
                 } catch (InterruptedException e) { e.printStackTrace(); }
             }
-
-            System.exit(0);
         }).start();
     }
 
@@ -182,13 +191,14 @@ class Visualizer extends JFrame implements ViewerListener {
 
     @Override
     public void buttonPushed(String stepId) {
-
-
-            if (this.statisticsReports.containsKey(stepId)) {
-
-                metadataLabel.setText("<html><b>" + stepId + "</b><br>" + this.statisticsReports.get(stepId).toString() + "</html>");
-            }
-
+        if (this.statisticsReports.containsKey(stepId)) {
+            StatisticsReport statisticsReport = this.statisticsReports.get(stepId);
+            metadataLabel.setText("<html><H3>" + stepId + "</H3>" +
+                    "<b>Avg Processing Time: </b>" + statisticsReport.getAvgProcessingTime() + " seconds" +
+                    "<br> <b>Avg  Chunk Size: </b>" + statisticsReport.getAvgChunkSize() +
+                    "<br> <b>Queue Size: </b>" + statisticsReport.getLatestQSize() +
+                    "</html>");
+        }
     }
 
     @Override
@@ -206,7 +216,7 @@ class Visualizer extends JFrame implements ViewerListener {
 
     }
 
-    public void updateMetadata(List<StatisticsReport> statisticsReports) {
+    void updateMetadata(List<StatisticsReport> statisticsReports) {
 
 
 
@@ -216,7 +226,6 @@ class Visualizer extends JFrame implements ViewerListener {
         });
 
     }
-
 
     class EdgeData {
         public String sourceClass;
@@ -234,13 +243,4 @@ class Visualizer extends JFrame implements ViewerListener {
         }
     }
 }
-
-
-//    private Visualizer() {
-//        System.setProperty("org.graphstream.ui", "swing");
-//        nodes = new HashMap<>();
-//        edgeWaitingList = new HashMap<>();
-//        allEdgeIds = new HashSet<>();
-//        setDefaultCloseOperation(EXIT_ON_CLOSE);
-//    }
 

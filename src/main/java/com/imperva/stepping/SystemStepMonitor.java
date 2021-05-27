@@ -79,7 +79,7 @@ class SystemStepMonitor implements Step {
 
     @Override
     public void onKill() {
-
+        visualizer.viewClosed("");
     }
 
     @Override

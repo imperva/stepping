@@ -19,13 +19,13 @@ class MonitorAgent {
         this.timeout = timeout;
     }
 
-    void start(int chunkSize) {
+    void start(int chunkSize, int QSize) {
         startProcessingTime = System.currentTimeMillis();
 
         StepsRuntimeMetadata stepsRuntimeMetadata = new StepsRuntimeMetadata();
         stepsRuntimeMetadata.setStartTime(startProcessingTime);
         stepsRuntimeMetadata.setChunkSize(chunkSize);
-
+        stepsRuntimeMetadata.setQSize(QSize);
         stepsRuntimeMetadataList.add(stepsRuntimeMetadata);
     }
 

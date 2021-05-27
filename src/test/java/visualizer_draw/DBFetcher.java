@@ -41,6 +41,9 @@ public class DBFetcher implements Step {
         //Shouter notifies and safely publishes the data to "DBDataArrived" event subscribers
         String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
         shouter.shout("DBDataArrived", manipulatedData);
+        shouter.shout("DBDataArrived2", manipulatedData);
+        shouter.shout("DBDataArrived3", manipulatedData);
+
 
     }
 

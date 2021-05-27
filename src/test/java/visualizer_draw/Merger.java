@@ -36,7 +36,7 @@ public class Merger implements Step {
         //This is the way to notify Stepping which events (Subjects) we are interested in.
         //In this case we need to subscribe to a subset of Subjects so it makes sense to use the new API:
 
-        follower.follow("DBDataArrived").follow("KafkaDataArrived");
+        follower.follow("DBDataArrived").follow("KafkaDataArrived").follow("DBDataArrived2").follow("DBDataArrived3");
 
 
     }

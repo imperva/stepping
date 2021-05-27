@@ -100,7 +100,7 @@ class StepDecorator implements IStepDecorator {
                 boolean isTickCallBack = message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
 
                 if (isMonitorEnabledForStep && !isSystemStep) {
-                    monitorAgent.start(message.getData().getSize());
+                    monitorAgent.start(message.getData().getSize(), q.size());
                 }
 
                 if (message.getData().isExpirable()) {
