@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Subject implements ISubject {
     private volatile ConcurrentHashMap<SubjectKey, List<IStepDecorator>> iSteps = new ConcurrentHashMap<>();
-    private List<String> stepsObserversNames = new ArrayList<>();
+    private List<String> stepsFollowersNames = new ArrayList<>();
     private volatile String type;
     private volatile Data data;
 
@@ -47,7 +47,7 @@ public class Subject implements ISubject {
 
     @Override
     public void attach(IStepDecorator step) {
-        stepsObserversNames.add(step.getStep().getId());
+        stepsFollowersNames.add(step.getStep().getId());
         IDistributionStrategy distributionStrategy = step.getDistributionStrategy(type);
 
         if (distributionStrategy == null)
@@ -63,8 +63,8 @@ public class Subject implements ISubject {
         }
     }
 
-    List<String> getCopyObserversNames() {
-        return new ArrayList<>(stepsObserversNames);
+    List<String> getCopyFollowersNames() {
+        return new ArrayList<>(stepsFollowersNames);
     }
 
     String getSubjectType() {
