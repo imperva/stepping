@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Merger implements Step {
-
+    private String id = "Merger";
     private Container cntr;
     private Shouter shouter;
 
@@ -93,6 +93,7 @@ public class Merger implements Step {
         stepConfig.setRunningPeriodicDelay(3);//1 millisecond
         stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
         stepConfig.setMonitorEmmitTimeout(10);
+        stepConfig.setNumOfNodes(4);
         return stepConfig;
     }
 
@@ -101,6 +102,12 @@ public class Merger implements Step {
 
     @Override
     public String getId() {
-        return "Merger";
+        return id;
+    }
+
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
     }
 }

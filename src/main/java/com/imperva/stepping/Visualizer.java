@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -53,26 +51,53 @@ class Visualizer extends JFrame implements ViewerListener {
         nodes = new HashMap<>();
         edgeWaitingList = new HashMap<>();
         allEdgeIds = new HashMap<>();
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        init();
+
+        prepareData(subjects);
+
+        initVisualization();
+    }
+
+    private void prepareData(List<Subject> subjects) {
+        List<String> subjectsNames = subjects.stream().map(subject -> subject.getSubjectType()).collect(Collectors.toList());
+        subjectsToFollowers = getListOfFollowersPerSubject(subjectsNames);
     }
 
     void draw(String senderId, String subjectType) {
         if (senderId.equals("SYSTEM_STEP_MONITOR"))
             return;
-        List<String> listOfFollowers = getListOfFollowers(subjectType);
+        List<String> listOfFollowers = subjectsToFollowers.get(subjectType);
         logger.debug("**** Step Id: " + senderId + " is sending Subject: " + subjectType + " to the following Steps : " + String.join(",", listOfFollowers));
         addEdge(senderId, subjectType, listOfFollowers);
     }
 
-    private List<String> getListOfFollowers(String subjectType) {
-        List<String> listOfFollowers = subjectsToFollowers.get(subjectType);
-        if(listOfFollowers == null) {
-            Subject relevantSubjects = subjects.stream().filter(x -> x.getSubjectType().equals(subjectType)).findFirst().get();
-            listOfFollowers = relevantSubjects.getCopyFollowersNames();
-            subjectsToFollowers.put(subjectType, listOfFollowers);
-        }
-        return listOfFollowers;
+//    private List<String> getListOfFollowers(String subjectType) {
+//        List<String> listOfFollowers = subjectsToFollowers.get(subjectType);
+//        if(listOfFollowers == null) {
+//            Subject relevantSubjects = subjects.stream().filter(x -> x.getSubjectType().equals(subjectType)).findFirst().get();
+//            listOfFollowers = relevantSubjects.getCopyFollowersNames();
+//            subjectsToFollowers.put(subjectType, listOfFollowers);
+//        }
+//        return listOfFollowers;
+//    }
+//
+//    private HashMap<String, List<String>> getListOfFollowersPerSubject(String subjectType) {
+//        HashMap<String, List<String>> followerPerSubject = new HashMap<>();
+//
+//
+//        Subject relevantSubjects = subjects.stream().filter(subject -> subject.getSubjectType().equals(subjectType)).findFirst().get();
+//        listOfFollowers = relevantSubjects.getCopyFollowersNames();
+//        subjectsToFollowers.put(subjectType, listOfFollowers);
+//
+//        return listOfFollowers;
+//    }
+
+    private HashMap<String, List<String>> getListOfFollowersPerSubject(List<String> subjectTypes) {
+        HashMap<String, List<String>> followerPerSubject = new HashMap<>();
+        subjectTypes.forEach(sub->{
+            Subject relevantSubjects = subjects.stream().filter(subject -> subject.getSubjectType().equals(sub)).findFirst().get();
+            followerPerSubject.put(sub, relevantSubjects.getCopyFollowersNames());
+        });
+        return followerPerSubject;
     }
 
     @Override
@@ -156,7 +181,9 @@ class Visualizer extends JFrame implements ViewerListener {
         graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true).setAttribute("ui.label", edgeData.subject);
     }
 
-    private void init(){
+    private void initVisualization(){
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         graph = new MultiGraph(TITLE);
         graph.setAttribute("ui.stylesheet", GRAPH_STYLE);
         graph.setAttribute("ui.quality");
