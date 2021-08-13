@@ -64,7 +64,7 @@ class SystemStepMonitor implements Step {
         logger.debug("Monitor onTickCallBack: " + statisticsReports.size());
         if(statisticsReports.size() > 0)
             visualizer.updateMetadata(statisticsReports);
-        if (!statisticsReports.isEmpty())
+        if(!statisticsReports.isEmpty())
             shouter.shout(BuiltinSubjectType.STEPPING_STEPS_STATISTICS_READY.name(), new Data(statisticsReports));
     }
 
