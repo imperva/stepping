@@ -60,10 +60,12 @@ public class Merger implements Step {
     public void onSubjectUpdate(Data data, String subjectType) {
         //This function is called by Stepping whenever a Subject that the Step registered to was triggered in this case
         // "DBDataArrived" and "KafkaDataArrived"
-        if(subjectType.equals("DBDataArrived")){
+        if(subjectType.contains("DBDataArrived")){
             //do that
-        } else if(subjectType.equals("KafkaDataArrived")){
+            System.out.println("Merger " + id + " - "+ subjectType +" : " + data.getValue());
+        } else if(subjectType.contains("KafkaDataArrived")){
             //do that
+            System.out.println("Merger " + id + " - " + subjectType + ": " + data.getValue());
         }
 
         try {

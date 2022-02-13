@@ -1,6 +1,8 @@
 package visualizer_draw;
 import com.imperva.stepping.*;
 
+import java.util.Random;
+
 public class DBFetcher implements Step {
 
     private Container cntr;
@@ -39,7 +41,8 @@ public class DBFetcher implements Step {
         // Shouter is responsible of notifying subscribers when onr or more Subjects' or Events' state change.
         // In this case new data has arrived and manipulated by DBFetcher Step.
         //Shouter notifies and safely publishes the data to "DBDataArrived" event subscribers
-        String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
+        //String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
+        Integer manipulatedData = new Random().nextInt();
         shouter.shout("DBDataArrived", manipulatedData);
         shouter.shout("DBDataArrived2", manipulatedData);
         shouter.shout("DBDataArrived3", manipulatedData);
