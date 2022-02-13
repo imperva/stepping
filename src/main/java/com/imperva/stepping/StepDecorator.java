@@ -238,6 +238,7 @@ class StepDecorator implements IStepDecorator {
 
         IDistributionStrategy stepConfigDistributionStrategy = getConfig().getDistributionStrategy();
 
+        //* todo VERY BAD PERFORMANCE - DATA PATH
         Optional<FollowRequest> followRequestData = listSubjectsToFollow().get().stream().filter((c) -> c.getSubjectType().equals(subjectType)).findFirst();
 
         if ((!followRequestData.isPresent() || followRequestData.get().getDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
