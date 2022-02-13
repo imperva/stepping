@@ -189,7 +189,8 @@ class Visualizer extends JFrame implements ViewerListener {
         graph.setAttribute("ui.quality");
 
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-        viewer.enableAutoLayout();
+        viewer.disableAutoLayout();
+
         add((DefaultView)viewer.addDefaultView(false, new SwingGraphRenderer()), BorderLayout.CENTER);
 
         ViewerPipe pipe = viewer.newViewerPipe();
@@ -236,7 +237,7 @@ class Visualizer extends JFrame implements ViewerListener {
             Node a = graph.addNode(s);
             a.setAttribute("ui.label", s);
 
-            a.setAttribute("ui.style", s.equals("SYSTEM_STEP_MONITOR") ?   SYSTEM_NODE_STYLE : NODE_STYLE);
+            a.setAttribute("ui.style", NODE_STYLE);
         }
 
         //keep listening to events
