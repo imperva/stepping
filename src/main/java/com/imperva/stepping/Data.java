@@ -16,6 +16,10 @@ public class Data {
     private Object expirationContext;
     private IExpirationCondition expirationCondition;
 
+    public Data(Object value, String senderId) {
+        this(value);
+        this.senderId = senderId;
+    }
 
     public Data(Object value) {
         this.value = value;

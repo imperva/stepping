@@ -36,13 +36,13 @@ class MonitorAgent {
         boolean isTimeExceeded = isTimeExceeded();
         if(isTimeExceeded) {
             sendMonitorReport();
+            stepsRuntimeMetadataList = new ArrayList<>();
             lastTime = System.currentTimeMillis();
         }
     }
 
     private void sendMonitorReport() {
         shouter.shout(BuiltinSubjectType.STEPPING_RUNTIME_METADATA.name(), new Data(Collections.unmodifiableList(stepsRuntimeMetadataList)));
-        stepsRuntimeMetadataList = new ArrayList<>();
     }
 
     private boolean isTimeExceeded(){

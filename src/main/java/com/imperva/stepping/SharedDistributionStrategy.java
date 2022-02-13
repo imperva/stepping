@@ -8,12 +8,13 @@ public class SharedDistributionStrategy extends IDistributionStrategy {
     //* TODO - use super.distribute()?
     @Override
     public void distribute(List<IStepDecorator> iStepDecorators, Data data, String subjectType) {
-        data.setExpirationCondition((d, c) -> {
+        Data dataCopy = new Data(data.getValue(), data.getSenderId());
+        dataCopy.setExpirationCondition((d, c) -> {
             SharedDistributionExpirationContext context = ((SharedDistributionExpirationContext) c);
             return context.getAtomicBarrier().compareAndSet(context.expectedValue, context.newValue);
         }, new SharedDistributionExpirationContext(1, 0));
         for (IStepDecorator step : iStepDecorators) {
-            step.queueSubjectUpdate(data, subjectType);
+            step.queueSubjectUpdate(dataCopy, subjectType);
         }
     }
 
