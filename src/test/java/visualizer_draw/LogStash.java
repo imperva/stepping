@@ -68,7 +68,7 @@ public class LogStash implements Step {
         // NOTE: In this case no one is subscribed to "MergerDone" event (Subject) so no Step will be notified
         String[] mergedData = {"Volvo", "BMW", "Ford", "Mazda"};
         //shouter.shout("MergerDone", mergedData);
-        System.out.println("Merged done!. ");
+        System.out.println("Log Stash done!. ");
     }
 
     @Override
