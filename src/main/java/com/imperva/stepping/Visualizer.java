@@ -189,7 +189,7 @@ class Visualizer extends JFrame implements ViewerListener {
         graph.setAttribute("ui.quality");
 
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-        viewer.disableAutoLayout();
+        viewer.enableAutoLayout();
 
         add((DefaultView)viewer.addDefaultView(false, new SwingGraphRenderer()), BorderLayout.CENTER);
 
@@ -209,6 +209,7 @@ class Visualizer extends JFrame implements ViewerListener {
         refreshButton.addActionListener(e -> {
             if(edgeWaitingList.isEmpty()) return;
 
+            viewer.disableAutoLayout();
             refreshing = true;
             refreshButton.setEnabled(false);
 
