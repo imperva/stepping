@@ -55,6 +55,16 @@ class Visualizer extends JFrame implements ViewerListener {
         initVisualization();
     }
 
+    private String getDistributeIdByStepID(String stepId) {
+        for(StepInfo s : stepsInfo) {
+            if(s.getId().equals(stepId)) {
+                if(s.getDistributionNodeId().equalsIgnoreCase("default")) return stepId;
+                return s.getDistributionNodeId();
+            }
+        }
+        return "";
+    }
+
     private void prepareData(List<Subject> subjects) {
         List<String> subjectsNames = subjects.stream().map(subject -> subject.getSubjectType()).collect(Collectors.toList());
         subjectsToFollowers = getListOfFollowersPerSubject(subjectsNames);
@@ -104,19 +114,25 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     @Override
-    public void buttonPushed(String stepId) {
-        if (this.statisticsReports.containsKey(stepId)) {
-            printMetadata(stepId);
-        }
+    public void buttonPushed(String destId) {
+        printMetadata(destId);
     }
 
-    private void printMetadata(String stepId) {
-        StatisticsReport statisticsReport = this.statisticsReports.get(stepId);
-        metadataLabel.setText("<html><H3>" + stepId + "</H3>" +
-                "<b>Avg Processing Time: </b>" + statisticsReport.getAvgProcessingTime() + " seconds" +
-                "<br> <b>Avg  Chunk Size: </b>" + statisticsReport.getAvgChunkSize() +
-                "<br> <b>Queue Size: </b>" + statisticsReport.getLatestQSize() +
-                "</html>");
+    private void printMetadata(String destId) {
+        String text = "";
+        for(StepInfo s : stepsInfo) {
+            if(this.statisticsReports.containsKey(s.getId())
+                    && getDistributeIdByStepID(s.getId()).equals(destId)) {
+                StatisticsReport statisticsReport = this.statisticsReports.get(s.getId());
+                text += "<H3>" + s.getId() + "</H3>" +
+                        "<b>Avg Processing Time: </b>" + statisticsReport.getAvgProcessingTime() + " seconds" +
+                        "<br> <b>Avg  Chunk Size: </b>" + statisticsReport.getAvgChunkSize() +
+                        "<br> <b>Queue Size: </b>" + statisticsReport.getLatestQSize();
+            }
+        }
+        if(!text.isEmpty()) {
+            metadataLabel.setText("<html>" + text + "</html>");
+        }
     }
 
     @Override
@@ -142,14 +158,19 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void addEdge(String stepId, String subject, List<String> subjectObservers) {
         if (!initialized) return;
+        Set<String> distSubjectObservers = new HashSet<>();
         for (String dest : subjectObservers) {
+            distSubjectObservers.add(getDistributeIdByStepID(dest));
+        }
+
+        for (String dest : distSubjectObservers) {
             if(dest.equals("SYSTEM_STEP_MONITOR"))
                 continue;
             String id = renderEdgeId(stepId, subject, dest);
 
             if (!allEdgeIds.containsKey(id)) {//edge doesn't exist
-                allEdgeIds.put(id,1);
-                EdgeData edgeData = new EdgeData(stepId, subject, dest);
+                allEdgeIds.put(id, 1);
+                EdgeData edgeData = new EdgeData(getDistributeIdByStepID(stepId), subject, dest);
                 if (refreshing) {
                     addEdge(dest, edgeData);
                 } else {
@@ -223,20 +244,32 @@ class Visualizer extends JFrame implements ViewerListener {
             refreshButton.setEnabled(true);
         });
 
-        metadataLabel = new JLabel("Press any node for more infomration");
+        metadataLabel = new JLabel("Press any node for more information");
         add(metadataLabel, BorderLayout.SOUTH);
 
         initialized = true;
 
+        Map<String, StepData> distUniqueList = new HashMap<>();
         for(StepInfo s : stepsInfo) {
-            String stepId = s.getId();
-            if(stepId.equals("SYSTEM_STEP_MONITOR"))
+            if(s.getId().equals("SYSTEM_STEP_MONITOR"))
                 continue;
 
-            Node a = graph.addNode(stepId);
-            a.setAttribute("ui.label", stepId);
+            String id = getDistributeIdByStepID(s.getId());
+            String name = s.getId();
+            if(!s.getId().equals(id) && name.contains(".")) { //if has distribution
+                name = name.substring(0, name.lastIndexOf('.'));
+            }
+            StepData stepData = distUniqueList.getOrDefault(id, new StepData(name));
+            stepData.count++;
+            distUniqueList.put(id, stepData);
+        }
+
+        for(Map.Entry<String, StepData> stepEntry : distUniqueList.entrySet()) {
+            Node a = graph.addNode(stepEntry.getKey());
+            a.setAttribute("ui.label", stepEntry.getValue().getFullName());
             a.setAttribute("ui.style", NODE_STYLE);
         }
+
 
         //keep listening to events
         new Thread( () ->  {
@@ -290,6 +323,19 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void updateRefreshButton() {
         refreshButton.setText(REFRESH_TEXT + " (" + edgeWaitingList.size() + ")");
+    }
+
+    class StepData {
+        private String name;
+        public int count;
+        public StepData(String name) {
+            this.name = name;
+            this.count = 0;
+        }
+        public String getFullName() {
+            if(count > 1) return name + "(" + count + ")";
+            return name;
+        }
     }
 
     class EdgeData {
