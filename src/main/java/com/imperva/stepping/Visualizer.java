@@ -28,7 +28,6 @@ class Visualizer extends JFrame implements ViewerListener {
     private final String EDGE_STYLE = "edge {text-size: 60px; text-color:Blue;}";
     private final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Yellow;size: 100px; text-alignment: center;";
     private final String REFRESH_TEXT = "Refresh";
-    private HashMap<String, String> nodes;
     private Graph graph;
     private boolean initialized = false;
     private JButton refreshButton;
@@ -38,17 +37,16 @@ class Visualizer extends JFrame implements ViewerListener {
     private HashMap<String, Integer> allEdgeIds;
     private boolean loop = true;
     private List<Subject> subjects;
-    private List<String> stepIds;
+    private List<StepInfo> stepsInfo;
     private HashMap<String, List<String>> subjectsToFollowers = new HashMap<>();
     private HashMap<String,StatisticsReport> statisticsReports = new HashMap<>();
 
-    public Visualizer(List<Subject> subjects, List<String> stepIds) {
+    public Visualizer(List<Subject> subjects, List<StepInfo> stepsInfo) {
         this.subjects = subjects;
-        this.stepIds = stepIds;
+        this.stepsInfo = stepsInfo;
 
         //* System.setProperty("org.graphstream.ui", "swing");
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-        nodes = new HashMap<>();
         edgeWaitingList = new HashMap<>();
         allEdgeIds = new HashMap<>();
 
@@ -230,14 +228,13 @@ class Visualizer extends JFrame implements ViewerListener {
 
         initialized = true;
 
-        for(String s : stepIds) {
-            if(s.equals("SYSTEM_STEP_MONITOR"))
+        for(StepInfo s : stepsInfo) {
+            String stepId = s.getId();
+            if(stepId.equals("SYSTEM_STEP_MONITOR"))
                 continue;
-            nodes.put(s, s);
 
-            Node a = graph.addNode(s);
-            a.setAttribute("ui.label", s);
-
+            Node a = graph.addNode(stepId);
+            a.setAttribute("ui.label", stepId);
             a.setAttribute("ui.style", NODE_STYLE);
         }
 

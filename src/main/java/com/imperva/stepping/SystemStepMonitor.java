@@ -15,7 +15,7 @@ class SystemStepMonitor implements Step {
     private Container cntr;
     private Shouter shouter;
     private List<Subject> subjects;
-    private List<String> stepsIds;
+    private List<StepInfo> stepsInfo;
     private Visualizer visualizer;
     private StatisticsCalculator statisticsCalculator;
 
@@ -24,13 +24,13 @@ class SystemStepMonitor implements Step {
         this.cntr = cntr;
         this.shouter = shouter;
         subjects = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).getTypeOf(Subject.class);
-        stepsIds = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).<StepDecorator>getTypeOf(StepDecorator.class).stream().map(s-> s.getStep().getId()).collect(Collectors.toList());
+        stepsInfo = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).<StepDecorator>getTypeOf(StepDecorator.class).stream().map(s-> new StepInfo(s.getStep().getId(),s.getDistributionNodeID(), false)).collect(Collectors.toList());
 
     }
 
     @Override
     public void onRestate() {
-        visualizer = new Visualizer(subjects, stepsIds);
+        visualizer = new Visualizer(subjects, stepsInfo);
         statisticsCalculator = new StatisticsCalculator();
     }
 
