@@ -180,17 +180,16 @@ class Visualizer extends JFrame implements ViewerListener {
         graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true).setAttribute("ui.label", edgeData.subject);
     }
 
-    void initVisualization(){
+    void initVisualization() {
+        if (initialized) return;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        graph = new MultiGraph(TITLE);
-        graph.setAttribute("ui.stylesheet", GRAPH_STYLE);
-        graph.setAttribute("ui.quality");
+        graph = createGraph(TITLE, GRAPH_STYLE);
 
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
 
-        add((DefaultView)viewer.addDefaultView(false, new SwingGraphRenderer()), BorderLayout.CENTER);
+        add((DefaultView) viewer.addDefaultView(false, new SwingGraphRenderer()), BorderLayout.CENTER);
 
         ViewerPipe pipe = viewer.newViewerPipe();
         pipe.addAttributeSink(graph);
@@ -198,7 +197,7 @@ class Visualizer extends JFrame implements ViewerListener {
         pipe.pump();
 
         setTitle(TITLE);
-        setSize( 800, 600 );
+        setSize(800, 600);
         setVisible(true);
 
         refreshButton = new JButton();
@@ -206,15 +205,15 @@ class Visualizer extends JFrame implements ViewerListener {
         updateRefreshButtonTxt(edgeWaitingList.size());
         add(refreshButton, BorderLayout.NORTH);
         refreshButton.addActionListener(e -> {
-            if(edgeWaitingList.isEmpty()) return;
+            if (edgeWaitingList.isEmpty()) return;
 
             viewer.disableAutoLayout();
             refreshing = true;
             refreshButton.setEnabled(false);
 
-            Iterator<Map.Entry<String,EdgeData>> iter = edgeWaitingList.entrySet().iterator();
+            Iterator<Map.Entry<String, EdgeData>> iter = edgeWaitingList.entrySet().iterator();
             while (iter.hasNext()) {
-                Map.Entry<String,EdgeData> entry = iter.next();
+                Map.Entry<String, EdgeData> entry = iter.next();
                 addEdge(entry.getKey(), entry.getValue());
                 iter.remove();
             }
@@ -227,40 +226,49 @@ class Visualizer extends JFrame implements ViewerListener {
         metadataLabel = new JLabel("Press any node for more information");
         add(metadataLabel, BorderLayout.SOUTH);
 
-        initialized = true;
+
 
         Map<String, VisualStep> distUniqueList = new HashMap<>();
-        for(VisualStep s : visualSteps) {
-            if(s.getId().equals("SYSTEM_STEP_MONITOR"))
+        for (VisualStep s : visualSteps) {
+            if (s.getId().equals("SYSTEM_STEP_MONITOR"))
                 continue;
 
             String id = getDistributeIdByStepID(s.getId());
             String name = s.getId();
-            if(!s.getId().equals(id) && name.contains(".")) { //if has distribution
+            if (!s.getId().equals(id) && name.contains(".")) { //if has distribution
                 name = name.substring(0, name.lastIndexOf('.'));
             }
-            VisualStep stepData = distUniqueList.getOrDefault(id, new VisualStep(s.getId(),name,s.getDistributionNodeId(), s.getNumOfNodes(),s.isSystem()));
+            VisualStep stepData = distUniqueList.getOrDefault(id, new VisualStep(s.getId(), name, s.getDistributionNodeId(), s.getNumOfNodes(), s.isSystem()));
             distUniqueList.put(id, stepData);
         }
 
 
-
-        for(Map.Entry<String, VisualStep> stepEntry : distUniqueList.entrySet()) {
+        for (Map.Entry<String, VisualStep> stepEntry : distUniqueList.entrySet()) {
             Node a = graph.addNode(stepEntry.getKey());
-            a.setAttribute("ui.label", stepEntry.getValue().hasMultipleNodes()? stepEntry.getValue().getFriendlyName() + "(" + stepEntry.getValue().getNumOfNodes() + ")" : stepEntry.getValue().getFriendlyName());
+            a.setAttribute("ui.label", stepEntry.getValue().hasMultipleNodes() ? stepEntry.getValue().getFriendlyName() + "(" + stepEntry.getValue().getNumOfNodes() + ")" : stepEntry.getValue().getFriendlyName());
             a.setAttribute("ui.style", stepEntry.getValue().hasMultipleNodes() ? DISTRIBUTED_NODE_STYLE : NODE_STYLE);
         }
 
+        initialized = true;
 
         //keep listening to events
-        new Thread( () ->  {
-            while(loop) {
+        new Thread(() -> {
+            while (loop) {
                 pipe.pump();
                 try {
                     Thread.sleep(40);
-                } catch (InterruptedException e) { e.printStackTrace(); }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
+    }
+
+    private Graph createGraph(String title, String style) {
+        Graph graph = new MultiGraph(title);
+        graph.setAttribute("ui.stylesheet", style);
+        graph.setAttribute("ui.quality");
+        return graph;
     }
 
     private void fixOverlappingEdgeLabel() {
