@@ -31,6 +31,7 @@ class SystemStepMonitor implements Step {
     @Override
     public void onRestate() {
         visualizer = new Visualizer(subjects, stepsInfo);
+        visualizer.initVisualization();
         statisticsCalculator = new StatisticsCalculator();
     }
 

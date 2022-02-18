@@ -34,41 +34,39 @@ class Visualizer extends JFrame implements ViewerListener {
     private JButton refreshButton;
     private JLabel metadataLabel;
     private boolean refreshing = false;
-    private HashMap<String, EdgeData> edgeWaitingList;
-    private HashMap<String, Integer> allEdgeIds;
+    private HashMap<String, EdgeData> edgeWaitingList = new HashMap<>();
+    private HashMap<String, Integer> allEdgeIds = new HashMap<>();
     private boolean loop = true;
     private List<Subject> subjects;
     private List<VisualStep> visualSteps;
-    private HashMap<String, List<String>> subjectsToFollowers = new HashMap<>();
+    private Map<String, VisualStep> visualStepsMap = new HashMap<>();
+    private HashMap<String, List<String>> subjectsToFollowers;
     private HashMap<String,StatisticsReport> statisticsReports = new HashMap<>();
 
     Visualizer(List<Subject> subjects, List<VisualStep> visualSteps) {
         this.subjects = subjects;
         this.visualSteps = visualSteps;
 
+        for (VisualStep vstep : visualSteps) {
+            visualStepsMap.put(vstep.getId(),vstep);
+        }
         //* System.setProperty("org.graphstream.ui", "swing");
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-        edgeWaitingList = new HashMap<>();
-        allEdgeIds = new HashMap<>();
-
-        prepareData(subjects);
-
-        initVisualization();
+        subjectsToFollowers = getFollowers(subjects);
     }
 
     private String getDistributeIdByStepID(String stepId) {
-        for(VisualStep s : visualSteps) {
-            if(s.getId().equals(stepId)) {
-                if(!s.hasMultipleNodes()) return stepId;
-                return s.getDistributionNodeId();
-            }
+        if (visualStepsMap.containsKey(stepId)) {
+            VisualStep s = visualStepsMap.get(stepId);
+            return !s.hasMultipleNodes() ? s.getId() : s.getDistributionNodeId();
+        } else {
+            return "";
         }
-        return "";
     }
 
-    private void prepareData(List<Subject> subjects) {
+    private HashMap<String, List<String>> getFollowers(List<Subject> subjects) {
         List<String> subjectsNames = subjects.stream().map(subject -> subject.getSubjectType()).collect(Collectors.toList());
-        subjectsToFollowers = getListOfFollowersPerSubject(subjectsNames);
+        return getListOfFollowersPerSubject(subjectsNames);
     }
 
     void draw(String senderId, String subjectType) {
@@ -155,7 +153,7 @@ class Visualizer extends JFrame implements ViewerListener {
                     addEdge(dest, edgeData);
                 } else {
                     edgeWaitingList.put(id, edgeData);
-                    updateRefreshButton();
+                    updateRefreshButtonTxt(edgeWaitingList.size());
                 }
             } else {
                 int counter = allEdgeIds.get(id);
@@ -182,7 +180,7 @@ class Visualizer extends JFrame implements ViewerListener {
         graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true).setAttribute("ui.label", edgeData.subject);
     }
 
-    private void initVisualization(){
+    void initVisualization(){
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         graph = new MultiGraph(TITLE);
@@ -205,7 +203,7 @@ class Visualizer extends JFrame implements ViewerListener {
 
         refreshButton = new JButton();
         refreshButton.setBounds(750, 550, 600, 300);
-        updateRefreshButton();
+        updateRefreshButtonTxt(edgeWaitingList.size());
         add(refreshButton, BorderLayout.NORTH);
         refreshButton.addActionListener(e -> {
             if(edgeWaitingList.isEmpty()) return;
@@ -222,7 +220,7 @@ class Visualizer extends JFrame implements ViewerListener {
             }
             fixOverlappingEdgeLabel();
             refreshing = false;
-            updateRefreshButton();
+            updateRefreshButtonTxt(edgeWaitingList.size());
             refreshButton.setEnabled(true);
         });
 
@@ -304,8 +302,8 @@ class Visualizer extends JFrame implements ViewerListener {
 
     }// function to fix overlapping edge label
 
-    private void updateRefreshButton() {
-        refreshButton.setText(REFRESH_TEXT + " (" + edgeWaitingList.size() + ")");
+    private void updateRefreshButtonTxt(int numOfChanges) {
+        refreshButton.setText(REFRESH_TEXT + " (" + numOfChanges  + ")");
     }
 
     class EdgeData {
