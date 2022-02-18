@@ -27,6 +27,7 @@ class Visualizer extends JFrame implements ViewerListener {
     private final String NODE_STYLE = "shape:circle;fill-color: #4e81bd;size: 100px; text-alignment: center; text-size: 12px; text-color:#ffffff;";
     private final String EDGE_STYLE = "edge {text-size: 60px; text-color:Blue;}";
     private final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Yellow;size: 100px; text-alignment: center;";
+    private final String DISTRIBUTED_NODE_STYLE = "shape:circle;fill-color: Orange;size: 100px; text-alignment: center;";
     private final String REFRESH_TEXT = "Refresh";
     private Graph graph;
     private boolean initialized = false;
@@ -37,13 +38,13 @@ class Visualizer extends JFrame implements ViewerListener {
     private HashMap<String, Integer> allEdgeIds;
     private boolean loop = true;
     private List<Subject> subjects;
-    private List<StepInfo> stepsInfo;
+    private List<VisualStep> visualSteps;
     private HashMap<String, List<String>> subjectsToFollowers = new HashMap<>();
     private HashMap<String,StatisticsReport> statisticsReports = new HashMap<>();
 
-    public Visualizer(List<Subject> subjects, List<StepInfo> stepsInfo) {
+    Visualizer(List<Subject> subjects, List<VisualStep> visualSteps) {
         this.subjects = subjects;
-        this.stepsInfo = stepsInfo;
+        this.visualSteps = visualSteps;
 
         //* System.setProperty("org.graphstream.ui", "swing");
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
@@ -56,9 +57,9 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     private String getDistributeIdByStepID(String stepId) {
-        for(StepInfo s : stepsInfo) {
+        for(VisualStep s : visualSteps) {
             if(s.getId().equals(stepId)) {
-                if(s.getDistributionNodeId().equalsIgnoreCase("default")) return stepId;
+                if(!s.hasMultipleNodes()) return stepId;
                 return s.getDistributionNodeId();
             }
         }
@@ -77,27 +78,6 @@ class Visualizer extends JFrame implements ViewerListener {
         logger.debug("**** Step Id: " + senderId + " is sending Subject: " + subjectType + " to the following Steps : " + String.join(",", listOfFollowers));
         addEdge(senderId, subjectType, listOfFollowers);
     }
-
-//    private List<String> getListOfFollowers(String subjectType) {
-//        List<String> listOfFollowers = subjectsToFollowers.get(subjectType);
-//        if(listOfFollowers == null) {
-//            Subject relevantSubjects = subjects.stream().filter(x -> x.getSubjectType().equals(subjectType)).findFirst().get();
-//            listOfFollowers = relevantSubjects.getCopyFollowersNames();
-//            subjectsToFollowers.put(subjectType, listOfFollowers);
-//        }
-//        return listOfFollowers;
-//    }
-//
-//    private HashMap<String, List<String>> getListOfFollowersPerSubject(String subjectType) {
-//        HashMap<String, List<String>> followerPerSubject = new HashMap<>();
-//
-//
-//        Subject relevantSubjects = subjects.stream().filter(subject -> subject.getSubjectType().equals(subjectType)).findFirst().get();
-//        listOfFollowers = relevantSubjects.getCopyFollowersNames();
-//        subjectsToFollowers.put(subjectType, listOfFollowers);
-//
-//        return listOfFollowers;
-//    }
 
     private HashMap<String, List<String>> getListOfFollowersPerSubject(List<String> subjectTypes) {
         HashMap<String, List<String>> followerPerSubject = new HashMap<>();
@@ -120,7 +100,7 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void printMetadata(String destId) {
         String text = "";
-        for(StepInfo s : stepsInfo) {
+        for(VisualStep s : visualSteps) {
             if(this.statisticsReports.containsKey(s.getId())
                     && getDistributeIdByStepID(s.getId()).equals(destId)) {
                 StatisticsReport statisticsReport = this.statisticsReports.get(s.getId());
@@ -184,8 +164,10 @@ class Visualizer extends JFrame implements ViewerListener {
                 Edge edge = graph.getEdge(id);
                 if(edge == null)
                     return; //*IT MEANS THAT THE EDGE WAS STILL NOT DRAWN BECAUSE THE USER NEVER CLICKED ON REFRESH BUTTON
+
+
                 edge.setAttribute("ui.label", subject + ":" + counter);
-                edge.setAttribute("ui.stylesheet", EDGE_STYLE);
+                edge.setAttribute("ui.stylesheet",  EDGE_STYLE);
             }
         }
     }
@@ -249,8 +231,8 @@ class Visualizer extends JFrame implements ViewerListener {
 
         initialized = true;
 
-        Map<String, StepData> distUniqueList = new HashMap<>();
-        for(StepInfo s : stepsInfo) {
+        Map<String, VisualStep> distUniqueList = new HashMap<>();
+        for(VisualStep s : visualSteps) {
             if(s.getId().equals("SYSTEM_STEP_MONITOR"))
                 continue;
 
@@ -259,15 +241,16 @@ class Visualizer extends JFrame implements ViewerListener {
             if(!s.getId().equals(id) && name.contains(".")) { //if has distribution
                 name = name.substring(0, name.lastIndexOf('.'));
             }
-            StepData stepData = distUniqueList.getOrDefault(id, new StepData(name));
-            stepData.count++;
+            VisualStep stepData = distUniqueList.getOrDefault(id, new VisualStep(s.getId(),name,s.getDistributionNodeId(), s.getNumOfNodes(),s.isSystem()));
             distUniqueList.put(id, stepData);
         }
 
-        for(Map.Entry<String, StepData> stepEntry : distUniqueList.entrySet()) {
+
+
+        for(Map.Entry<String, VisualStep> stepEntry : distUniqueList.entrySet()) {
             Node a = graph.addNode(stepEntry.getKey());
-            a.setAttribute("ui.label", stepEntry.getValue().getFullName());
-            a.setAttribute("ui.style", NODE_STYLE);
+            a.setAttribute("ui.label", stepEntry.getValue().hasMultipleNodes()? stepEntry.getValue().getFriendlyName() + "(" + stepEntry.getValue().getNumOfNodes() + ")" : stepEntry.getValue().getFriendlyName());
+            a.setAttribute("ui.style", stepEntry.getValue().hasMultipleNodes() ? DISTRIBUTED_NODE_STYLE : NODE_STYLE);
         }
 
 
@@ -323,19 +306,6 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void updateRefreshButton() {
         refreshButton.setText(REFRESH_TEXT + " (" + edgeWaitingList.size() + ")");
-    }
-
-    class StepData {
-        private String name;
-        public int count;
-        public StepData(String name) {
-            this.name = name;
-            this.count = 0;
-        }
-        public String getFullName() {
-            if(count > 1) return name + "(" + count + ")";
-            return name;
-        }
     }
 
     class EdgeData {

@@ -2,6 +2,7 @@ package visualizer_draw;
 import com.imperva.stepping.*;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class DBFetcher implements Step {
 
@@ -22,11 +23,7 @@ public class DBFetcher implements Step {
     @Override
     public void onTickCallBack() {
 
-        try {
-            Thread.currentThread().sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         //Will be called periodically based on Step configuration.
         //In this case the Step is configured to request CPU time every 10 seconds see getConfig()
 
@@ -44,8 +41,8 @@ public class DBFetcher implements Step {
         //String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
         Integer manipulatedData = new Random().nextInt();
         shouter.shout("DBDataArrived", manipulatedData);
-        shouter.shout("DBDataArrived2", manipulatedData);
-        shouter.shout("DBDataArrived3", manipulatedData);
+//        shouter.shout("DBDataArrived2", manipulatedData);
+//        shouter.shout("DBDataArrived3", manipulatedData);
 
 
     }
@@ -77,9 +74,10 @@ public class DBFetcher implements Step {
         //In this case we enable TickCallBack event and set is the PeriodicDelay to 10 seconds
         StepConfig stepConfig = new StepConfig();
         stepConfig.setEnableTickCallback(true);
-        stepConfig.setRunningPeriodicDelay(10000);//10 Seconds
+        stepConfig.setRunningPeriodicDelay(5);//10 Seconds
         stepConfig.setMonitorEnabledForStep(true);
-        stepConfig.setMonitorEmmitTimeout(13);
+        stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
+        stepConfig.setMonitorEmmitTimeout(10);
         return stepConfig;
     }
 
