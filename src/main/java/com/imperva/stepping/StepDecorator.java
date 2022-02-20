@@ -20,7 +20,7 @@ class StepDecorator implements IStepDecorator {
     private CyclicBarrier cb;
     private String id;
     private Shouter shouter;
-    HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
+    private HashMap<String, SubjectUpdateEvent> subjectUpdateEvents = new HashMap<>();
     private boolean isSystemStep;
     private Boolean isMonitorEnabledForStep;
     private MonitorAgent monitorAgent;
@@ -98,8 +98,6 @@ class StepDecorator implements IStepDecorator {
                 Message message = q.take();
 
                 boolean isTickCallBack = message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
-
-
 
                 if (message.getData().isExpirable()) {
                     boolean succeeded = message.getData().tryGrabAndExpire();
@@ -225,16 +223,6 @@ class StepDecorator implements IStepDecorator {
         return q.getCapacity();
     }
 
-//    @Override
-//    public void setQ(Q q) {
-//        this.q = q;
-//    }
-//
-//    @Override
-//    public Q getQ() {
-//        return q;
-//    }
-
     @Override
     public IDistributionStrategy getDistributionStrategy(String subjectType) {
 
@@ -293,6 +281,11 @@ class StepDecorator implements IStepDecorator {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public HashMap<String, SubjectUpdateEvent> getSubjectUpdateEvents(){
+        return subjectUpdateEvents;
     }
 
     private boolean isSystemStep() {
