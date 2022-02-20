@@ -421,8 +421,8 @@ class StepDecoratorTest {
         Counter counter = new Counter(0);
         StepDecorator decorator = createCounterTripleStep(counter);
         decorator.init(mock(Container.class), mock(Shouter.class));
-        decorator.subjectUpdateEvents.put("subject1", (data) -> counter.increment());
-        decorator.subjectUpdateEvents.put("subject2", (data) -> { counter.increment(); counter.increment();});
+        decorator.getSubjectUpdateEvents().put("subject1", (data) -> counter.increment());
+        decorator.getSubjectUpdateEvents().put("subject2", (data) -> { counter.increment(); counter.increment();});
 
         Data data = createExpirableData(true);
         decorator.q.queue(new Message(data, "subject1"));
@@ -690,7 +690,7 @@ class StepDecoratorTest {
         decorator.attachSubjects();
 
         Assertions.assertEquals(1, counter.get());
-        Assertions.assertEquals(1, decorator.subjectUpdateEvents.size());
+        Assertions.assertEquals(1, decorator.getSubjectUpdateEvents().size());
     }
 
     @Test

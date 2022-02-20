@@ -68,11 +68,11 @@ public class Merger implements Step {
             System.out.println("Merger " + id + " - " + subjectType + ": " + data.getValue());
         }
 
-        try {
-            Thread.currentThread().sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.currentThread().sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         /* PSEUDO CODE
          * - Merge Kafka and DB data
