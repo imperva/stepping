@@ -99,15 +99,17 @@ class StepDecorator implements IStepDecorator {
 
                 boolean isTickCallBack = message.getSubjectType().equals(BuiltinSubjectType.STEPPING_TIMEOUT_CALLBACK.name());
 
-                if (isMonitorEnabledForStep && !isSystemStep) {
-                    monitorAgent.start(message.getData().getSize(), q.size());
-                }
+
 
                 if (message.getData().isExpirable()) {
                     boolean succeeded = message.getData().tryGrabAndExpire();
                     if (!succeeded) {
                         continue;
                     }
+                }
+
+                if (isMonitorEnabledForStep && !isSystemStep) {
+                    monitorAgent.start(message.getData().getSize(), q.size());
                 }
 
                 if (message.getSubjectType().equals("POISON-PILL")) {
@@ -238,8 +240,7 @@ class StepDecorator implements IStepDecorator {
 
         IDistributionStrategy stepConfigDistributionStrategy = getConfig().getDistributionStrategy();
 
-        //* todo VERY BAD PERFORMANCE - DATA PATH
-        Optional<FollowRequest> followRequestData = listSubjectsToFollow().get().stream().filter((c) -> c.getSubjectType().equals(subjectType)).findFirst();
+        Optional<FollowRequest> followRequestData = listSubjectsToFollow().getFollowRequest(subjectType);
 
         if ((!followRequestData.isPresent() || followRequestData.get().getDistributionStrategy() == null) && stepConfigDistributionStrategy == null)
             throw new SteppingException("Distribution Strategy for Step " + step.getId() + " is missing.");
