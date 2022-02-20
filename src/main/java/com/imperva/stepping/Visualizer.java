@@ -11,7 +11,6 @@ import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
@@ -22,13 +21,6 @@ import java.util.stream.Collectors;
 
 class Visualizer extends JFrame implements ViewerListener {
     private final Logger logger = LoggerFactory.getLogger(Visualizer.class);
-    private final String TITLE = "Stepping Live Visualizer";
-    private final String GRAPH_STYLE = "graph {padding: 100px; }";
-    private final String NODE_STYLE = "shape:circle;fill-color: #4e81bd;size: 100px; text-alignment: center; text-size: 12px; text-color:#ffffff;";
-    private final String EDGE_STYLE = "edge {text-size: 60px; text-color:Blue;}";
-    private final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Yellow;size: 100px; text-alignment: center;";
-    private final String DISTRIBUTED_NODE_STYLE = "shape:circle;fill-color: Orange;size: 100px; text-alignment: center;";
-    private final String REFRESH_TEXT = "Refresh";
     private Graph graph;
     private boolean initialized = false;
     private JButton refreshButton;
@@ -41,16 +33,15 @@ class Visualizer extends JFrame implements ViewerListener {
     private List<VisualStep> visualSteps;
     private Map<String, VisualStep> visualStepsMap = new HashMap<>();
     private HashMap<String, List<String>> subjectsToFollowers;
-    private HashMap<String,StatisticsReport> statisticsReports = new HashMap<>();
+    private HashMap<String, StatisticsReport> statisticsReports = new HashMap<>();
 
     Visualizer(List<Subject> subjects, List<VisualStep> visualSteps) {
         this.subjects = subjects;
         this.visualSteps = visualSteps;
 
         for (VisualStep vstep : visualSteps) {
-            visualStepsMap.put(vstep.getId(),vstep);
+            visualStepsMap.put(vstep.getId(), vstep);
         }
-        //* System.setProperty("org.graphstream.ui", "swing");
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         subjectsToFollowers = getFollowers(subjects);
     }
@@ -79,7 +70,7 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private HashMap<String, List<String>> getListOfFollowersPerSubject(List<String> subjectTypes) {
         HashMap<String, List<String>> followerPerSubject = new HashMap<>();
-        subjectTypes.forEach(sub->{
+        subjectTypes.forEach(sub -> {
             Subject relevantSubjects = subjects.stream().filter(subject -> subject.getSubjectType().equals(sub)).findFirst().get();
             followerPerSubject.put(sub, relevantSubjects.getCopyFollowersNames());
         });
@@ -98,17 +89,18 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void printMetadata(String destId) {
         String text = "";
-        for(VisualStep s : visualSteps) {
-            if(this.statisticsReports.containsKey(s.getId())
+        for (VisualStep s : visualSteps) {
+            if (this.statisticsReports.containsKey(s.getId())
                     && getDistributeIdByStepID(s.getId()).equals(destId)) {
                 StatisticsReport statisticsReport = this.statisticsReports.get(s.getId());
-                text += "<H3>" + s.getId() + "</H3>" +
-                        "<b>Avg Processing Time: </b>" + statisticsReport.getAvgProcessingTime() + " seconds" +
-                        "<br> <b>Avg  Chunk Size: </b>" + statisticsReport.getAvgChunkSize() +
-                        "<br> <b>Queue Size: </b>" + statisticsReport.getLatestQSize();
+                text += TextConst.METADATA
+                        .replace("{STEP_ID}", s.getId())
+                        .replace("{AVG_PROCESSING_TIME}", statisticsReport.getAvgProcessingTime() + "")
+                        .replace("{AVG_CHUNK_SIZE}", statisticsReport.getAvgChunkSize() + "")
+                        .replace("{QUEUE_SIZE}", statisticsReport.getLatestQSize() + "");
             }
         }
-        if(!text.isEmpty()) {
+        if (!text.isEmpty()) {
             metadataLabel.setText("<html>" + text + "</html>");
         }
     }
@@ -129,7 +121,7 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     void updateMetadata(List<StatisticsReport> statisticsReports) {
-        statisticsReports.forEach(stat->{
+        statisticsReports.forEach(stat -> {
             this.statisticsReports.put(stat.getStepSenderId(), stat);
         });
     }
@@ -142,13 +134,14 @@ class Visualizer extends JFrame implements ViewerListener {
         }
 
         for (String dest : distSubjectObservers) {
-            if(dest.equals("SYSTEM_STEP_MONITOR"))
+            if (dest.equals("SYSTEM_STEP_MONITOR"))
                 continue;
             String id = renderEdgeId(stepId, subject, dest);
 
             if (!allEdgeIds.containsKey(id)) {//edge doesn't exist
                 allEdgeIds.put(id, 1);
                 EdgeData edgeData = new EdgeData(getDistributeIdByStepID(stepId), subject, dest);
+
                 if (refreshing) {
                     addEdge(dest, edgeData);
                 } else {
@@ -160,12 +153,11 @@ class Visualizer extends JFrame implements ViewerListener {
                 counter++;
                 allEdgeIds.put(id, counter);
                 Edge edge = graph.getEdge(id);
-                if(edge == null)
+                if (edge == null)
                     return; //*IT MEANS THAT THE EDGE WAS STILL NOT DRAWN BECAUSE THE USER NEVER CLICKED ON REFRESH BUTTON
 
 
                 edge.setAttribute("ui.label", subject + ":" + counter);
-                edge.setAttribute("ui.stylesheet",  EDGE_STYLE);
             }
         }
     }
@@ -175,16 +167,18 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     private void addEdge(String id, EdgeData edgeData) {
-        if(edgeData.destinationClass.equals("SYSTEM_STEP_MONITOR"))
+        if (edgeData.destinationClass.equals("SYSTEM_STEP_MONITOR"))
             return;
-        graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true).setAttribute("ui.label", edgeData.subject);
+        Edge edge  = graph.addEdge(id, edgeData.sourceClass, edgeData.destinationClass, true);
+        edge.setAttribute("ui.label", edgeData.subject + ": (calculating...)");
+        edge.setAttribute("ui.style", StyleConst.EDGE_STYLE);
     }
 
     void initVisualization() {
         if (initialized) return;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        graph = createGraph(TITLE, GRAPH_STYLE);
+        graph = createGraph(TextConst.TITLE,  StyleConst.GRAPH_STYLE);
 
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
@@ -196,7 +190,7 @@ class Visualizer extends JFrame implements ViewerListener {
         pipe.addViewerListener(this);
         pipe.pump();
 
-        setTitle(TITLE);
+        setTitle(TextConst.TITLE);
         setSize(800, 600);
         setVisible(true);
 
@@ -227,7 +221,6 @@ class Visualizer extends JFrame implements ViewerListener {
         add(metadataLabel, BorderLayout.SOUTH);
 
 
-
         Map<String, VisualStep> distUniqueList = new HashMap<>();
         for (VisualStep s : visualSteps) {
             if (s.getId().equals("SYSTEM_STEP_MONITOR"))
@@ -245,14 +238,20 @@ class Visualizer extends JFrame implements ViewerListener {
 
         for (Map.Entry<String, VisualStep> stepEntry : distUniqueList.entrySet()) {
             Node a = graph.addNode(stepEntry.getKey());
-            a.setAttribute("ui.label", stepEntry.getValue().hasMultipleNodes() ? stepEntry.getValue().getFriendlyName() + "(" + stepEntry.getValue().getNumOfNodes() + ")" : stepEntry.getValue().getFriendlyName());
+
+            String nodeLabel = "";
+            if(!stepEntry.getValue().isSystem())
+             nodeLabel = stepEntry.getValue().hasMultipleNodes() ? stepEntry.getValue().getFriendlyName() + " (" + stepEntry.getValue().getNumOfNodes() + ") " : stepEntry.getValue().getFriendlyName();
+           else
+               nodeLabel = stepEntry.getValue().getFriendlyName() + " (System Step) ";
+            a.setAttribute("ui.label", nodeLabel);
 
 
-            String nodeStyle = NODE_STYLE;
-            if(stepEntry.getValue().hasMultipleNodes()){
-                nodeStyle = DISTRIBUTED_NODE_STYLE;
-            }else if(stepEntry.getValue().isSystem()){
-                nodeStyle = SYSTEM_NODE_STYLE;
+            String nodeStyle = StyleConst.NODE_STYLE;
+            if (stepEntry.getValue().hasMultipleNodes()) {
+                nodeStyle =  StyleConst.DISTRIBUTED_NODE_STYLE;
+            } else if (stepEntry.getValue().isSystem()) {
+                nodeStyle =  StyleConst.SYSTEM_NODE_STYLE;
             }
 
 
@@ -312,7 +311,7 @@ class Visualizer extends JFrame implements ViewerListener {
                 BigDecimal factor = BigDecimal.valueOf(edgeListSize / 2).setScale(0, RoundingMode.FLOOR);
                 int maxOffset = factor.intValue() * offsetInterval;
                 for (int i = 0, offset = maxOffset; i < edgeListSize; i++, offset -= offsetInterval) {
-                    edgeList.get(i).setAttribute("ui.style", "text-offset: " + offset +"," + offset + ";");
+                    edgeList.get(i).setAttribute("ui.style", "text-offset: " + offset + "," + offset + ";");
                 }
             } // loop neighbouring nodes
 
@@ -321,7 +320,7 @@ class Visualizer extends JFrame implements ViewerListener {
     }// function to fix overlapping edge label
 
     private void updateRefreshButtonTxt(int numOfChanges) {
-        refreshButton.setText(REFRESH_TEXT + " (" + numOfChanges  + ")");
+        refreshButton.setText(TextConst.REFRESH_TEXT + " (" + numOfChanges + ")");
     }
 
     class EdgeData {
@@ -338,6 +337,23 @@ class Visualizer extends JFrame implements ViewerListener {
         public String getId(String sourceClass, String subject, String destinationClass) {
             return sourceClass + "-" + subject + "-" + destinationClass;
         }
+    }
+
+    class StyleConst {
+        static final String GRAPH_STYLE = "graph {padding: 100px; }";
+        static final String NODE_STYLE = "shape:circle;fill-color: #4e81bd;size: 150px; text-alignment: center; text-size: 14px; text-color:#ffffff;";
+        static final String EDGE_STYLE = "arrow-size: 14px,5px;text-size: 14px;";
+        static final String SYSTEM_NODE_STYLE = "shape:circle;fill-color: Gray;size: 150px; text-alignment: center; text-size: 10px;";
+        static final String DISTRIBUTED_NODE_STYLE = "shape:circle;fill-color: Orange;size: 150px; text-alignment: center; text-size: 14px;";
+    }
+
+    class TextConst{
+        static final String TITLE = "Stepping Live Visualizer";
+        static final String REFRESH_TEXT = "Refresh";
+        static final String METADATA = "<H3> {STEP_ID} </H3>" +
+                "<b>Avg Processing Time: </b>{AVG_PROCESSING_TIME} seconds" +
+                "<br> <b>Avg  Chunk Size: </b>{AVG_CHUNK_SIZE}" +
+                "<br> <b>Queue Size: </b>{QUEUE_SIZE}";
     }
 }
 
