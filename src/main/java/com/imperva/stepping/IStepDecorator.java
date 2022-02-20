@@ -3,6 +3,7 @@ package com.imperva.stepping;
 
 
 import java.io.Closeable;
+import java.util.HashMap;
 
 interface IStepDecorator extends Step, Closeable {
 
@@ -35,4 +36,6 @@ interface IStepDecorator extends Step, Closeable {
     int getQCapacity();
 
     IDistributionStrategy getDistributionStrategy(String subjectType);
+
+    HashMap<String, SubjectUpdateEvent> getSubjectUpdateEvents();
 }

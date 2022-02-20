@@ -49,6 +49,9 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             logger.info("Initializing Steps");
             initSteps();
 
+            logger.info("Start Configuration Validation");
+            validateConfiguration();
+
             logger.info("Initializing Runners...");
             initRunners();
 
@@ -72,6 +75,23 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         } catch (Error err) {
             logger.error("Algo initialization FAILED - ERROR", err);
             handle(err);
+        }
+    }
+
+    private void validateConfiguration() {
+        for (IStepDecorator step : cntr.<IStepDecorator>getSonOf(IStepDecorator.class)) {
+           if(step.getDistributionNodeID().equals("default")){
+               String err = "Single Step node can be configured with All2AllDistributionStrategy only";
+               if(!(step.getConfig().getDistributionStrategy() instanceof All2AllDistributionStrategy) && !(step.getConfig().getDistributionStrategy() instanceof OfferAll2AllDistributionStrategy)){
+                   throw new SteppingException(err);
+               }
+               step.listSubjectsToFollow().get().forEach(followRequest -> {
+                   if(followRequest.getDistributionStrategy() != null && (!(followRequest.getDistributionStrategy() instanceof All2AllDistributionStrategy) && !(step.getConfig().getDistributionStrategy() instanceof OfferAll2AllDistributionStrategy))){
+                       throw new SteppingException(err);
+                   }
+               });
+
+           }
         }
     }
 
