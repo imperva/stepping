@@ -38,4 +38,6 @@ interface IStepDecorator extends Step, Closeable {
     IDistributionStrategy getDistributionStrategy(String subjectType);
 
     HashMap<String, SubjectUpdateEvent> getSubjectUpdateEvents();
+
+    boolean isSystemStep();
 }

@@ -24,7 +24,7 @@ class SystemStepMonitor implements Step {
         this.cntr = cntr;
         this.shouter = shouter;
         subjects = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).getTypeOf(Subject.class);
-        stepsInfo = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).<StepDecorator>getTypeOf(StepDecorator.class).stream().map(s-> new VisualStep(s.getStep().getId(), s.getId(),s.getDistributionNodeID(), s.getConfig().getNumOfNodes(), false)).collect(Collectors.toList());
+        stepsInfo = ((Container) (cntr.getById("__STEPPING_PRIVATE_CONTAINER__"))).<StepDecorator>getTypeOf(StepDecorator.class).stream().map(s-> new VisualStep(s.getStep().getId(), s.getId(),s.getDistributionNodeID(), s.getConfig().getNumOfNodes(), s.isSystemStep())).collect(Collectors.toList());
 
     }
 

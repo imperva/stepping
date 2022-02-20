@@ -246,7 +246,17 @@ class Visualizer extends JFrame implements ViewerListener {
         for (Map.Entry<String, VisualStep> stepEntry : distUniqueList.entrySet()) {
             Node a = graph.addNode(stepEntry.getKey());
             a.setAttribute("ui.label", stepEntry.getValue().hasMultipleNodes() ? stepEntry.getValue().getFriendlyName() + "(" + stepEntry.getValue().getNumOfNodes() + ")" : stepEntry.getValue().getFriendlyName());
-            a.setAttribute("ui.style", stepEntry.getValue().hasMultipleNodes() ? DISTRIBUTED_NODE_STYLE : NODE_STYLE);
+
+
+            String nodeStyle = NODE_STYLE;
+            if(stepEntry.getValue().hasMultipleNodes()){
+                nodeStyle = DISTRIBUTED_NODE_STYLE;
+            }else if(stepEntry.getValue().isSystem()){
+                nodeStyle = SYSTEM_NODE_STYLE;
+            }
+
+
+            a.setAttribute("ui.style", nodeStyle);
         }
 
         initialized = true;

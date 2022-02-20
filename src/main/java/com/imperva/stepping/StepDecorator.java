@@ -288,7 +288,8 @@ class StepDecorator implements IStepDecorator {
         return subjectUpdateEvents;
     }
 
-    private boolean isSystemStep() {
+    @Override
+    public boolean isSystemStep() {
         return getStep().getClass().isAnnotationPresent(SystemStep.class);
     }
 }
