@@ -105,21 +105,6 @@ class Visualizer extends JFrame implements ViewerListener {
         }
     }
 
-    @Override
-    public void buttonReleased(String s) {
-
-    }
-
-    @Override
-    public void mouseOver(String s) {
-
-    }
-
-    @Override
-    public void mouseLeft(String s) {
-
-    }
-
     void updateMetadata(List<StatisticsReport> statisticsReports) {
         statisticsReports.forEach(stat -> {
             this.statisticsReports.put(stat.getStepSenderId(), stat);
@@ -321,6 +306,21 @@ class Visualizer extends JFrame implements ViewerListener {
 
     private void updateRefreshButtonTxt(int numOfChanges) {
         refreshButton.setText(TextConst.REFRESH_TEXT + " (" + numOfChanges + ")");
+    }
+
+    @Override
+    public void buttonReleased(String s) {
+
+    }
+
+    @Override
+    public void mouseOver(String s) {
+
+    }
+
+    @Override
+    public void mouseLeft(String s) {
+
     }
 
     class EdgeData {
