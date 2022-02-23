@@ -102,6 +102,8 @@ class Visualizer extends JFrame implements ViewerListener {
         }
         if (!text.isEmpty()) {
             metadataLabel.setText("<html>" + text + "</html>");
+        } else {
+            metadataLabel.setText(" Information still not available... ");
         }
     }
 
@@ -202,7 +204,7 @@ class Visualizer extends JFrame implements ViewerListener {
             refreshButton.setEnabled(true);
         });
 
-        metadataLabel = new JLabel("Press any node for more information");
+        metadataLabel = new JLabel("");
         add(metadataLabel, BorderLayout.SOUTH);
 
 
@@ -348,7 +350,7 @@ class Visualizer extends JFrame implements ViewerListener {
     }
 
     class TextConst{
-        static final String TITLE = "Stepping Live Visualizer";
+        static final String TITLE = "Stepping Live Visualizer (Beta)";
         static final String REFRESH_TEXT = "Refresh";
         static final String METADATA = "<H3> {STEP_ID} </H3>" +
                 "<b>Avg Processing Time: </b>{AVG_PROCESSING_TIME} seconds" +
