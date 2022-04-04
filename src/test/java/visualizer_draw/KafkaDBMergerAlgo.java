@@ -11,7 +11,7 @@ public class KafkaDBMergerAlgo implements Algo {
         containerRegistrar = new ContainerRegistrar();
 
         containerRegistrar.add(new DBFetcher());
-//        containerRegistrar.add(new KafkaFetcher());
+        containerRegistrar.add(new KafkaFetcher());
         containerRegistrar.add(new Merger());
         containerRegistrar.add(new LogStash());
     }
@@ -30,6 +30,7 @@ public class KafkaDBMergerAlgo implements Algo {
         algoConfig.setEnableTickCallback(true);
         algoConfig.setRunningPeriodicDelay(1000);//1 sec
         algoConfig.setInitMonitorCollector(true);
+        algoConfig.setMonitorReportReleaseTimeout(10);
         return algoConfig;
     }
 

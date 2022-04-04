@@ -41,8 +41,8 @@ public class DBFetcher implements Step {
         //String[] manipulatedData = {"Volvo", "BMW", "Ford", "Mazda"};
         Integer manipulatedData = new Random().nextInt();
         shouter.shout("DBDataArrived", manipulatedData);
-//        shouter.shout("DBDataArrived2", manipulatedData);
-//        shouter.shout("DBDataArrived3", manipulatedData);
+        shouter.shout("DBDataArrived2", manipulatedData);
+        shouter.shout("DBDataArrived3", manipulatedData);
 
 
     }

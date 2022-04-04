@@ -69,7 +69,7 @@ public class KafkaFetcher implements Step {
         stepConfig.setEnableTickCallback(true);
         stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
         stepConfig.setRunningPeriodicDelay(10);
-        stepConfig.setMonitorEnabledForStep(true);
+        stepConfig.setMonitorEnabledForStep(false);
         stepConfig.setMonitorEmmitTimeout(12);
         return stepConfig;
     }

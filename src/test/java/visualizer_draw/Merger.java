@@ -68,11 +68,11 @@ public class Merger implements Step {
             System.out.println("Merger " + id + " - " + subjectType + ": " + data.getValue());
         }
 
-//        try {
-//            Thread.currentThread().sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Thread.currentThread().sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         /* PSEUDO CODE
          * - Merge Kafka and DB data
@@ -90,12 +90,13 @@ public class Merger implements Step {
 
     public StepConfig getConfig() {
         StepConfig stepConfig = new StepConfig();
-        stepConfig.setEnableTickCallback(true);
+        stepConfig.setEnableTickCallback(false);
         stepConfig.setMonitorEnabledForStep(true);
         stepConfig.setRunningPeriodicDelay(5);//1 millisecond
         stepConfig.setRunningPeriodicDelayUnit(TimeUnit.SECONDS);
-        stepConfig.setMonitorEmmitTimeout(10);
-        stepConfig.setNumOfNodes(2);
+        stepConfig.setMonitorEmmitTimeout(1);
+        stepConfig.setNumOfNodes(5);
+//        stepConfig.setBoundQueueCapacity(20);
         stepConfig.setDistributionStrategy(new SharedDistributionStrategy());
         return stepConfig;
     }
