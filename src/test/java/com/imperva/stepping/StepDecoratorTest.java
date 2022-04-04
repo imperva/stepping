@@ -3,7 +3,6 @@ package com.imperva.stepping;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.ws.Holder;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.concurrent.BrokenBarrierException;
@@ -18,6 +17,10 @@ import static org.mockito.Mockito.*;
  * Date: 17 Sep 2020
  */
 class StepDecoratorTest {
+
+    private class Holder<T> {
+        T value;
+    }
 
     private class ContainerShouterStep implements Step {
         private Container container;

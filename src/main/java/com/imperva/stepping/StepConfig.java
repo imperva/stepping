@@ -12,6 +12,7 @@ public class StepConfig {
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
     private int boundQueueCapacity;
     private MonitorStepConfig monitorStepConfig;
+    private boolean keepOriginalThreadName;
 
     public StepConfig() {
         SteppingProperties stepProp = SteppingProperties.getInstance();
@@ -21,6 +22,7 @@ public class StepConfig {
         enableTickCallback = new Boolean(stepProp.getProperty("stepping.default.step.enable.tickcallback"));
         boundQueueCapacity = new Integer(stepProp.getProperty("stepping.default.step.bound.queue"));
         monitorStepConfig = new MonitorStepConfig();
+        keepOriginalThreadName = false;
     }
 
     public long getRunningInitialDelay() {
@@ -101,5 +103,13 @@ public class StepConfig {
 
     public void setMonitorEnabledForStep(Boolean isMonitorEnabledForStep) {
         this.monitorStepConfig.setIsMonitorEnabledForStep(isMonitorEnabledForStep);
+    }
+
+    public boolean isKeepOriginalThreadName() {
+        return keepOriginalThreadName;
+    }
+
+    public void setKeepOriginalThreadName(boolean keepOriginalThreadName) {
+        this.keepOriginalThreadName = keepOriginalThreadName;
     }
 }

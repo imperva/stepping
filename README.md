@@ -890,6 +890,21 @@ public AlgoConfig getConfig() {
 
 Currently the report will be output its findings in the default Logger.
 
+### Step Thread Name
+
+By default, stepping chooses the step thread name.
+Since version 4.0, it is possible to keep the original thread name by setting the 'keepOriginalThreadName' property in the step config.
+
+```java
+public class MyStep implements Step {
+
+    public StepConfig getConfig() {
+        stepConfig.setKeepOriginalThreadName(true);
+        return stepConfig;
+    }
+}
+```
+
 
 # SteppingLauncher
 SteepingLauncher is a new Stepping wrapper that enables enhanced capabilities related to Stepping initialization.

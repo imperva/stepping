@@ -156,7 +156,8 @@ class StepDecorator implements IStepDecorator {
     }
 
     private void setThreadName() {
-        Thread.currentThread().setName(getId() + ".running");
+        if (! step.getConfig().isKeepOriginalThreadName())
+            Thread.currentThread().setName(getId() + ".running");
     }
 
     @Override
