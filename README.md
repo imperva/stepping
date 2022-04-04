@@ -935,6 +935,30 @@ In any case the Launcher will internally close Stepping and exit if the stop con
 SteppingLauncher brings benefits not only for Component Tests use cases, but can be used for debugging, or even in production where we have more sophisticated 
 needs. For example if we want to dynamically allocate different Algos or different Steps based on some external configuration.
 
+# Step Visualizer
+Version 4.0.0 introduces a visual way to monitor a Stepping application.
+The Visualizer help developers by exposing information about the Steps at real time.
+For example, the Visualizer draws the Steps, the Steps' Subjects, how many times a Subject was Shouted and more.
+In addition the Visualizer exposes other various statistics on each Step, for example: how many messages are in each queue, what is the everage processing time and more.
+
+### Step Visualizer Configuration
+There are 4 configurations related to the Visualizer, two of them are configurable from AlgoConfig class, and the others from StepConfig class: setInitMonitorCollector, setMonitorReportReleaseTimeout, setMonitorEnabledForStep and setMonitorEmmitTimeout.
+
+#### setMonitorReportReleaseTimeout
+This configures Steps to wait X seconds before sending the accumulated statistics about the Steps. 
+In the case below all the Steps of the Algo are configured to send the statistics (of the Steps that enabled it explicitly), every 10 seconds.
+
+```java
+public AlgoConfig getConfig() {
+        AlgoConfig algoConfig = new AlgoConfig();
+        algoConfig.setInitMonitorCollector(true);
+        algoConfig.algoConfig.setMonitorReportReleaseTimeout(10);
+        return algoConfig;
+    }
+```
+
+
+
 #### Additional Capabilities
 - Alongside the synchronous launch() method, which waits for the Launcher to finish the current run, the Launcher expose an async method lunchAndGo() which works like the 
 standard new Stepping()...go() method. In this case no return value is expected and the main thread dies while keeping Stepping alive.
