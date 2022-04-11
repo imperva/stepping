@@ -962,6 +962,7 @@ There are 4 configurations related to the Visualizer, two of them are configurab
 #### setMonitorReportReleaseTimeout
 This configures Steps to wait X seconds before sending the accumulated statistics about the Steps. 
 In the case below all the Steps of the Algo are configured to send the statistics (of the Steps that enabled it explicitly), every 10 seconds.
+In order to receive these events one must configure the receiving Step to 'follow' Subject 'STEPPING_STEPS_STATISTICS_READY' 
 
 ```java
 public AlgoConfig getConfig() {
@@ -971,7 +972,18 @@ public AlgoConfig getConfig() {
         return algoConfig;
     }
 ```
+#### setMonitorEmmitTimeout
+Each Step needs to be explicitly configured to send its statistics to 'SystemStepMonitor' Step. To do that, each step 
+needs to internally initiates a new 'AgentMonitor' instance responsible for collecting the data and send the data to the 'SystemStepMonitor'.
 
+```java
+public StepConfig getConfig() {
+    StepConfig stepConfig = new StepConfig();
+    stepConfig.setMonitorEnabledForStep(true);
+    stepConfig.setMonitorEmmitTimeout(3);
+    return stepConfig;
+}
+```
 
 
 #### Additional Capabilities
