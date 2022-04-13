@@ -236,7 +236,7 @@
                 <version>1.6</version>
                 <executions>
                     <execution>
-                        <phase>deploy</phase>
+                        <phase>verify</phase>
                         <id>sign-artifacts</id>
                         <goals>
                             <goal>sign</goal>
