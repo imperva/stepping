@@ -6,7 +6,7 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <name>Stepping</name>
     <distributionManagement>
         <snapshotRepository>
@@ -236,7 +236,7 @@
                 <version>1.6</version>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
+                        <phase>deploy</phase>
                         <id>sign-artifacts</id>
                         <goals>
                             <goal>sign</goal>
