@@ -376,8 +376,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
            if(delegateErrorHandling(e)) return true;
 
 
-            String error = generateLogMessage(e);
-            logger.error(error, e);
+            String logMessage = generateLogMessage(e);
+            logger.error(logMessage, e);
 
             if (!closingLock.tryLock() && isClosed)
                 return false;
@@ -449,7 +449,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
 
     private void closeAndKillIfNeeded(Exception e) {
         try {
-            logger.error("Try to close and kill", e);
+            logger.info("Try to close and kill", e);
             close();
         } finally {
             if (containsInChain(e, SteppingSystemCriticalException.class)) {
@@ -538,10 +538,10 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
     }
 
     private boolean delegateExceptionHandling(Throwable e) {
-        logger.info("Try delegate Exception/Error to custom Exception Handler", e);
+        logger.info("Try delegate Throwable to Custom Exception Handler", e);
         IExceptionHandler customExceptionHandler = getConfig().getCustomExceptionHandler();
         if (customExceptionHandler == null) {
-            logger.info("Custom Exception/Error Handler MISSING");
+            logger.info("Custom Exception Handler MISSING");
             return false;
         }
         try {
@@ -554,17 +554,17 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             }
 
             if (!handle)
-                logger.debug("Custom Exception/Error Handler was not able to fully handle the Exception");
+                logger.debug("Custom Exception Handler was unable to fully handle the Throwable");
             else
-                logger.debug("Custom Exception/Error Handler fully handled the Exception");
+                logger.debug("Custom Exception Handler fully handled the Throwable");
 
             return handle;
         } catch (SteppingSystemCriticalException ex) {
-            logger.error("Custom Exception/Error Handler throw SteppingSystemCriticalException", ex);
+            logger.error("Custom Exception Handler threw SteppingSystemCriticalException", ex);
             closeAndKillIfNeeded(ex);
             return false;
         } catch (Exception ex) {
-            logger.error("Custom Exception/Error Handler FAILED", ex);
+            logger.error("Custom Exception Handler FAILED", ex);
             return false;
         }
     }

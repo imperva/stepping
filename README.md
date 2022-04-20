@@ -444,7 +444,7 @@ public class DBFetcher implements Step {
     @Override
     public void onRestate() {
        //This is a special function called just once in the lifecycle of a Step.
-       //Steeping allows Steps to hook into the initialization stage, before Steps execution in order to enable Steps to
+       //Stepping allows Steps to hook into the initialization stage, before Steps execution in order to enable Steps to
        //load the necessary state into the Step before execution. This can be useful when spawning new instances of Stepping
        //and we need to fist load some state in-memory before starting. 
        //Stepping will wait for all Steps to "Re-state" before continuing the initialization process
@@ -659,14 +659,18 @@ Stepping contains a single configuration file at this location:
 # Advanced Topics
 
 ### Exception & Error Handling
-Steeping provides its internal error handling for un-handled exception. 
+Stepping provides its internal error handling for un-handled exception. 
 
 The builtin implementation will try to delegate the exception handling to client's custom ExceptionHandler if provided 
 (more about this in the next paragraph), otherwise it will try to gracefully shutdown all the steps, give a change to 
 all Steps to cleanup and die gracefully.
 
+Since version 4.0.2, if a custom exception handler is provided, the framework refrains from logging errors to the log concerning 
+the exceptions which are deleted to this handler. It is up to the consumer to decide how to handle the exceptions, among which, 
+if to log an error.
+
 ### Custom ExceptionHandling
-Steeping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
+Stepping enables consumers to provide their own Exception logic and notify the framework whether it was able to handle the
 exception (return true), in this case the builtin Exception handling is suppressed, otherwise (return false) Stepping will trigger the default behaviour.
 
 To set your CustomException Handler you just need to supply an IExceptionHandler implementation to your AlgoConfig:
@@ -691,7 +695,7 @@ To set your CustomException Handler you just need to supply an IExceptionHandler
 Since version 3.8.x Stepping supports Java Errors (i.e. OutOfMemoryError). When Stepping detects an un-handled Error it will
 try to delegate the Error to IExceptionHandler in a dedicated new function 'boolean handle(Error err)'. This method behaves exactly 
 as the 'boolean handle(Exception e)'. 
-In case 'boolean handle(Error err)' method is not implemented, the default Error handling implementation will throw a SteppingSystemCriticalException().
+In case 'boolean handle(Error err)' method is not implemented, the default Error handling implementation will throw a SteppingSystemCriticalException.
 
 ### Kill Process
 In case a single process hosts multiple Algos, Stepping expose a way to kill the entire process in case of exception, including 
@@ -792,7 +796,7 @@ NOTE: In case of Duplicated Nodes (see next paragraph), implementation of this t
 to your Step is required. Duplicating Steps that don't implement the Identity interface will lead to a runtime exception.
 
 ### Duplicated Nodes
-In order to maximize CPU usage, Steeping enables consumers to split the workload to multiple Threads. 
+In order to maximize CPU usage, Stepping enables consumers to split the workload to multiple Threads. 
 
 Consumers just need to specify the number of Steps nodes and internally Stepping will create the corresponding number of threads 
 that will work in-parallel on the data inorder to increase throughput:
@@ -866,7 +870,7 @@ In addition the same API allows consumers to close Stepping externally.
 
 ### Performance Sampler
 Debugging can be not so trivial in an event driven system as Stepping. 
-To facilitate the debugging process, Steeping supplies a special builtin Step (by default not enabled) called PerfSamplerStep designed to help developers understand where their 
+To facilitate the debugging process, Stepping supplies a special builtin Step (by default not enabled) called PerfSamplerStep designed to help developers understand where their 
 application spends its time. 
 
 By enabling this Step, Stepping will emit once awhile (configurable) a report that specify the
@@ -907,7 +911,7 @@ public class MyStep implements Step {
 
 
 # SteppingLauncher
-SteepingLauncher is a new Stepping wrapper that enables enhanced capabilities related to Stepping initialization.
+SteppingLauncher is a new Stepping wrapper that enables enhanced capabilities related to Stepping initialization.
 Till version 3.9.1 Stepping exposed a single initialization API:
 
 ```java
