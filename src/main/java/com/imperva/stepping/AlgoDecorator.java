@@ -543,6 +543,8 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         if (customExceptionHandler == null) {
             logger.info("Custom Exception Handler MISSING");
             return false;
+        } else {
+            logger.info("Custom Exception Handler FOUND");
         }
         try {
 
