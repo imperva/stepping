@@ -6,7 +6,7 @@
 
     <groupId>com.imperva.stepping</groupId>
     <artifactId>stepping</artifactId>
-    <version>4.0.3-SNAPSHOT</version>
+    <version>4.0.3</version>
     <name>Stepping</name>
     <distributionManagement>
         <snapshotRepository>

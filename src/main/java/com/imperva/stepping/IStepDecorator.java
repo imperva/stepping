@@ -1,11 +1,9 @@
 package com.imperva.stepping;
 
-
-
 import java.io.Closeable;
 import java.util.HashMap;
 
-interface IStepDecorator extends Step, Closeable {
+public interface IStepDecorator extends Step, Closeable {
 
     void init(Container cntr, Shouter shouter);
 
