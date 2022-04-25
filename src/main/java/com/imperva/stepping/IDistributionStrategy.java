@@ -10,7 +10,7 @@ public abstract class IDistributionStrategy {
     private static final int MAXIMUM_OFFERS_RETRIES = 10;
     private static final int WAIT_PERIOD_MILLI = 250;
 
-    abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
+    protected abstract void distribute(List<IStepDecorator> steps, Data data, String subjectType);
 
     protected void distribute(Distribution[] distributionList) {
         try {
