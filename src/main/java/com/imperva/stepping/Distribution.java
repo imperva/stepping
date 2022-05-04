@@ -5,10 +5,10 @@ public class Distribution {
     private IStepDecorator iStepDecorator;
     private String subject;
 
-    Distribution() {
+    public Distribution() {
     }
 
-    Distribution(IStepDecorator iStepDecorator, Data data, String subject) {
+    public Distribution(IStepDecorator iStepDecorator, Data data, String subject) {
 
         this.iStepDecorator = iStepDecorator;
         this.data = data;
