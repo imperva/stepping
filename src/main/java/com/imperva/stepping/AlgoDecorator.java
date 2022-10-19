@@ -159,7 +159,12 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
                 for (int i = 1; i <= numOfNodes - 1; i++) {
                     Step currentStep = iStepDecoratorToDuplicate.getStep();
                     String currentStepId = currentStep.getId();
-                    Step duplicatedStp = (Step) Class.forName(currentStep.getClass().getName(), true, currentStep.getClass().getClassLoader()).newInstance();
+                    Step duplicatedStp;
+                    if (null != iStepDecoratorToDuplicate.getConfig().getStepNodeSupplier()) {
+                        duplicatedStp = iStepDecoratorToDuplicate.getConfig().getStepNodeSupplier().get();
+                    } else {
+                         duplicatedStp = (Step) Class.forName(currentStep.getClass().getName(), true, currentStep.getClass().getClassLoader()).newInstance();
+                    }
                     String stepID = currentStepId + "." + i;
                     try {
                         duplicatedStp.setId(stepID);
@@ -373,7 +378,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
             if (isClosed)
                 return false;
 
-           if(delegateErrorHandling(e)) return true;
+            if (delegateErrorHandling(e)) return true;
 
 
             String logMessage = generateLogMessage(e);
