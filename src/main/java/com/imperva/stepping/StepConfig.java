@@ -1,6 +1,7 @@
 package com.imperva.stepping;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class StepConfig {
     private  String runningPeriodicCronDelay;
@@ -8,6 +9,7 @@ public class StepConfig {
     private long runningPeriodicDelay;
     private TimeUnit runningPeriodicDelayUnit;
     private int numOfNodes = 0;
+    private Supplier<Step> stepNodeSupplier;
     private boolean enableTickCallback;
     private IDistributionStrategy distributionStrategy = new All2AllDistributionStrategy();
     private int boundQueueCapacity;
@@ -47,6 +49,14 @@ public class StepConfig {
 
     public void setNumOfNodes(int numOfNodes) {
         this.numOfNodes = numOfNodes;
+    }
+
+    public Supplier<Step> getStepNodeSupplier() {
+        return stepNodeSupplier;
+    }
+
+    public void setStepNodeSupplier(Supplier<Step> stepNodeSupplier) {
+        this.stepNodeSupplier = stepNodeSupplier;
     }
 
     public boolean isEnableTickCallback() {

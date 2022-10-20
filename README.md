@@ -37,7 +37,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>3.9.2</version>
+  <version>5.0.0</version>
 </dependency>
 ~~~
 
@@ -1001,7 +1001,28 @@ standard new Stepping()...go() method. In this case no return value is expected 
 - withShout(String subject, Data data) this method can be used in cases we register some Steps which waits for some subjects to be triggered in order to initiate.
 The Launcher will Shout all the registered Subjects right after initializing Stepping. 
  
+#### Support custom creation of step nodes 
+- Till 4.0.6, when setting a step to use multiple nodes, we had to have an empty constructor because stepping instantiate node via reflection which uses default constructor,
+- From 5.0.0, we add a step creation supplier property to StepConfig which return a Step, this way you can provide the step node with all properties in non default constructor.
 
+### Working with Spring
+Since version 5.0.0, with the support of custom step nodes creation it is possible to instantiate step [as spring bean],
+all you have to do is set the step supplier to step config as shown in the example below:
+dont forget to set the step bean scope to 'prototype'.
+```java
+public StepConfig getConfig() {
+    StepConfig stepConfig = new StepConfig();
+    stepConfig.setMonitorEnabledForStep(true);
+    stepConfig.setMonitorEmmitTimeout(3);
+    stepConfig.setStepNodeSupplier(this::createNode);
+    return stepConfig;
+}
+        
+Step createNode() {
+    CustomerRiskCalcStep bean = context.getBean(CustomerRiskCalcStep.class);
+    return bean;
+}
+```
 # Getting Help
 If you have questions about the library, please be sure to check out the API documentation. 
 If you still have questions, reach out me via mail gabi.beyo@imperva.com.
