@@ -1,5 +1,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.imperva.stepping/stepping.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.imperva.stepping%22%20AND%20a:%22stepping%22) [![Build Status](https://www.travis-ci.org/imperva/stepping.svg?branch=master)](https://www.travis-ci.org/imperva/stepping?branch=master) [![Coverage Status](https://coveralls.io/repos/github/imperva/stepping/badge.svg?branch=master&2=2)](https://coveralls.io/github/imperva/stepping?branch=master&2=2)
 
+
+![Stepping Logo](https://github.com/imperva/stepping/assets/3204291/2f37015c-3613-4898-9abc-359397e25079)
+
 # Stepping
 Stepping is a framework designed to ease the implementation of data processing solutions.
 In use cases where we need to implement data or data-streaming algorithms or any other processing on data, we need to 
@@ -17,6 +20,9 @@ these infrastructures is minimal as possible.
 
 Stepping aims to handle many of these aspects so developers can spend their time on the business logic instead of 
 solving these infrastructure and data flow issues, over and over again. 
+
+
+[Want to Chat with Stepping Framework? Click here to start a ChatGPT converstaion where you can ask eveything!](https://chatgpt.com/g/g-iSfgFQlJW-stepping)
 
 # Benefits
 The goal of this framework is to solve infrastructure issues encountered when developing data or data-streaming processing solution.
