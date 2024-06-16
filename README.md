@@ -22,7 +22,7 @@ Stepping aims to handle many of these aspects so developers can spend their time
 solving these infrastructure and data flow issues, over and over again. 
 
 
-[Want to Chat with Stepping Framework? Click here to start a ChatGPT converstaion where you can ask eveything!](https://chatgpt.com/g/g-iSfgFQlJW-stepping)
+[Want to Chat with Stepping Framework? Click here to start a ChatGPT conversation where you can ask everything!](https://chatgpt.com/g/g-iSfgFQlJW-stepping)
 
 # Benefits
 The goal of this framework is to solve infrastructure issues encountered when developing data or data-streaming processing solution.
