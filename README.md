@@ -43,7 +43,7 @@ Stepping is a Maven project (binaries are deployed in Maven Central) so you can 
 <dependency>
   <groupId>com.imperva.stepping</groupId>
   <artifactId>stepping</artifactId>
-  <version>5.0.0</version>
+  <version>5.1.0</version>
 </dependency>
 ~~~
 
