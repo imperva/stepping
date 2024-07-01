@@ -227,7 +227,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -252,4 +252,6 @@
         <developerConnection>scm:git:ssh://github.com:imperva/stepping.git</developerConnection>
         <url>https://github.com/imperva/stepping.git</url>
     </scm>
+
+
 </project>
