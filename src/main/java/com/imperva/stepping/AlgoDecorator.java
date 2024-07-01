@@ -223,6 +223,7 @@ class AlgoDecorator implements IExceptionHandler, IAlgoDecorator {
         }
 
         if(getConfig().getIsInitMonitorCollector()) {
+            System.setProperty("java.awt.headless", "false");
             SystemStepMonitor systemStepMonitor = new SystemStepMonitor();
             systemStepMonitor.setReportReleaseTimeout(getConfig().getMonitorReportReleaseTimeout());
             containerRegistrar.add(systemStepMonitor);
